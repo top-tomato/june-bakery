@@ -292,6 +292,13 @@ section{position:relative}
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const clamp=(v,a=0,b=1)=>Math.min(b,Math.max(a,v)), ease=t=>t*t*(3-2*t), rnd=(a,b)=>a+Math.random()*(b-a);
 const calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
+/* Stable viewport height for all scroll maths. iOS Safari changes innerHeight on every frame while its toolbars slide
+   back in (i.e. whenever you scroll up), so progress values computed from it jumped: the story, the 3D cake and the drips
+   all twitched on scroll-up. CSS vh already means the tall viewport (100lvh); JS now uses the same number. */
+const vhProbe=document.createElement('div');vhProbe.style.cssText='position:fixed;left:0;top:0;width:0;height:100vh;height:100lvh;visibility:hidden;pointer-events:none';
+document.documentElement.append(vhProbe);
+let VH=vhProbe.offsetHeight||innerHeight,VW=innerWidth;
+addEventListener('resize',()=>{if(innerWidth!==VW){VW=innerWidth;VH=vhProbe.offsetHeight||innerHeight;lastY=-1}});   // only re-measure on rotation
 
 const G='#3E5D58',CR='#FFF6E6',DK='#243B37';
 const F=JSON.parse($('#menu-data').textContent).map(f=>({...f,ink:DK}));window.F=F;
@@ -380,7 +387,7 @@ window.photo=()=>{const f=F[window.ACT],on=!f.model||window.GLBAD||!!window.GLER
 setTimeout(()=>{if(!window.GLSTART){window.GLBAD=true;window.photo()}},4500);
 function setActive(i){i=clamp(i,0,F.length-1);window.ACT=i;$('#pickName').textContent=F[i].n.join('');$('#pickDesc').textContent=F[i].d;$('#prev').disabled=i===0;$('#next').disabled=i===F.length-1;setFeatured(i);window.photo()}
 $('#prev').onclick=()=>setActive(window.ACT-1);$('#next').onclick=()=>setActive(window.ACT+1);
-addEventListener('keydown',e=>{if(scrollY>innerHeight*.5)return;if(e.key==='ArrowRight')setActive(window.ACT+1);if(e.key==='ArrowLeft')setActive(window.ACT-1)});
+addEventListener('keydown',e=>{if(scrollY>VH*.5)return;if(e.key==='ArrowRight')setActive(window.ACT+1);if(e.key==='ArrowLeft')setActive(window.ACT-1)});
 $('#open').onclick=()=>openStory(window.ACT);
 
 /* story */
@@ -396,7 +403,7 @@ function setFeatured(i){
   $('#band').textContent=(f.n.join('')+'  ●  ').repeat(14);
   story.dataset.nav=f.ink===DK?'dark':'light';
 }
-function openStory(i){setFeatured(i);scrollTo({top:story.offsetTop+innerHeight*.9,behavior:calm?'auto':'smooth'})}
+function openStory(i){setFeatured(i);scrollTo({top:story.offsetTop+VH*.9,behavior:calm?'auto':'smooth'})}
 
 
 /* stats */
@@ -411,7 +418,7 @@ let lastY=-1,lastH=0;
    re-layout the page several times per frame while scrolling, which showed up as stutter on phones. */
 const heroSpot=$('#heroSpot'),stageEl=$('#stage');
 function frame(){
-  const y=scrollY,vh=innerHeight;
+  const y=scrollY,vh=VH;
   if(y!==lastY||vh!==lastH){lastY=y;lastH=vh;
     // --- reads ---
     const dripTops=dripEls.map(d=>d.parentElement.getBoundingClientRect().top);
@@ -567,7 +574,7 @@ const lerp=(a,b,t)=>a+(b-a)*t,clamp=v=>Math.min(1,Math.max(0,v)),ease=t=>t*t*(3-
 // intro: rise a little from below while growing 60% -> 105% -> 100% (mock/intro-drop.html, option 1)
 const outC=t=>1-Math.pow(1-t,3),outBack=t=>1+2.4*Math.pow(t-1,3)+1.4*Math.pow(t-1,2);
 let dragX=0,down=null;
-addEventListener('pointerdown',e=>{if(scrollY<innerHeight*.6&&!e.target.closest('button,a'))down=e.clientX});
+addEventListener('pointerdown',e=>{if(scrollY<VH*.6&&!e.target.closest('button,a'))down=e.clientX});
 addEventListener('pointermove',e=>{if(down!==null){dragX+=(e.clientX-down)*.01;down=e.clientX}});
 addEventListener('pointerup',()=>down=null);
 let sm=0;
@@ -584,12 +591,12 @@ function tick(t){
   if(away!==glAway){glAway=away;glCv.style.visibility=away?'hidden':'';if(away)R.clear()}
   if(away)return;
   const act=window.ACT||0;sm+=(act-sm)*(calm?1:.12);
-  const cx=lerp(h.left+h.width/2,st.left+st.width/2,S.a),cy=lerp(Math.max(h.top+h.height/2,innerHeight*.42),st.top+st.height/2,S.a),px=lerp(h.height,st.height*.86,S.a);
+  const cx=lerp(h.left+h.width/2,st.left+st.width/2,S.a),cy=lerp(Math.max(h.top+h.height/2,VH*.42),st.top+st.height/2,S.a),px=lerp(h.height,st.height*.86,S.a);
   const gap=(innerWidth<700?innerWidth*.6:Math.min(innerWidth*.3,440))*(1+S.a*5),k=ease(clamp(S.p/.18));
   items.forEach((it,i)=>{
-    const dI=i-sm,near=1-Math.min(1,Math.abs(dI)),d=calm?1:clamp((t-(window.T0||0)-2500-i*200)/900),drop=-(1-outC(d))*innerHeight*.12,grow=lerp(.6,1,outBack(d));
+    const dI=i-sm,near=1-Math.min(1,Math.abs(dI)),d=calm?1:clamp((t-(window.T0||0)-2500-i*200)/900),drop=-(1-outC(d))*VH*.12,grow=lerp(.6,1,outBack(d));
     it.grp.position.set((cx+dI*gap-CW/2)*wpp,-(cy-drop-CH/2)*wpp,0);
-    const hide=(1-near)*ease(clamp(scrollY/(innerHeight*.3)));it.grp.visible=!!it.loaded&&hide<.99&&d>0&&outro<.995;it.grp.scale.setScalar(px*wpp*(.55+.45*near)*(1-hide)*grow*(1-outro));
+    const hide=(1-near)*ease(clamp(scrollY/(VH*.3)));it.grp.visible=!!it.loaded&&hide<.99&&d>0&&outro<.995;it.grp.scale.setScalar(px*wpp*(.55+.45*near)*(1-hide)*grow*(1-outro));
     const free=((calm?0:t*.0004)+dragX+i*1.3+(1-d)*1.5)%(Math.PI*2);
     it.grp.rotation.set(lerp(.5,.75,S.a)-Math.sin(S.p*Math.PI)*.35*near,lerp(free,.35,k)+ease(clamp((S.p-.15)/.8))*Math.PI*2*near,0);
   });
