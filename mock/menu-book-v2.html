@@ -271,7 +271,8 @@ pf.on('flip',e=>upd(e.data));upd(0);
 let bookState='read';pf.on('changeState',e=>bookState=e.data);
 const setOrient=o=>{stageEl.classList.toggle('single',o==='portrait');upd(pf.getCurrentPageIndex())};
 pf.on('changeOrientation',e=>setOrient(e.data));setOrient(pf.getOrientation());
-next.onclick=()=>pf.flipNext();prev.onclick=()=>pf.flipPrev();
+const flipBack=()=>{const s=pf.getSettings();s.disableFlipByClick=false;pf.flipPrev();s.disableFlipByClick=true};   // flipPrev fakes a click at the left edge, which disableFlipByClick ignores on phones
+next.onclick=()=>pf.flipNext();prev.onclick=flipBack;
 const zoom=document.getElementById('zoom'),sheet=document.getElementById('sheet');
 function openZoom(pg){const c=pg.cloneNode(true);c.removeAttribute('style');
   c.className=[...c.classList].filter(k=>!k.startsWith('stf__')&&!k.startsWith('--')).join(' ');   // drop page-flip's own classes (they hide/position the page)
@@ -285,7 +286,7 @@ book.addEventListener('click',e=>{
   if(e.target.closest('a,button'))return;
   const pg=e.target.closest('.pg');if(pg&&!pg.classList.contains('cover')&&bookState==='read'&&!stageEl.classList.contains('single'))openZoom(pg);
 });
-addEventListener('keydown',e=>{if(e.key==='Escape')closeZoom();if(e.key==='ArrowRight')pf.flipNext();if(e.key==='ArrowLeft')pf.flipPrev()});
+addEventListener('keydown',e=>{if(e.key==='Escape')closeZoom();if(e.key==='ArrowRight')pf.flipNext();if(e.key==='ArrowLeft')flipBack()});
 </script>
 </body>
 </html>

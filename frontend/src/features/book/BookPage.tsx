@@ -9,6 +9,19 @@ import { buildPages } from './pages'
 
 // Rebuild the book only when the layout really changes: width changes (rotation, desktop window resize) or the frozen
 // viewport height changes (rotation). Phone toolbars sliding in and out don't count.
+/**
+ * page-flip's flipPrev() works by faking a click near the left edge. With disableFlipByClick on (we use page taps for
+ * zoom), that fake click is ignored on phones, where the left edge isn't a page corner, so the "←" button did nothing.
+ * Allow click-flips just for this call.
+ */
+function flipPrev(pf: PageFlip | null) {
+  if (!pf) return
+  const s = pf.getSettings()
+  s.disableFlipByClick = false
+  pf.flipPrev()
+  s.disableFlipByClick = true
+}
+
 const layoutKey = () => {
   const l = bookLayout(innerWidth, viewportHeight())
   return `${l.single ? 's' : 'd'}:${l.pageW}`
@@ -105,7 +118,7 @@ function Book({ data, single, pageW }: { data: MenuData; single: boolean; pageW:
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setZoomed(false)
       if (e.key === 'ArrowRight') flipRef.current?.flipNext()
-      if (e.key === 'ArrowLeft') flipRef.current?.flipPrev()
+      if (e.key === 'ArrowLeft') flipPrev(flipRef.current)
     }
     addEventListener('keydown', onKey)
     return () => removeEventListener('keydown', onKey)
@@ -150,7 +163,7 @@ function Book({ data, single, pageW }: { data: MenuData; single: boolean; pageW:
         </button>
       </div>
       <nav className="book-nav" aria-label="พลิกหน้า">
-        <button type="button" aria-label="หน้าก่อน" disabled={index === 0} onClick={() => flipRef.current?.flipPrev()}>
+        <button type="button" aria-label="หน้าก่อน" disabled={index === 0} onClick={() => flipPrev(flipRef.current)}>
           ←
         </button>
         <span className="count">{label}</span>

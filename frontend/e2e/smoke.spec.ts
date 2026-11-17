@@ -54,6 +54,14 @@ test('book: opens, flips, and links back home without a reload', async ({ page }
   await expect(page.locator('.book-nav .count')).toHaveText('ปกหน้า')
   await page.getByRole('button', { name: 'หน้าถัดไป' }).click()
   await expect(page.locator('.book-nav .count')).not.toHaveText('ปกหน้า', { timeout: 3000 })
+  // "←" must flip back too (it silently did nothing on phones: page-flip ignored its fake click)
+  await page.getByRole('button', { name: 'หน้าถัดไป' }).click()
+  const count = page.locator('.book-nav .count')
+  await expect(count).not.toHaveText('ปกหน้า')
+  await page.waitForTimeout(1200) // let the forward flip finish
+  const before = await count.textContent()
+  await page.getByRole('button', { name: 'หน้าก่อน' }).click()
+  await expect(count).not.toHaveText(before ?? '', { timeout: 3000 })
   // rings must sit inside page-flip's layer so the turning page covers them
   await expect(page.locator('.stf__block > .book-rings')).toHaveCount(1)
   await page.locator('.book-back').click()

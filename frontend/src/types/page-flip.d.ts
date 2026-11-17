@@ -29,6 +29,8 @@ declare module 'page-flip' {
     on(event: 'changeOrientation', cb: (e: { data: Orientation }) => void): this
     flipNext(corner?: 'top' | 'bottom'): void
     flipPrev(corner?: 'top' | 'bottom'): void
+    /** the live settings object (mutable) */
+    getSettings(): { disableFlipByClick: boolean }
     flip(page: number, corner?: 'top' | 'bottom'): void
     getCurrentPageIndex(): number
     getOrientation(): Orientation
