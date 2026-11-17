@@ -28,7 +28,9 @@ p.lead{opacity:.75;font-size:.9rem;margin-bottom:16px}
 .wm-c::after{content:"";position:absolute;right:3.5%;bottom:3%;width:clamp(44px,24cqw,90px);aspect-ratio:1000/660;background:rgba(255,255,255,.85);-webkit-mask:var(--logo) center/contain no-repeat;mask:var(--logo) center/contain no-repeat}
 .ph{container-type:inline-size}
 /* E: like D, the IG handle on a frosted pill (the photo behind it blurred + a little darker) */
-.wm-e::before{content:"";position:absolute;left:3.5%;top:3%;width:clamp(44px,22cqw,84px);aspect-ratio:1000/660;background:rgba(255,255,255,.9);-webkit-mask:var(--logo) center/contain no-repeat;mask:var(--logo) center/contain no-repeat;filter:drop-shadow(0 1px 2px rgba(0,0,0,.45))}
+/* the logo sits on the same frosted badge, so it reads on light photos too */
+.wm-e .badge{position:absolute;left:3%;top:3%;padding:.35em .7em;border-radius:14px;background:rgba(30,40,38,.28);-webkit-backdrop-filter:blur(8px) saturate(1.2);backdrop-filter:blur(8px) saturate(1.2)}
+.wm-e .badge i{display:block;width:clamp(40px,19cqw,74px);aspect-ratio:1000/660;background:#fff;-webkit-mask:var(--logo) center/contain no-repeat;mask:var(--logo) center/contain no-repeat}
 .wm-e .pill{position:absolute;right:3%;bottom:3%;padding:.3em .8em;border-radius:99px;font:600 clamp(9px,3.6cqw,15px) Anuphan,sans-serif;color:#fff;
   background:rgba(30,40,38,.28);-webkit-backdrop-filter:blur(8px) saturate(1.2);backdrop-filter:blur(8px) saturate(1.2)}
 /* D: logo top-left, IG handle bottom-right */
@@ -46,15 +48,15 @@ p.lead{opacity:.75;font-size:.9rem;margin-bottom:16px}
   <section class="opt"><h2>A · ชื่อ IG (แนะนำ)</h2><p>@june.bakery.dessert ตัวเล็กมุมขวาล่าง เหมือนในวิดีโอ คนเห็นแล้วค้นต่อได้</p><div class="pics" id="a"></div></section>
   <section class="opt"><h2>B · โลโก้ + ชื่อ IG</h2><p>เห็นทั้งแบรนด์และที่ตามต่อ แต่กินที่มากขึ้น</p><div class="pics" id="b"></div></section>
   <section class="opt"><h2>D · โลโก้ซ้ายบน + ชื่อ IG ขวาล่าง</h2><p>แยกสองมุม โลโก้เด่น ชื่อ IG ไว้ให้ค้นต่อ</p><div class="pics" id="d"></div></section>
-  <section class="opt"><h2>E · แบบ D + พื้นเบลอหลังชื่อ IG</h2><p>ชื่อ IG อยู่บนแคปซูลกระจกฝ้า รูปข้างหลังเบลอและเข้มลงนิด อ่านชัดทุกรูป</p><div class="pics" id="e"></div></section>
+  <section class="opt"><h2>E · โลโก้ + ชื่อ IG บนพื้นเบลอ</h2><p>ทั้งโลโก้ (ซ้ายบน) และชื่อ IG (ขวาล่าง) อยู่บนพื้นกระจกฝ้า รูปข้างหลังเบลอและเข้มลงนิด อ่านชัดทุกรูป แม้รูปพื้นสว่าง</p><div class="pics" id="e"></div></section>
   <section class="opt"><h2>C · โลโก้อย่างเดียว</h2><p>สวยสุด แต่พอรูปถูกย่อในแชต อ่านชื่อร้านยาก</p><div class="pics" id="c"></div></section>
 </div>
 <h2 style="font:600 1rem Mitr,sans-serif;margin-bottom:6px">ตอนถูกส่งต่อในแชต LINE (รูปถูกย่อ) · แบบ A</h2>
 <div class="chat"><div class="ph wm-a" style="background-image:url(img/shop-12.jpg)"></div></div>
 <script>
-const P=['shop-12','shop-05','shop-13','shop-07'];
+const P=['shop-12','shop-05','shop-13','shop-07','shop-08','shop-02'];
 for(const [id,cls] of [['a','wm-a'],['b','wm-b'],['c','wm-c'],['d','wm-d'],['e','wm-e']])
-  document.getElementById(id).innerHTML=P.map(p=>`<div class="ph ${cls}" style="background-image:url(img/${p}.jpg)">${cls==='wm-b'?'<span class="mk"><i></i>@june.bakery.dessert</span>':cls==='wm-e'?'<span class="pill">@june.bakery.dessert</span>':''}</div>`).join('');
+  document.getElementById(id).innerHTML=P.map(p=>`<div class="ph ${cls}" style="background-image:url(img/${p}.jpg)">${cls==='wm-b'?'<span class="mk"><i></i>@june.bakery.dessert</span>':cls==='wm-e'?'<span class="badge"><i></i></span><span class="pill">@june.bakery.dessert</span>':''}</div>`).join('');
 </script>
 </body>
 </html>
