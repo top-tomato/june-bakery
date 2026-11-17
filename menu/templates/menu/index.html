@@ -323,15 +323,12 @@ const pop=f=>`<span class="pic${f.soft?' soft':''}"><img src="${f.img}" alt="" d
 const inside=()=>'';
 
 /* drips between sections (mock/section-drips.html).
-   They stretch with scroll. The old SVG blur filter made phones re-filter them on the CPU every scroll frame,
-   so now one shared WebGL context draws each strip (band + drips + beads merged with a smooth minimum)
-   and copies the result into that strip's own canvas. The canvas lives inside the section, so it scrolls with the page.
+   They stretch with scroll. The old SVG blur filter made phones re-filter them on the CPU every scroll frame.
+   Each strip now has its own small WebGL canvas (created the first time it comes into view) that draws
+   band + drips + beads merged with a smooth minimum. Drawing straight into the strip's canvas avoids the
+   GPU-to-2D copy that the first version did per frame, which stalled phones on fast scrolls.
    Without WebGL we fall back to the old divs + filter. */
-const dripGL=(()=>{
-  const MAXD=32,c=document.createElement('canvas'),gl=c.getContext('webgl',{premultipliedAlpha:true,alpha:true,antialias:false,preserveDrawingBuffer:true});
-  if(!gl)return null;
-  const deriv=!!gl.getExtension('OES_standard_derivatives');
-  const FS=`${deriv?'#extension GL_OES_standard_derivatives : enable\n':''}#ifdef GL_FRAGMENT_PRECISION_HIGH
+const DRIP_FS=(MAXD,deriv)=>`${deriv?'#extension GL_OES_standard_derivatives : enable\n':''}#ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
 #else
 precision mediump float;
@@ -342,6 +339,7 @@ void main(){
   vec2 p=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y)/dpr;
   float f=p.y-60.;
   for(int i=0;i<${MAXD};i++){if(i>=n)break;vec4 q=d[i];
+    if(abs(p.x-q.x)>q.y*.64+26.)continue;   // too far sideways to touch this pixel: skip the maths
     float r=q.y*.5,bot=30.+q.z*g;
     float body=length(p-vec2(q.x,clamp(p.y,-100.,bot-r)))-r;
     float bead=length(p-vec2(q.x,bot+5.-q.y*.64))-q.y*.64;
@@ -351,35 +349,49 @@ void main(){
   float a=1.-smoothstep(-aa,aa,f);
   gl_FragColor=vec4(col*a,a);
 }`;
-  const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return gl.getShaderParameter(o,gl.COMPILE_STATUS)?o:null};
-  const vs=sh(gl.VERTEX_SHADER,'attribute vec2 v;void main(){gl_Position=vec4(v,0.,1.);}'),fs=sh(gl.FRAGMENT_SHADER,FS);
+// old look: one div per drip, merged by the SVG goo filter (.drips:not(.gl))
+function dripFallback(el){
+  el._cv?.remove();el._cv=null;el._draw=null;el.classList.remove('gl');
+  el._d.forEach(q=>{const d=document.createElement('div');d.className='drip';
+    d.style.cssText=`left:${q.left.toFixed(2)}%;width:${q.w}px;--len:${q.len}px`;el.append(d)});
+}
+const hasWebGL=(()=>{try{return !!document.createElement('canvas').getContext('webgl')}catch(e){return false}})();
+function makeDripGL(cv,drips){
+  const MAXD=32,gl=cv.getContext('webgl',{premultipliedAlpha:true,alpha:true,antialias:false});
+  if(!gl)return null;
+  const deriv=!!gl.getExtension('OES_standard_derivatives');
+  const sh=(t,src)=>{const o=gl.createShader(t);gl.shaderSource(o,src);gl.compileShader(o);return gl.getShaderParameter(o,gl.COMPILE_STATUS)?o:null};
+  const vs=sh(gl.VERTEX_SHADER,'attribute vec2 v;void main(){gl_Position=vec4(v,0.,1.);}'),fs=sh(gl.FRAGMENT_SHADER,DRIP_FS(MAXD,deriv));
   if(!vs||!fs)return null;
   const pr=gl.createProgram();gl.attachShader(pr,vs);gl.attachShader(pr,fs);gl.linkProgram(pr);
   if(!gl.getProgramParameter(pr,gl.LINK_STATUS))return null;
   gl.useProgram(pr);
   gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
   const vl=gl.getAttribLocation(pr,'v');gl.enableVertexAttribArray(vl);gl.vertexAttribPointer(vl,2,gl.FLOAT,false,0,0);
-  const U=k=>gl.getUniformLocation(pr,k),uRes=U('res'),uDpr=U('dpr'),uCol=U('col'),uD=U('d'),uN=U('n'),uG=U('g'),buf=new Float32Array(MAXD*4);
-  // el: the .drips strip; W,H,rgb measured by the caller during its read phase
-  return (el,g,W,H,rgb)=>{
-    const dpr=Math.min(devicePixelRatio||1,1.5),cw=Math.round(W*dpr),ch=Math.round(H*dpr),out=el._cv;
-    if(c.width!==cw||c.height!==ch){c.width=cw;c.height=ch}
-    if(out.width!==cw||out.height!==ch){out.width=cw;out.height=ch}
-    gl.viewport(0,0,cw,ch);
-    buf.fill(0);el._d.slice(0,MAXD).forEach((q,i)=>buf.set([q.left/100*W+q.w/2,q.w,q.len,0],i*4));
-    gl.uniform2f(uRes,cw,ch);gl.uniform1f(uDpr,dpr);gl.uniform3f(uCol,rgb[0],rgb[1],rgb[2]);
-    gl.uniform4fv(uD,buf);gl.uniform1i(uN,Math.min(MAXD,el._d.length));gl.uniform1f(uG,g);
+  const U=k=>gl.getUniformLocation(pr,k),uRes=U('res'),uDpr=U('dpr'),uCol=U('col'),uD=U('d'),uN=U('n'),uG=U('g');
+  gl.uniform1i(uN,Math.min(MAXD,drips.length));
+  let lastW=0,lastG=-1,lastRGB='';
+  // W,H,rgb are measured by the caller during its read phase
+  return (g,W,H,rgb)=>{
+    const key=rgb.join();
+    if(W===lastW&&key===lastRGB&&Math.abs(g-lastG)<.002)return;   // nothing visible changed
+    const dpr=Math.min(devicePixelRatio||1,1.25),cw=Math.round(W*dpr),ch=Math.round(H*dpr);
+    if(W!==lastW||cv.height!==ch){
+      cv.width=cw;cv.height=ch;gl.viewport(0,0,cw,ch);gl.uniform2f(uRes,cw,ch);gl.uniform1f(uDpr,dpr);
+      const buf=new Float32Array(MAXD*4);drips.slice(0,MAXD).forEach((q,i)=>buf.set([q.left/100*W+q.w/2,q.w,q.len,0],i*4));gl.uniform4fv(uD,buf);
+      lastW=W;
+    }
+    if(key!==lastRGB){gl.uniform3f(uCol,rgb[0],rgb[1],rgb[2]);lastRGB=key}
+    gl.uniform1f(uG,g);lastG=g;
     gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLES,0,3);
-    const x=el._ctx;x.clearRect(0,0,cw,ch);x.drawImage(c,0,0);
   };
-})();
+}
 $$('.drips').forEach(el=>{
   const n=Math.max(7,Math.round(+el.dataset.n*Math.min(1,innerWidth/1300)));
   el._d=Array.from({length:n},(_,i)=>({left:(i+rnd(.15,.85))/n*100,w:rnd(20,50)|0,len:(Math.random()<.3?rnd(150,235):rnd(40,130))|0}));
-  if(dripGL){
-    el.classList.add('gl');el._cv=document.createElement('canvas');el._ctx=el._cv.getContext('2d');el.append(el._cv);
-  }else el._d.forEach(q=>{const d=document.createElement('div');d.className='drip';
-    d.style.cssText=`left:${q.left.toFixed(2)}%;width:${q.w}px;--len:${q.len}px`;el.append(d)});
+  if(hasWebGL){
+    el.classList.add('gl');el._cv=document.createElement('canvas');el.append(el._cv);   // its WebGL is set up on first view
+  }else dripFallback(el);
 });
 
 let featured=0;
@@ -398,7 +410,7 @@ const story=$('#story'),stage=$('#stage');
 function setFeatured(i){
   featured=i;const f=F[i];
   story.style.cssText=`${vars(f)};--fink:${f.ink}`;
-  $('#boxDrips').style.setProperty('--from',f.fl);lastY=-1; // redraw the drips in the new colour
+  $('#boxDrips').style.setProperty('--from',f.fl);$('#boxDrips')._rgb=null;lastY=-1; // redraw the drips in the new colour
   $('#sName1').textContent=f.n[0];$('#sName2').textContent=f.n[1];$('#sDesc').textContent=f.d;$('#sPrice').textContent='฿'+f.price;
   
   f.L.forEach((t,j)=>$('#c'+j).textContent=t);
@@ -473,15 +485,20 @@ function frame(){
     // --- reads ---
     const dripTops=dripEls.map(d=>d.parentElement.getBoundingClientRect().top);
     const dripOn=dripTops.map(t=>t<vh+50&&t>-400);
-    // size + colour of the visible WebGL strips (read now, drawn in the write phase)
-    const dripInfo=dripEls.map((d,i)=>dripGL&&dripOn[i]?{W:d.clientWidth,H:d.clientHeight,rgb:getComputedStyle(d).color.match(/[\d.]+/g).slice(0,3).map(v=>v/255)}:null);
+    // size + colour of the visible WebGL strips (colour is cached; only re-read when it changes)
+    const dripInfo=dripEls.map((d,i)=>{if(!d._cv||!dripOn[i])return null;
+      if(!d._rgb)d._rgb=getComputedStyle(d).color.match(/[\d.]+/g).slice(0,3).map(v=>v/255);
+      return{W:d.clientWidth,H:d.clientHeight,rgb:d._rgb}});
     let navHit=null;for(const s of navSecs){const r=s.getBoundingClientRect();if(r.top<=40&&r.bottom>40){navHit=s;break}}
     const sTop=story.offsetTop,sH=story.offsetHeight;
     const cardTops=cards.map(c=>c.parentElement.getBoundingClientRect().top);
     const mr=mark.getBoundingClientRect();
     // --- writes ---
     dripEls.forEach((d,i)=>{if(!dripOn[i])return;const g=.2+.8*ease(clamp((vh-dripTops[i])/(vh*.85)));
-      const k=dripInfo[i];if(k)dripGL(d,g,k.W,k.H,k.rgb);else d.style.setProperty('--g',g.toFixed(3))});
+      const k=dripInfo[i];
+      if(k){if(d._draw===undefined){d._draw=makeDripGL(d._cv,d._d);if(!d._draw)dripFallback(d)}   // first time on screen
+        if(d._draw){d._draw(g,k.W,k.H,k.rgb);return}}
+      d.style.setProperty('--g',g.toFixed(3))});
     if(navHit){nav.classList.toggle('dark',navHit.dataset.nav==='dark');nav.classList.toggle('top',navHit.id==='flavors')}
     const p=clamp((y-sTop)/(sH-vh));
     const a=calm?1:ease(clamp((y-sTop+vh*.5)/(vh*.9)));
