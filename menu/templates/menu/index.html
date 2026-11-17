@@ -2,6 +2,14 @@
 <html lang="th">
 <head>
 <script>
+/* Frozen viewport height. In-app browsers (LINE on iPhone measured: 684 <-> 778px, ~18 resizes per change) resize the
+   page itself while their toolbars collapse/expand on scroll, so every vh-sized section re-laid out and the 3D canvas was
+   rebuilt ~18 times per scroll direction change. All CSS uses var(--vh) instead, set once here and only re-set on rotation.
+   --vhmax only ever grows, for the fixed 3D canvas so it still covers the screen when the toolbars hide. */
+(()=>{const r=document.documentElement;let w=innerWidth,max=innerHeight;
+  const set=()=>{window.__VH=innerHeight;max=innerHeight;r.style.setProperty('--vh',innerHeight/100+'px');r.style.setProperty('--vhmax',max+'px')};set();
+  addEventListener('resize',()=>{if(innerWidth!==w){w=innerWidth;set();return}if(innerHeight>max){max=innerHeight;r.style.setProperty('--vhmax',max+'px')}});
+})();
 /* Debug switches for finding mobile jank on a real phone (no effect unless the URL asks for them):
    ?fps      on-screen frame meter        ?no3d    skip the 3D scene (photos instead)
    ?lowres   3D at 1x, no antialias       ?nodrips hide the cream drips between sections
@@ -9,6 +17,7 @@
    ?log      with ?fps: send each second's numbers to the server log (local testing only)
    Combine with &, e.g. ?fps&no3d */
 window.DBG=Object.fromEntries([...new URLSearchParams(location.search).keys()].map(k=>[k,true]));
+if(/^(192\.168|10)\./.test(location.hostname)&&location.port==='8765'){window.DBG.fps=true;window.DBG.log=true}   // phone testing against the dev server
 document.documentElement.classList.add(...Object.keys(window.DBG).map(k=>'dbg-'+k));
 </script>
 <meta charset="utf-8">
@@ -60,11 +69,11 @@ section{position:relative}
 #count .load .fill{clip-path:inset(100% 0 0 0)}
 
 /* sized to the tallest viewport (browser bar hidden) so it never has to resize while the bar slides in/out on phones */
-#gl{position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:7;pointer-events:none}
-#heroSpot{position:absolute;left:50%;top:40vh;top:40svh;height:31vh;height:31svh;aspect-ratio:1;transform:translateX(-50%)}
+#gl{position:fixed;left:0;top:0;width:100%;height:var(--vhmax);z-index:7;pointer-events:none}
+#heroSpot{position:absolute;left:50%;top:calc(var(--vh)*40);height:calc(var(--vh)*31);aspect-ratio:1;transform:translateX(-50%)}
 .hint{font-size:.85rem;opacity:.6}
 .card.soon{border:2px dashed rgba(36,59,55,.4);background:transparent;box-shadow:none;display:grid;place-items:center;text-align:center;min-height:180px;font-family:var(--display);font-size:1.1rem}
-.edge{position:absolute;top:30vh;top:30svh;height:46vh;height:46svh;width:calc(50% - 250px);z-index:8;pointer-events:none;-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
+.edge{position:absolute;top:calc(var(--vh)*30);height:calc(var(--vh)*46);width:calc(50% - 250px);z-index:8;pointer-events:none;-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px)}
 .edge.l{left:0;-webkit-mask:linear-gradient(90deg,#000 70%,transparent);mask:linear-gradient(90deg,#000 70%,transparent)}
 .edge.r{right:0;-webkit-mask:linear-gradient(270deg,#000 70%,transparent);mask:linear-gradient(270deg,#000 70%,transparent)}
 /* pic */
@@ -74,28 +83,28 @@ section{position:relative}
 .pic.soft{border:0;border-radius:0;background:none;-webkit-mask:radial-gradient(closest-side,#000 80%,transparent 100%);mask:radial-gradient(closest-side,#000 80%,transparent 100%)}
 
 /* hero */
-.hero{height:100vh;height:100svh;min-height:620px;background:var(--indigo);overflow:hidden}
-.hero .logo{position:absolute;left:50%;top:3vh;top:3svh;height:15vh;height:15svh;transform:translateX(-50%);z-index:1}
-.hero h1{position:absolute;left:0;right:0;top:19vh;top:19svh;text-align:center;font-size:clamp(1.8rem,4.4vw,3.8rem);padding:0 16px;z-index:1}
+.hero{height:calc(var(--vh)*100);min-height:620px;background:var(--indigo);overflow:hidden}
+.hero .logo{position:absolute;left:50%;top:calc(var(--vh)*3);height:calc(var(--vh)*15);transform:translateX(-50%);z-index:1}
+.hero h1{position:absolute;left:0;right:0;top:calc(var(--vh)*19);text-align:center;font-size:clamp(1.8rem,4.4vw,3.8rem);padding:0 16px;z-index:1}
 .hero h1 span{display:block}
-.rail{position:absolute;inset:0;z-index:2;display:flex;align-items:flex-end;gap:clamp(8px,2vw,32px);overflow-x:auto;overflow-y:hidden;padding:0 calc(50% - var(--iw)/2) 21vh;padding:0 calc(50% - var(--iw)/2) 21svh;scroll-snap-type:x mandatory;scrollbar-width:none;cursor:grab;--iw:clamp(150px,19vw,260px)}
+.rail{position:absolute;inset:0;z-index:2;display:flex;align-items:flex-end;gap:clamp(8px,2vw,32px);overflow-x:auto;overflow-y:hidden;padding:0 calc(50% - var(--iw)/2) calc(var(--vh)*21);padding:0 calc(50% - var(--iw)/2) calc(var(--vh)*21);scroll-snap-type:x mandatory;scrollbar-width:none;cursor:grab;--iw:clamp(150px,19vw,260px)}
 .rail::-webkit-scrollbar{display:none}
 .rail.drag{scroll-snap-type:none;cursor:grabbing;scroll-behavior:auto}
-.item{flex:0 0 var(--iw);height:min(34vh,var(--iw));height:min(34svh,var(--iw));scroll-snap-align:center;display:flex;justify-content:center;background:none;--d:1}
+.item{flex:0 0 var(--iw);height:min(calc(var(--vh)*34),var(--iw));height:min(calc(var(--vh)*34),var(--iw));scroll-snap-align:center;display:flex;justify-content:center;background:none;--d:1}
 .item .tilt{height:100%;transform:scale(calc(1 - var(--d)*.34)) translateY(calc(var(--d)*-6%));filter:blur(calc(var(--d)*2.5px)) drop-shadow(0 22px 16px rgba(0,0,0,.3));opacity:calc(1 - var(--d)*.3);transition:transform .15s linear}
 .item .fall{height:100%}
-.pick{position:absolute;left:0;right:0;bottom:2.5vh;bottom:2.5svh;z-index:5;text-align:center;pointer-events:none}
+.pick{position:absolute;left:0;right:0;bottom:calc(var(--vh)*2.5);z-index:5;text-align:center;pointer-events:none}
 .pick h2{font-size:clamp(1.3rem,2.4vw,2rem);font-weight:600}
 .pick p{opacity:.75;font-size:.95rem}
 .pick button,.btn{pointer-events:auto;margin-top:10px;padding:10px 22px;border-radius:999px;background:var(--cream);color:var(--ink);font-weight:600;transition:transform .2s}
 .pick button:hover,.btn:hover{transform:scale(1.05)}
-.arrow{position:absolute;z-index:3;bottom:34vh;bottom:34svh;width:48px;height:48px;border-radius:50%;border:2px solid currentColor;font-size:1.2rem}
+.arrow{position:absolute;z-index:3;bottom:calc(var(--vh)*34);width:48px;height:48px;border-radius:50%;border:2px solid currentColor;font-size:1.2rem}
 .arrow{z-index:9;transition:opacity .2s}.arrow:disabled{opacity:.25;cursor:default}
 .arrow.l{left:clamp(12px,3vw,40px)} .arrow.r{right:clamp(12px,3vw,40px)}
 
 /* story */
-.story{height:340vh;background:var(--fl);color:var(--fink);transition:background .5s,color .5s;--from:var(--indigo)}
-.story .pin{position:sticky;top:0;height:100vh;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:0 clamp(16px,5vw,80px) 9vh}
+.story{height:calc(var(--vh)*340);background:var(--fl);color:var(--fink);transition:background .5s,color .5s;--from:var(--indigo)}
+.story .pin{position:sticky;top:0;height:calc(var(--vh)*100);overflow:hidden;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:0 clamp(16px,5vw,80px) calc(var(--vh)*9)}
 .story h2{font-size:clamp(2.2rem,5.2vw,5rem);line-height:1.18}
 .story h2 .ln{display:block;overflow:hidden;padding-top:.12em}
 .story h2 .ln b{display:block;font-weight:600;transform:translateY(calc((1 - var(--a,0))*115%))}
@@ -104,8 +113,8 @@ section{position:relative}
 .buy strong{font-family:var(--display);font-size:2rem}
 .stagewrap{display:grid;place-items:center start;padding-left:3vw;height:100%;position:relative}
 .stage::before{content:"";position:absolute;inset:-5%;border-radius:50%;background:var(--cream);opacity:calc(.9*var(--a,0))}
-.plate{position:absolute;width:min(56vh,38vw);aspect-ratio:1;border-radius:50%;background:var(--cream);opacity:.9}
-.stage{position:relative;height:min(58vh,40vw);aspect-ratio:1;will-change:transform}
+.plate{position:absolute;width:min(calc(var(--vh)*56),38vw);aspect-ratio:1;border-radius:50%;background:var(--cream);opacity:.9}
+.stage{position:relative;height:min(calc(var(--vh)*58),40vw);aspect-ratio:1;will-change:transform}
 .stage .float{position:absolute;inset:0;animation:float 4s ease-in-out infinite}
 @keyframes float{50%{transform:translateY(-12px) rotate(1.5deg)}}
 .stage .lay{position:absolute;inset:0;will-change:transform}
@@ -116,13 +125,13 @@ section{position:relative}
 .call i{display:block;height:2px;background:currentColor;width:clamp(50px,9vw,150px);transform-origin:left;transform:scaleX(var(--c,0))}
 .call span{opacity:var(--c,0);line-height:1.25}
 .call small{display:block;font-weight:400;opacity:.8}
-.band{position:absolute;left:-10%;right:-10%;bottom:1vh;transform:rotate(-3deg);background:var(--fink);color:var(--fl);font-family:var(--display);font-weight:600;font-size:clamp(1.4rem,3vw,2.6rem);white-space:nowrap;padding:6px 0;overflow:hidden;z-index:4;transition:background .5s,color .5s}
+.band{position:absolute;left:-10%;right:-10%;bottom:calc(var(--vh)*1);transform:rotate(-3deg);background:var(--fink);color:var(--fl);font-family:var(--display);font-weight:600;font-size:clamp(1.4rem,3vw,2.6rem);white-space:nowrap;padding:6px 0;overflow:hidden;z-index:4;transition:background .5s,color .5s}
 .band div{display:inline-block;will-change:transform}
 
 
 
 /* map */
-.where{background:var(--indigo);padding:clamp(240px,34vh,340px) clamp(16px,5vw,80px) 140px;--from:var(--pink);display:grid;grid-template-columns:minmax(260px,1fr) 1.5fr;gap:clamp(24px,4vw,64px);align-items:start}
+.where{background:var(--indigo);padding:clamp(240px,calc(var(--vh)*34),340px) clamp(16px,5vw,80px) 140px;--from:var(--pink);display:grid;grid-template-columns:minmax(260px,1fr) 1.5fr;gap:clamp(24px,4vw,64px);align-items:start}
 .where h2{font-size:clamp(2.2rem,5vw,4.4rem);margin-bottom:22px}
 .shop{border-top:2px solid rgba(255,243,220,.18);border-bottom:2px solid rgba(255,243,220,.18);padding:16px 0}
 .shop b{display:block;font:600 1.35rem var(--display);color:var(--tea)}
@@ -144,7 +153,7 @@ section{position:relative}
 .approx{margin-top:10px;font-size:.8rem;opacity:.65}
 
 /* footer */
-.end{background:var(--tea);color:var(--ink);padding:clamp(260px,38vh,360px) 16px 0;text-align:center;--from:var(--indigo);overflow:hidden}
+.end{background:var(--tea);color:var(--ink);padding:clamp(260px,calc(var(--vh)*38),360px) 16px 0;text-align:center;--from:var(--indigo);overflow:hidden}
 .end h2{font-size:clamp(2rem,5vw,4rem)}
 .end .btn{display:inline-block;margin:22px 0 0;background:var(--ink);color:var(--cream);text-decoration:none}
 .qr{display:flex;align-items:center;gap:14px;width:max-content;margin:26px auto 0;padding:12px 20px 12px 12px;background:var(--cream);border-radius:20px;text-align:left;font-size:.95rem;line-height:1.5}
@@ -158,20 +167,20 @@ section{position:relative}
   .nav{padding:12px 16px}
   .nav .brand{height:36px}
   .hero{min-height:560px}
-  .hero .logo{height:11vh;height:11svh;top:8vh;top:8svh}
-  .hero h1{top:21vh;top:21svh}
-  #heroSpot{top:39vh;top:39svh;height:27vh;height:27svh}
-  .arrow{width:40px;height:40px;bottom:auto;top:calc(52.5vh - 20px);top:calc(52.5svh - 20px)}
+  .hero .logo{height:calc(var(--vh)*11);top:calc(var(--vh)*8)}
+  .hero h1{top:calc(var(--vh)*21)}
+  #heroSpot{top:calc(var(--vh)*39);height:calc(var(--vh)*27)}
+  .arrow{width:40px;height:40px;bottom:auto;top:calc(calc(var(--vh)*52.5) - 20px);top:calc(calc(var(--vh)*52.5) - 20px)}
   .arrow.l{left:8px} .arrow.r{right:8px}
   .edge{width:19%}
-  .pick{bottom:3vh;bottom:3svh;padding:0 16px}
-  .story{height:300vh}
-  .story .pin{grid-template-columns:1fr;grid-template-rows:auto 1fr;align-content:start;padding:76px 20px 9vh;gap:0}
+  .pick{bottom:calc(var(--vh)*3);padding:0 16px}
+  .story{height:calc(var(--vh)*300)}
+  .story .pin{grid-template-columns:1fr;grid-template-rows:auto 1fr;align-content:start;padding:76px 20px calc(var(--vh)*9);gap:0}
   .story h2{font-size:clamp(2rem,10vw,3.2rem)}
   .story .desc{font-size:1rem;margin-top:6px}
   .buy{margin-top:10px}.buy strong{font-size:1.5rem}
-  .stagewrap{place-items:start center;padding:3vh 0 0}
-  .stage{height:min(29vh,60vw)}
+  .stagewrap{place-items:start center;padding:calc(var(--vh)*3) 0 0}
+  .stage{height:min(calc(var(--vh)*29),60vw)}
   .call{left:0!important;right:0;top:auto!important;justify-content:center;font-size:.9rem}
   .call i{display:none}
   .call:nth-of-type(1){bottom:-2.4em}.call:nth-of-type(2){bottom:-4.2em}.call:nth-of-type(3){bottom:-6em}
@@ -295,10 +304,8 @@ const calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
 /* Stable viewport height for all scroll maths. iOS Safari changes innerHeight on every frame while its toolbars slide
    back in (i.e. whenever you scroll up), so progress values computed from it jumped: the story, the 3D cake and the drips
    all twitched on scroll-up. CSS vh already means the tall viewport (100lvh); JS now uses the same number. */
-const vhProbe=document.createElement('div');vhProbe.style.cssText='position:fixed;left:0;top:0;width:0;height:100vh;height:100lvh;visibility:hidden;pointer-events:none';
-document.documentElement.append(vhProbe);
-let VH=vhProbe.offsetHeight||innerHeight,VW=innerWidth;
-addEventListener('resize',()=>{if(innerWidth!==VW){VW=innerWidth;VH=vhProbe.offsetHeight||innerHeight;lastY=-1}});   // only re-measure on rotation
+let VH=window.__VH,VW=innerWidth;
+addEventListener('resize',()=>{if(innerWidth!==VW){VW=innerWidth;VH=window.__VH;lastY=-1}});   // only changes on rotation (set in <head>)
 
 const G='#3E5D58',CR='#FFF6E6',DK='#243B37';
 const F=JSON.parse($('#menu-data').textContent).map(f=>({...f,ink:DK}));window.F=F;
@@ -529,10 +536,13 @@ function intro(){
 setActive(0);
 window.T0=performance.now();requestAnimationFrame(()=>{intro();frame()});
 if(window.DBG.fps){const el=document.createElement('div');el.id='dbgfps';document.body.append(el);
-  let n=0,worst=0,slow=0,last=performance.now(),t0=last;
+  if(window.DBG.log)fetch('/__dbg?ua='+encodeURIComponent(navigator.userAgent)+'&dpr='+devicePixelRatio+'&w='+innerWidth+'&h='+innerHeight+'&webgl='+(!!document.createElement('canvas').getContext('webgl')),{keepalive:true}).catch(()=>{});
+  let n=0,worst=0,slow=0,last=performance.now(),t0=last,lastY=scrollY,moved=0,jumps=0,maxStep=0,rs=0,hmin=innerHeight,hmax=innerHeight,vmin=VH,vmax=VH;
+  addEventListener('resize',()=>{rs++;hmin=Math.min(hmin,innerHeight);hmax=Math.max(hmax,innerHeight);const v=document.getElementById('gl').clientHeight;vmin=Math.min(vmin,v);vmax=Math.max(vmax,v)});   // does the in-app browser resize the page while scrolling?
   (function f(t){const d=t-last;last=t;n++;worst=Math.max(worst,d);if(d>25)slow++;
-    if(t-t0>=1000){if(window.DBG.log)fetch(`/__dbg?fps=${Math.round(n*1000/(t-t0))}&worst=${Math.round(worst)}&slow=${slow}&y=${Math.round(scrollY)}&sec=${(document.elementFromPoint(innerWidth/2,innerHeight/2)?.closest('section,header,footer')?.id||document.elementFromPoint(innerWidth/2,innerHeight/2)?.closest('section')?.className||'-').split(' ')[0]}&flags=${Object.keys(window.DBG).join('+')}`,{keepalive:true}).catch(()=>{});   // ?log: report to the dev server log
-      el.textContent=`${Math.round(n*1000/(t-t0))} fps\nช้าสุด ${Math.round(worst)} ms\nสะดุด ${slow} ครั้ง\n${Object.keys(window.DBG).filter(k=>k!=='fps').join(' ')||'ทุกอย่างเปิด'}`;n=0;worst=0;slow=0;t0=t}
+    const dy=Math.abs(scrollY-lastY);lastY=scrollY;if(dy)moved++;if(dy>maxStep)maxStep=dy;if(dy>120)jumps++;
+    if(t-t0>=1000){if(window.DBG.log)fetch(`/__dbg?fps=${Math.round(n*1000/(t-t0))}&worst=${Math.round(worst)}&slow=${slow}&y=${Math.round(scrollY)}&sec=${(document.elementFromPoint(innerWidth/2,innerHeight/2)?.closest('section,header,footer')?.id||document.elementFromPoint(innerWidth/2,innerHeight/2)?.closest('section')?.className||'-').split(' ')[0]}&moved=${moved}&maxStep=${maxStep}&jumps=${jumps}&resizes=${rs}&ih=${hmin}-${hmax}&glh=${vmin}-${vmax}&flags=${Object.keys(window.DBG).join('+')}`,{keepalive:true}).catch(()=>{});   // ?log: report to the dev server log
+      el.textContent=`${Math.round(n*1000/(t-t0))} fps\nช้าสุด ${Math.round(worst)} ms\nสะดุด ${slow} ครั้ง\n${Object.keys(window.DBG).filter(k=>k!=='fps').join(' ')||'ทุกอย่างเปิด'}`;n=0;worst=0;slow=0;moved=0;maxStep=0;jumps=0;rs=0;hmin=hmax=innerHeight;vmin=vmax=document.getElementById('gl').clientHeight;t0=t}
     requestAnimationFrame(f)})(last)}
 </script>
 <script type="module">
