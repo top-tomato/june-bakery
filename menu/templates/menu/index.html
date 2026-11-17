@@ -410,23 +410,34 @@ $('#stores').addEventListener('click',e=>{const b=e.target.closest('button');if(
 /* scroll loop */
 const dripEls=$$('.drips'),navSecs=$$('[data-nav]'),nav=$('#nav'),mark=$('#mark'),band=$('#band'),calls=$$('.call'),cut=$('#layCut'),keep=$('#layKeep'),pin=$('.story .pin');
 let lastY=-1,lastH=0;
+/* Read every position first, then write every style. Mixing them (read, write, read, …) made the browser
+   re-layout the page several times per frame while scrolling, which showed up as stutter on phones. */
+const heroSpot=$('#heroSpot'),stageEl=$('#stage');
 function frame(){
   const y=scrollY,vh=innerHeight;
   if(y!==lastY||vh!==lastH){lastY=y;lastH=vh;
-    dripEls.forEach(d=>{const t=d.parentElement.getBoundingClientRect().top;if(t<vh+50&&t>-400)d.style.setProperty('--g',(.2+.8*ease(clamp((vh-t)/(vh*.85)))).toFixed(3))});
-    for(const s of navSecs){const r=s.getBoundingClientRect();if(r.top<=40&&r.bottom>40){nav.classList.toggle('dark',s.dataset.nav==='dark');nav.classList.toggle('top',s.id==='flavors');break}}
-    const p=clamp((y-story.offsetTop)/(story.offsetHeight-vh));
-    const a=calm?1:ease(clamp((y-story.offsetTop+vh*.5)/(vh*.9)));
+    // --- reads ---
+    const dripTops=dripEls.map(d=>d.parentElement.getBoundingClientRect().top);
+    let navHit=null;for(const s of navSecs){const r=s.getBoundingClientRect();if(r.top<=40&&r.bottom>40){navHit=s;break}}
+    const sTop=story.offsetTop,sH=story.offsetHeight;
+    const cardTops=cards.map(c=>c.parentElement.getBoundingClientRect().top);
+    const mr=mark.getBoundingClientRect();
+    // --- writes ---
+    dripEls.forEach((d,i)=>{const t=dripTops[i];if(t<vh+50&&t>-400)d.style.setProperty('--g',(.2+.8*ease(clamp((vh-t)/(vh*.85)))).toFixed(3))});
+    if(navHit){nav.classList.toggle('dark',navHit.dataset.nav==='dark');nav.classList.toggle('top',navHit.id==='flavors')}
+    const p=clamp((y-sTop)/(sH-vh));
+    const a=calm?1:ease(clamp((y-sTop+vh*.5)/(vh*.9)));
     pin.style.setProperty('--a',a.toFixed(3));
-    
     const b=ease(clamp((p-.18)/.3));
     window.S3={a,p,b};
     calls.forEach((c,k)=>c.style.setProperty('--c',ease(clamp((p-.46-k*.08)/.12)).toFixed(3)));
     pin.style.setProperty('--e',ease(clamp((p-.74)/.14)).toFixed(3));
     band.style.transform=`translateX(${-5-p*28}%)`;
-    cards.forEach(c=>{const r=c.parentElement.getBoundingClientRect();c.style.setProperty('--y',((r.top-vh*.5)*c.dataset.sp*.35).toFixed(1)+'px')});
-    const mr=mark.getBoundingClientRect();mark.style.setProperty('--m',ease(clamp((vh-mr.top+mr.height*.45)/(vh*.6))).toFixed(3));
+    cards.forEach((c,i)=>c.style.setProperty('--y',((cardTops[i]-vh*.5)*c.dataset.sp*.35).toFixed(1)+'px'));
+    mark.style.setProperty('--m',ease(clamp((vh-mr.top+mr.height*.45)/(vh*.6))).toFixed(3));
   }
+  // one layout read per frame for the 3D layer (it runs right after this in the same frame)
+  window.R3={h:heroSpot.getBoundingClientRect(),st:stageEl.getBoundingClientRect()};
   requestAnimationFrame(frame);
 }
 
@@ -543,7 +554,7 @@ addEventListener('pointerup',()=>down=null);
 let sm=0;
 function tick(t){
   requestAnimationFrame(tick);
-  const S=window.S3||{a:0,p:0,b:0},h=spot.getBoundingClientRect(),st=stage.getBoundingClientRect();
+  const S=window.S3||{a:0,p:0,b:0},rects=window.R3,h=rects?rects.h:spot.getBoundingClientRect(),st=rects?rects.st:stage.getBoundingClientRect();
   if(st.bottom<-300){R.clear();return}
   const act=window.ACT||0;sm+=(act-sm)*(calm?1:.12);
   const cx=lerp(h.left+h.width/2,st.left+st.width/2,S.a),cy=lerp(Math.max(h.top+h.height/2,innerHeight*.42),st.top+st.height/2,S.a),px=lerp(h.height,st.height*.86,S.a);
