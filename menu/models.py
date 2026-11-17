@@ -1,3 +1,5 @@
+from urllib.parse import urlsplit
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
@@ -96,6 +98,8 @@ class ShopInfo(models.Model):
     about_title = models.CharField("หัวข้อเรื่องของร้าน", max_length=80, blank=True)
     about_text = models.TextField("เรื่องของร้าน (2–3 ประโยค)", blank=True)
     about_photo = models.ImageField("รูปประกอบเรื่องของร้าน", upload_to=UniqueName("shop/"), blank=True)
+    instagram_url = models.URLField("ลิงก์ Instagram", blank=True, help_text="เช่น https://www.instagram.com/ชื่อร้าน/ (ว่าง = ไม่แสดงปุ่ม)")
+    facebook_url = models.URLField("ลิงก์เพจ Facebook", blank=True, help_text="ว่าง = ไม่แสดงปุ่ม")
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -104,6 +108,22 @@ class ShopInfo(models.Model):
 
     def __str__(self) -> str:
         return "ข้อมูลร้าน"
+
+    def clean(self) -> None:
+        # a bare instagram.com / facebook.com (no page) took customers to the site's front page, not the shop's
+        for field, host in (("instagram_url", "instagram.com"), ("facebook_url", "facebook.com")):
+            url = getattr(self, field)
+            if not url:
+                continue
+            parts = urlsplit(url)
+            if not parts.netloc.lower().endswith(host) and not (host == "facebook.com" and parts.netloc.lower().endswith("fb.com")):
+                raise ValidationError({field: f"ลิงก์ต้องเป็นของ {host}"})
+            if parts.path.strip("/") == "" and not parts.query:
+                raise ValidationError({field: "ใส่ลิงก์หน้าร้าน ไม่ใช่หน้าแรกของเว็บ"})
+
+    @property
+    def social(self) -> dict[str, str]:
+        return {k: v for k, v in {"instagram": self.instagram_url, "facebook": self.facebook_url}.items() if v}
 
     @classmethod
     def load(cls) -> "ShopInfo":

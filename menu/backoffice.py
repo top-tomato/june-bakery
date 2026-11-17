@@ -446,7 +446,7 @@ def reviews(request: HttpRequest) -> HttpResponse:
 class ShopForm(forms.ModelForm):
     class Meta:
         model = ShopInfo
-        fields = ["preorder_days", "shelf_life", "payment", "hours", "about_title", "about_text", "about_photo"]
+        fields = ["preorder_days", "shelf_life", "payment", "hours", "about_title", "about_text", "about_photo", "instagram_url", "facebook_url"]
         widgets = {"about_text": forms.Textarea(attrs={"rows": 4})}
 
 

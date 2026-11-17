@@ -40,7 +40,7 @@ def menu_data() -> dict[str, object]:
             "qrSvg": line_qr_svg(line_add_url),
         },
         # only links the shop has set; the page shows a button for each one
-        "social": {k: v for k, v in {"instagram": settings.SHOP_INSTAGRAM_URL, "facebook": settings.SHOP_FACEBOOK_URL}.items() if v},
+        "social": ShopInfo.load().social,  # set in the back office (ข้อมูลร้าน)
         "shop": {
             **SHOP,
             "hours": info["hours"] or SHOP["hours"],

@@ -70,9 +70,18 @@ class MenuApiTests(MediaTestCase):
 
     def test_social_links_only_when_set(self) -> None:
         self.assertEqual(self.client.get(reverse("menu:api-menu")).json()["social"], {})
-        with override_settings(SHOP_INSTAGRAM_URL="https://www.instagram.com/june", SHOP_FACEBOOK_URL=""):
-            social = self.client.get(reverse("menu:api-menu")).json()["social"]
-        self.assertEqual(social, {"instagram": "https://www.instagram.com/june"})
+        info = ShopInfo.load()
+        info.instagram_url = "https://www.instagram.com/june"
+        info.save()
+        self.assertEqual(self.client.get(reverse("menu:api-menu")).json()["social"], {"instagram": "https://www.instagram.com/june"})
+
+    def test_social_links_must_point_at_a_page(self) -> None:
+        info = ShopInfo.load()
+        for bad in ("https://www.instagram.com/", "https://example.com/june", "https://www.facebook.com"):
+            info.instagram_url = bad if "facebook" not in bad else ""
+            info.facebook_url = bad if "facebook" in bad else ""
+            with self.assertRaises(ValidationError, msg=bad):
+                info.full_clean()
 
     def test_optional_sections_are_empty_until_filled_in(self) -> None:
         data = self.client.get(reverse("menu:api-menu")).json()

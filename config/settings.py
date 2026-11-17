@@ -158,8 +158,6 @@ STORAGES = {
 # LINE Official Account ของร้าน (รวม @ นำหน้า) ปุ่มสั่งทุกปุ่มบนเว็บพาไปที่นี่
 LINE_OA_ID = os.environ.get('LINE_OA_ID', '@561hgrea')
 # ลิงก์ Instagram / Facebook ของร้าน ว่างไว้ = ไม่แสดงปุ่มนั้น (ตั้งใน fly.toml [env] หรือ fly secrets)
-SHOP_INSTAGRAM_URL = os.environ.get('SHOP_INSTAGRAM_URL', '')
-SHOP_FACEBOOK_URL = os.environ.get('SHOP_FACEBOOK_URL', '')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

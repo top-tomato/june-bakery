@@ -9,6 +9,9 @@
   <label for="{{ form.about_title.id_for_label }}">หัวข้อ</label>{{ form.about_title }}
   <label for="{{ form.about_text.id_for_label }}">ข้อความ 2–3 ประโยค</label>{{ form.about_text }}
   <label for="{{ form.about_photo.id_for_label }}">รูป</label>{{ form.about_photo }}
+  <b style="font:600 1rem Mitr,sans-serif;margin-top:10px">โซเชียล <small class="muted" style="font:400 .85rem Anuphan">ปุ่มท้ายหน้าเว็บ ช่องที่ว่างจะไม่แสดงปุ่ม</small></b>
+  <label for="{{ form.instagram_url.id_for_label }}">ลิงก์ Instagram</label>{{ form.instagram_url }}{{ form.instagram_url.errors }}
+  <label for="{{ form.facebook_url.id_for_label }}">ลิงก์เพจ Facebook</label>{{ form.facebook_url }}{{ form.facebook_url.errors }}
   {{ form.non_field_errors }}
   <button class="btn2" type="submit">บันทึก</button>
 </form>
