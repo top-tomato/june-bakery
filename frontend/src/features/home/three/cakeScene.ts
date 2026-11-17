@@ -39,7 +39,8 @@ export interface CakeSceneOptions {
   active: () => number
   /** extra rotation from dragging in the hero */
   dragX: () => number
-  startedAt: number
+  /** performance.now() time the cakes start dropping in */
+  introAt: number
   onModelError: (index: number) => void
 }
 
@@ -131,7 +132,7 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
         const dI = i - smooth
         const near = 1 - Math.min(1, Math.abs(dI))
         // intro: rise a little from below while growing 60% -> 105% -> 100% (mock/intro-drop.html)
-        const d = calm ? 1 : clamp((t - o.startedAt - 2500 - i * 200) / 900)
+        const d = calm ? 1 : clamp((t - o.introAt - i * 200) / 900)
         const drop = -(1 - outCubic(d)) * VH * 0.12
         const grow = lerp(0.6, 1, outBack(d))
         it.group.position.set((cx + dI * gap - cw / 2) * worldPerPx, -(cy - drop - ch / 2) * worldPerPx, 0)
