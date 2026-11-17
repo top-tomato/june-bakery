@@ -16,6 +16,7 @@ export interface Product {
 
 export interface GalleryItem {
   id: number
+  /** photo URL; for a video, its poster ("" when the shop uploaded only the video) */
   image: string
   caption: string
   /** URL of a short .mp4, or "" for a plain photo */

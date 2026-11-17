@@ -1,0 +1,6 @@
+{% extends "admin/base_site.html" %}
+{% comment %}
+  Every staff account sees a link to the easy gallery upload page (menu/gallery_upload.py) in the admin header,
+  even without per-table permissions.
+{% endcomment %}
+{% block userlinks %}<a href="/admin/gallery-upload/">อัปโหลดรูป Gallery</a> / {{ block.super }}{% endblock %}

@@ -170,6 +170,90 @@ class MediaServeTests(MediaTestCase):
         self.assertEqual(self.get("gallery/missing.mp4").status_code, 404)
 
 
+def png_bytes(size: tuple[int, int] = (3000, 2000)) -> bytes:
+    import io
+
+    from PIL import Image
+
+    out = io.BytesIO()
+    Image.new("RGB", size, (200, 120, 90)).save(out, "PNG")
+    return out.getvalue()
+
+
+class GalleryUploadTests(MediaTestCase):
+    """The staff upload page (menu/gallery_upload.py)."""
+
+    def setUp(self) -> None:
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        self.staff = User.objects.create_user("staff", password="x", is_staff=True)  # no per-table permissions
+        self.customer = User.objects.create_user("someone", password="x")
+
+    def test_staff_only(self) -> None:
+        url = reverse("gallery-upload")
+        self.assertEqual(self.client.get(url).status_code, 302)  # to the admin login
+        self.client.force_login(self.customer)
+        self.assertEqual(self.client.get(url).status_code, 302)
+        self.client.force_login(self.staff)
+        self.assertContains(self.client.get(url), "เลือกรูปหรือวิดีโอ")
+
+    def test_photo_is_shrunk_and_listed(self) -> None:
+        self.client.force_login(self.staff)
+        r = self.client.post(reverse("gallery-upload-file"), {"file": SimpleUploadedFile("big.png", png_bytes(), "image/png"), "caption": "ชิ้นแรก"})
+        self.assertEqual(r.status_code, 200, r.content)
+        g = GalleryPhoto.objects.get()
+        self.assertEqual(g.caption, "ชิ้นแรก")
+        self.assertTrue(g.image.name.endswith(".jpg"))
+        self.assertEqual(max(g.image.width, g.image.height), 1600)
+        self.assertEqual(self.client.get(reverse("menu:api-menu")).json()["gallery"][0]["caption"], "ชิ้นแรก")
+
+    def test_video_without_poster(self) -> None:
+        self.client.force_login(self.staff)
+        r = self.client.post(reverse("gallery-upload-file"), {"file": SimpleUploadedFile("clip.mp4", b"\x00" * 100, "video/mp4")})
+        self.assertEqual(r.status_code, 200, r.content)
+        self.assertEqual(r.json()["image"], "")
+        self.assertTrue(r.json()["video"].endswith(".mp4"))
+
+    def test_rejects_non_images(self) -> None:
+        self.client.force_login(self.staff)
+        r = self.client.post(reverse("gallery-upload-file"), {"file": SimpleUploadedFile("x.txt", b"hello", "text/plain")})
+        self.assertEqual(r.status_code, 400)
+        self.assertEqual(GalleryPhoto.objects.count(), 0)
+
+    def test_reorder_hide_caption_delete(self) -> None:
+        self.client.force_login(self.staff)
+        a, b = (GalleryPhoto.objects.create(image=SimpleUploadedFile(f"{n}.gif", TINY_GIF, "image/gif"), sort_order=i) for i, n in enumerate("ab"))
+        self.client.post(reverse("gallery-upload-order"), {"ids": [b.pk, a.pk]}, content_type="application/json")
+        self.assertEqual(list(GalleryPhoto.objects.values_list("pk", flat=True)), [b.pk, a.pk])
+        self.client.post(reverse("gallery-upload-update", args=[a.pk]), {"active": False, "caption": " ใหม่ "}, content_type="application/json")
+        a.refresh_from_db()
+        self.assertEqual((a.is_active, a.caption), (False, "ใหม่"))
+        path = Path(b.image.path)
+        self.client.post(reverse("gallery-upload-delete", args=[b.pk]))
+        self.assertFalse(GalleryPhoto.objects.filter(pk=b.pk).exists())
+        self.assertFalse(path.exists())
+
+    def test_only_post_changes_things(self) -> None:
+        self.client.force_login(self.staff)
+        self.assertEqual(self.client.get(reverse("gallery-upload-order")).status_code, 405)
+
+
+class AdminLoginTests(TestCase):
+    def test_login_page_in_the_shop_look(self) -> None:
+        r = self.client.get("/admin/login/?next=/admin/gallery-upload/")
+        self.assertContains(r, "เข้าสู่ระบบร้าน")
+        self.assertContains(r, 'name="next" value="/admin/gallery-upload/"')
+
+    def test_staff_can_sign_in(self) -> None:
+        from django.contrib.auth import get_user_model
+
+        get_user_model().objects.create_user("staff", password="pw-for-test-only", is_staff=True)
+        r = self.client.post("/admin/login/?next=/admin/gallery-upload/", {"username": "staff", "password": "pw-for-test-only", "next": "/admin/gallery-upload/"})
+        self.assertRedirects(r, "/admin/gallery-upload/")
+        self.assertContains(self.client.get("/admin/"), "อัปโหลดรูป Gallery")
+
+
 class ViteAssetsTagTests(SimpleTestCase):
     def render(self) -> str:
         return Template('{% load vite %}{% vite_assets "src/main.tsx" %}').render(Context())

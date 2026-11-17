@@ -14,7 +14,8 @@ export interface Sheet {
 
 const snap = (g: GalleryItem, k: number) => {
   const media = g.video
-    ? `<video class="ph" src="${esc(g.video)}" poster="${esc(g.image)}" muted loop playsinline preload="metadata"></video>`
+    ? // no poster uploaded: #t=0.1 makes browsers show the first frame instead of a blank box
+      `<video class="ph" src="${esc(g.video)}${g.image ? '' : '#t=0.1'}"${g.image ? ` poster="${esc(g.image)}"` : ''} muted loop playsinline preload="metadata"></video>`
     : `<div class="ph" style="background-image:url('${esc(g.image)}')" role="img" aria-label="${esc(g.caption)}"></div>`
   return `<div class="snap" style="--r:${k % 2 ? 2.2 : -2.2}deg"><span class="tape"></span>${media}<p>${esc(g.caption) || '&nbsp;'}</p></div>`
 }

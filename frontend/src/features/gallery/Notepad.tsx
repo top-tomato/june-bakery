@@ -79,6 +79,7 @@ function Pad({ sheets, hint, back, autoOpen, vtName, w, h }: NotepadProps & { w:
       // copies of the page for each strip; a video becomes its poster frame while the page turns
       const html = fr.innerHTML
         .replace(/<video[^>]*poster="([^"]+)"[^>]*>(<\/video>)?/g, '<img class="ph" src="$1" alt="">')
+        .replace(/<video[^>]*>(<\/video>)?/g, '<div class="ph"></div>') // no poster: a plain card while turning
         .replace(/<div class="np-(under|shade)"[^>]*><\/div>/g, '')
       const root = document.createElement('div')
       root.className = 'np-curl'

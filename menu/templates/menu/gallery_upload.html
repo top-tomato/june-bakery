@@ -1,0 +1,184 @@
+{% load static %}<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>อัปโหลดรูป · Gallery · June</title>
+<link rel="icon" href="{% static 'favicon.png' %}">
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Staff upload page for the photo book (mock/gallery-upload.html). Phone first. */
+:root{--ink:#2F4A45;--cream:#FFF6E6;--paper:#FFFBF3;--peach:#F3A18F;--green:#3E5D58;--line:#e6dccb}
+*{box-sizing:border-box;margin:0}
+body{font-family:Anuphan,system-ui,sans-serif;background:var(--paper);color:var(--ink);padding:0 0 60px}
+header{background:var(--green);color:var(--cream);padding:14px 16px;position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header h1{font:600 1.15rem Mitr,sans-serif}
+header nav{display:flex;gap:14px;font-size:.9rem}
+header a{color:var(--cream);opacity:.85;text-decoration:none}
+main{max-width:720px;margin:0 auto;padding:16px}
+.drop{display:grid;place-items:center;gap:10px;text-align:center;border:2.5px dashed #c9bfae;border-radius:18px;padding:34px 16px;background:#fff;cursor:pointer;transition:.2s}
+.drop.over{border-color:var(--peach);background:#fff4ef}
+.drop svg{width:44px;height:44px;fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.drop b{font:600 1.1rem Mitr,sans-serif}
+.drop small{opacity:.65}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:12px 22px;background:var(--ink);color:var(--cream);font:500 1rem Mitr,sans-serif;cursor:pointer}
+h2{font:600 1.05rem Mitr,sans-serif;margin:26px 0 10px}
+h2 small{font:400 .85rem Anuphan,sans-serif;opacity:.6}
+.list{display:grid;gap:10px}
+.item{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px}
+.item.sortable{grid-template-columns:34px 72px 1fr auto;transition:transform .18s}
+.th{width:72px;height:72px;border-radius:10px;background:#eee;position:relative;overflow:hidden}
+.th img,.th video{width:100%;height:100%;object-fit:cover;display:block}
+.th i{position:absolute;left:4px;bottom:4px;font:600 .62rem Mitr;background:rgba(36,59,55,.85);color:var(--cream);padding:1px 6px;border-radius:99px;font-style:normal}
+.item input{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;background:var(--paper)}
+.bar{height:6px;border-radius:9px;background:#eee;margin-top:6px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--peach);transition:width .2s}
+.st{font-size:.8rem;opacity:.7;margin-top:4px}
+.st.ok{color:#3d7a3a;opacity:1}
+.st.err{color:#b4412b;opacity:1}
+.tools{display:flex;gap:4px}
+.ic{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer}
+.ic svg{width:18px;height:18px;fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ic.on{background:#eaf3dd;border-color:#bcd79a}
+.item.off{opacity:.55}
+.grip{width:34px;height:56px;border:0;background:none;display:grid;place-items:center;cursor:grab;touch-action:none;border-radius:8px}
+.grip svg{width:20px;height:20px;fill:var(--ink);opacity:.55}
+.item.dragging{box-shadow:0 14px 30px rgba(0,0,0,.18);z-index:3;position:relative;cursor:grabbing;transition:none}
+.empty{opacity:.6;text-align:center;padding:20px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:var(--cream);padding:10px 18px;border-radius:999px;font-size:.9rem;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+@media (max-width:480px){.item.sortable{grid-template-columns:30px 60px 1fr}.item{grid-template-columns:60px 1fr}.th{width:60px;height:60px}.tools{grid-column:1/-1;justify-content:flex-end}}
+</style>
+</head>
+<body>
+<header><h1>อัปโหลดรูป · Gallery</h1><nav><a href="/gallery/" target="_blank" rel="noopener">ดูสมุดรูป</a><a href="/admin/">admin</a></nav></header>
+<main>
+  <label class="drop" id="drop">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg>
+    <b>เลือกรูปหรือวิดีโอ</b>
+    <small>เลือกได้ทีละหลายไฟล์ · ลากไฟล์มาวางตรงนี้ก็ได้<br>วิดีโอ .mp4 ไม่เกิน 20 MB</small>
+    <span class="btn">เลือกจากเครื่อง</span>
+    <input type="file" id="file" accept="image/*,video/mp4,video/webm" multiple hidden>
+  </label>
+
+  <h2 id="upH" hidden>กำลังอัปโหลด</h2>
+  <div class="list" id="up"></div>
+
+  <h2>บนเว็บตอนนี้ <small>(เรียงตามที่ลูกค้าเห็น · จับจุด ⠿ แล้วลากเพื่อสลับ)</small></h2>
+  <div class="list" id="now"></div>
+</main>
+<div class="toast" id="toast"></div>
+{% csrf_token %}
+{{ items|json_script:"items" }}
+<script>
+const CSRF=document.querySelector('[name=csrfmiddlewaretoken]').value;
+let items=JSON.parse(document.getElementById('items').textContent);
+const ICON={
+  grip:'<circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/>',
+  eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>',
+};
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
+const ic=(k,t,on)=>`<button type="button" class="ic${on?' on':''}" title="${t}" aria-label="${t}" data-a="${k}"><svg viewBox="0 0 24 24">${ICON[k]}</svg></button>`;
+const thumb=g=>g.image?`<img src="${esc(g.image)}" alt="">${g.video?'<i>วิดีโอ</i>':''}`:`<video src="${esc(g.video)}#t=0.1" muted playsinline preload="metadata"></video><i>วิดีโอ</i>`;
+const toast=t=>{const el=document.getElementById('toast');el.textContent=t;el.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('on'),1800)};
+async function post(url,body){
+  const r=await fetch(url,{method:'POST',headers:{'X-CSRFToken':CSRF,'Content-Type':'application/json'},body:JSON.stringify(body||{})});
+  if(!r.ok)throw new Error((await r.json().catch(()=>({}))).error||'บันทึกไม่สำเร็จ');
+  return r.json();
+}
+
+function renderNow(){
+  const el=document.getElementById('now');
+  el.innerHTML=items.length?items.map((g,i)=>`<div class="item sortable${g.active?'':' off'}" data-i="${i}">
+    <button type="button" class="grip" title="ลากเพื่อสลับลำดับ" aria-label="ลากเพื่อสลับลำดับ"><svg viewBox="0 0 24 24">${ICON.grip}</svg></button>
+    <div class="th">${thumb(g)}</div>
+    <div><input value="${esc(g.caption)}" placeholder="คำบรรยาย (ไม่ใส่ก็ได้)" maxlength="80"><div class="st">${g.active?'แสดงบนเว็บ':'ซ่อนอยู่'}</div></div>
+    <div class="tools">${ic('eye',g.active?'ซ่อน':'แสดง',g.active)}${ic('trash','ลบ')}</div></div>`).join(''):'<p class="empty">ยังไม่มีรูป</p>';
+}
+const now=document.getElementById('now');
+now.addEventListener('click',async e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;const i=+b.closest('.item').dataset.i,g=items[i],a=b.dataset.a;
+  try{
+    if(a==='eye'){Object.assign(g,await post(`/admin/gallery-upload/${g.id}/`,{active:!g.active}));toast(g.active?'แสดงบนเว็บแล้ว':'ซ่อนแล้ว')}
+    if(a==='trash'){if(!confirm('ลบรูปนี้ออกจากเว็บ? ลบแล้วกู้คืนไม่ได้'))return;await post(`/admin/gallery-upload/${g.id}/delete/`);items.splice(i,1);toast('ลบแล้ว')}
+  }catch(err){toast(err.message)}
+  renderNow();
+});
+// captions save when you leave the box
+now.addEventListener('change',async e=>{
+  if(e.target.tagName!=='INPUT')return;const g=items[+e.target.closest('.item').dataset.i];
+  try{Object.assign(g,await post(`/admin/gallery-upload/${g.id}/`,{caption:e.target.value}));toast('บันทึกคำบรรยายแล้ว')}catch(err){toast(err.message)}
+});
+
+/* drag to reorder: hold the ⠿ handle and move (finger or mouse); the others slide out of the way; release saves */
+now.addEventListener('pointerdown',e=>{
+  const h=e.target.closest('.grip');if(!h)return;e.preventDefault();
+  const row=h.closest('.item'),rows=[...now.querySelectorAll('.item')],from=rows.indexOf(row);
+  const tops=rows.map(r=>r.getBoundingClientRect().top),hgt=row.getBoundingClientRect().height+10,y0=e.clientY;
+  let to=from;row.classList.add('dragging');h.setPointerCapture(e.pointerId);
+  const move=ev=>{
+    const dy=ev.clientY-y0;row.style.transform=`translateY(${dy}px) scale(1.02)`;
+    const mid=tops[from]+dy+hgt/2;to=from;
+    rows.forEach((r,j)=>{if(j===from)return;const c=tops[j]+hgt/2;if(j<from&&mid<c)to=Math.min(to,j);if(j>from&&mid>c)to=Math.max(to,j)});
+    rows.forEach((r,j)=>{if(j===from)return;r.style.transform=j>=to&&j<from?`translateY(${hgt}px)`:j<=to&&j>from?`translateY(${-hgt}px)`:''});
+  };
+  const up=async()=>{
+    h.removeEventListener('pointermove',move);h.removeEventListener('pointerup',up);h.removeEventListener('pointercancel',up);
+    rows.forEach(r=>r.style.transform='');row.classList.remove('dragging');
+    if(to===from)return;
+    const [m]=items.splice(from,1);items.splice(to,0,m);renderNow();
+    try{await post('/admin/gallery-upload/order/',{ids:items.map(g=>g.id)});toast('บันทึกลำดับแล้ว')}catch(err){toast(err.message)}
+  };
+  h.addEventListener('pointermove',move);h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up);
+});
+
+/* upload: one request per file, so each has its own progress bar and one failure doesn't stop the rest */
+const queue=[];let busy=0;
+function add(files){
+  document.getElementById('upH').hidden=false;
+  [...files].forEach(f=>{
+    const video=f.type.startsWith('video'),url=URL.createObjectURL(f);
+    const row=document.createElement('div');row.className='item';
+    row.innerHTML=`<div class="th">${video?`<video src="${url}#t=0.1" muted playsinline></video><i>วิดีโอ</i>`:`<img src="${url}" alt="">`}</div>
+      <div><input placeholder="คำบรรยาย (ไม่ใส่ก็ได้)" maxlength="80"><div class="bar"><span></span></div><div class="st">รอคิว…</div></div><div></div>`;
+    document.getElementById('up').prepend(row);
+    if(video&&f.size>20*1024*1024){const st=row.querySelector('.st');st.textContent='วิดีโอใหญ่เกิน 20 MB';st.className='st err';return}
+    queue.push({f,row});
+  });
+  pump();
+}
+function pump(){
+  while(busy<2&&queue.length){busy++;send(queue.shift()).finally(()=>{busy--;pump()})}
+}
+function send({f,row}){
+  return new Promise(done=>{
+    const st=row.querySelector('.st'),bar=row.querySelector('.bar span'),fd=new FormData();
+    fd.append('file',f);fd.append('caption',row.querySelector('input').value);
+    const x=new XMLHttpRequest();x.open('POST','/admin/gallery-upload/file/');x.setRequestHeader('X-CSRFToken',CSRF);
+    st.textContent='กำลังอัปโหลด…';
+    x.upload.onprogress=e=>{if(e.lengthComputable)bar.style.width=(e.loaded/e.total*100)+'%'};
+    x.onload=()=>{
+      let r={};try{r=JSON.parse(x.responseText)}catch{}
+      if(x.status===200){bar.style.width='100%';st.textContent='ขึ้นเว็บแล้ว';st.className='st ok';
+        const cap=row.querySelector('input').value.trim();
+        items.push(r);renderNow();
+        if(cap&&cap!==r.caption)post(`/admin/gallery-upload/${r.id}/`,{caption:cap}).then(n=>{Object.assign(r,n);renderNow()}).catch(()=>{});
+        setTimeout(()=>{row.remove();if(!document.querySelector('#up .item'))document.getElementById('upH').hidden=true},2500);
+      }else{st.textContent=r.error||(x.status===413?'ไฟล์ใหญ่เกินไป':'อัปโหลดไม่สำเร็จ ลองใหม่อีกครั้ง');st.className='st err'}
+      done();
+    };
+    x.onerror=()=>{st.textContent='เน็ตหลุด ลองใหม่อีกครั้ง';st.className='st err';done()};
+    x.send(fd);
+  });
+}
+const drop=document.getElementById('drop'),file=document.getElementById('file');
+file.addEventListener('change',()=>{add(file.files);file.value=''});
+['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',e=>add(e.dataTransfer.files));
+renderNow();
+</script>
+</body>
+</html>

@@ -112,7 +112,7 @@ class Review(models.Model):
 class GalleryPhoto(models.Model):
     """รูปหรือวิดีโอในส่วนรูปขนมบนหน้าแรก และในสมุดรูป /gallery/"""
 
-    image = models.ImageField("รูป", upload_to="gallery/", help_text="ถ้าใส่วิดีโอด้วย รูปนี้ใช้เป็นภาพปกของวิดีโอ")
+    image = models.ImageField("รูป", upload_to="gallery/", blank=True, help_text="ถ้าใส่วิดีโอด้วย รูปนี้ใช้เป็นภาพปกของวิดีโอ (ไม่ใส่ก็ได้)")
     video = models.FileField(
         "วิดีโอ (ไม่ใส่ก็ได้)",
         upload_to="gallery/video/",
@@ -130,11 +130,24 @@ class GalleryPhoto(models.Model):
         verbose_name_plural = "รูปขนม"
 
     def __str__(self) -> str:
-        return self.caption or self.image.name
+        return self.caption or (self.image or self.video).name
+
+    def delete_files(self) -> None:
+        """ลบไฟล์รูปและวิดีโอออกจากดิสก์ด้วย (Django ไม่ลบให้เอง)"""
+        for f in (self.image, self.video):
+            if f:
+                f.delete(save=False)
 
     def as_payload(self) -> dict[str, object]:
-        return {"id": self.pk, "image": self.image.url, "caption": self.caption, "video": self.video.url if self.video else ""}
+        return {
+            "id": self.pk,
+            "image": self.image.url if self.image else "",
+            "caption": self.caption,
+            "video": self.video.url if self.video else "",
+        }
 
     def clean(self) -> None:
+        if not self.image and not self.video:
+            raise ValidationError("ใส่รูปหรือวิดีโออย่างน้อยหนึ่งอย่าง")
         if self.video and self.video.size > 20 * 1024 * 1024:
             raise ValidationError({"video": "วิดีโอใหญ่เกิน 20 MB ลองย่อไฟล์ก่อน"})
