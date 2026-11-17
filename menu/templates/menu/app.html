@@ -16,6 +16,9 @@
    per change) resize the page itself while their toolbars collapse on scroll, so vh-sized sections re-laid out every frame.
    The frontend CSS uses var(--vh) instead; it only changes on rotation. --vhmax only grows (for the fixed 3D canvas). */
 (()=>{const r=document.documentElement;let w=innerWidth,max=innerHeight;
+  /* JS works: hide the no-JS text version so it never flashes before the app starts. Pages that open with the cream
+     curtain start cream too, so the curtain fades in from the same colour (src/main.tsx removes .booting). */
+  r.classList.add('js');if(/^\/(gallery\/?)?$/.test(location.pathname)&&!matchMedia('(prefers-reduced-motion: reduce)').matches)r.classList.add('booting');
   const set=()=>{window.__VH=innerHeight;max=innerHeight;r.style.setProperty('--vh',innerHeight/100+'px');r.style.setProperty('--vhmax',max+'px')};set();
   addEventListener('resize',()=>{if(innerWidth!==w){w=innerWidth;set();dispatchEvent(new Event('vhchange'));return}if(innerHeight>max){max=innerHeight;r.style.setProperty('--vhmax',max+'px')}});
 })();
@@ -25,12 +28,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@400;500;600&family=Itim&display=swap" rel="stylesheet">
 {{ bootstrap|json_script:"bootstrap" }}
 {% vite_assets "src/main.tsx" %}
-<style>body{margin:0;background:#3E5D58;color:#FFF6E6;font-family:Anuphan,system-ui,sans-serif}</style>
+<style>body{margin:0;background:#3E5D58;color:#FFF6E6;font-family:Anuphan,system-ui,sans-serif}.js #boot-text{visibility:hidden}.booting body{background:#FFF6E6}</style>
 </head>
 <body>
 <div id="root">
   {# shown until the app starts (and to crawlers / no-JS): the same facts as the real page #}
-  <main style="max-width:40rem;margin:0 auto;padding:48px 20px">
+  <main id="boot-text" style="max-width:40rem;margin:0 auto;padding:48px 20px">
     <h1>June — อบใหม่ หอม นุ่มนาน</h1>
     <ul>{% for p in products %}<li><b>{{ p.name|join:"" }}</b> ฿{{ p.price }} — {{ p.description }}</li>{% endfor %}</ul>
     <p>{{ shop.name }} · {{ shop.address }}</p>

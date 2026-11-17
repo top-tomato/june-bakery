@@ -3,6 +3,23 @@ from django.core.validators import FileExtensionValidator
 from django.db import models
 
 
+class UniqueName:
+    """upload_to that gives every uploaded file a fresh random name (keeping the extension). Uploaded files are served
+    with a one-year cache (menu/media.py), so a name must never be reused for different content — even after a delete."""
+
+    def __init__(self, folder: str) -> None:
+        self.folder = folder
+
+    def __call__(self, instance: object, filename: str) -> str:
+        import uuid
+        from pathlib import PurePath
+
+        return f"{self.folder}{uuid.uuid4().hex[:16]}{PurePath(filename).suffix.lower()}"
+
+    def deconstruct(self) -> tuple[str, tuple[str], dict[str, object]]:  # so migrations can store it
+        return ("menu.models.UniqueName", (self.folder,), {})
+
+
 def make_preview(field: object, side: int = 32) -> str:
     """A 32px JPEG of the photo as a data: URI. Upscaled by the browser it looks like a soft blur of the photo,
     shown instantly (it's in the page data) until the real photo has loaded."""
@@ -30,8 +47,8 @@ class Product(models.Model):
     name_line2 = models.CharField("ชื่อบรรทัดสอง", max_length=60, blank=True)
     description = models.CharField("คำบรรยาย", max_length=200)
     price = models.PositiveIntegerField("ราคาต่อชิ้น (บาท)")
-    image = models.ImageField("รูปขนม", upload_to="products/img/")
-    model_3d = models.FileField("โมเดล 3D (.glb)", upload_to="products/model/", blank=True)
+    image = models.ImageField("รูปขนม", upload_to=UniqueName("products/img/"))
+    model_3d = models.FileField("โมเดล 3D (.glb)", upload_to=UniqueName("products/model/"), blank=True)
     accent_color = models.CharField("สีพื้นหลังประจำเมนู", max_length=7, default="#C9DE98", help_text="รหัสสีแบบ #RRGGBB")
     highlight_1 = models.CharField("จุดเด่น 1", max_length=60, blank=True)
     highlight_2 = models.CharField("จุดเด่น 2", max_length=60, blank=True)
@@ -76,7 +93,7 @@ class ShopInfo(models.Model):
     payment = models.CharField("วิธีจ่ายเงิน", max_length=120, blank=True, help_text="เช่น โอนพร้อมเพย์ / จ่ายตอนรับ")
     about_title = models.CharField("หัวข้อเรื่องของร้าน", max_length=80, blank=True)
     about_text = models.TextField("เรื่องของร้าน (2–3 ประโยค)", blank=True)
-    about_photo = models.ImageField("รูปประกอบเรื่องของร้าน", upload_to="shop/", blank=True)
+    about_photo = models.ImageField("รูปประกอบเรื่องของร้าน", upload_to=UniqueName("shop/"), blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
@@ -132,10 +149,10 @@ class Review(models.Model):
 class GalleryPhoto(models.Model):
     """รูปหรือวิดีโอในส่วนรูปขนมบนหน้าแรก และในสมุดรูป /gallery/"""
 
-    image = models.ImageField("รูป", upload_to="gallery/", blank=True, help_text="ถ้าใส่วิดีโอด้วย รูปนี้ใช้เป็นภาพปกของวิดีโอ (ไม่ใส่ก็ได้)")
+    image = models.ImageField("รูป", upload_to=UniqueName("gallery/"), blank=True, help_text="ถ้าใส่วิดีโอด้วย รูปนี้ใช้เป็นภาพปกของวิดีโอ (ไม่ใส่ก็ได้)")
     video = models.FileField(
         "วิดีโอ (ไม่ใส่ก็ได้)",
-        upload_to="gallery/video/",
+        upload_to=UniqueName("gallery/video/"),
         blank=True,
         validators=[FileExtensionValidator(["mp4", "webm"])],
         help_text="ไฟล์ .mp4 สั้น ๆ ไม่เกิน 20 MB เล่นเองแบบไม่มีเสียง",

@@ -50,3 +50,5 @@ createRoot(root).render(
     </QueryClientProvider>
   </StrictMode>,
 )
+// the app has drawn its first frame (the curtain is up on / and /gallery): drop the cream start-up background
+requestAnimationFrame(() => requestAnimationFrame(() => document.documentElement.classList.remove('booting')))

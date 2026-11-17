@@ -2,6 +2,8 @@
 
 ใช้แทน django.views.static.serve เพราะตัวนั้นไม่รองรับ HTTP Range: Safari บน iPhone (และเบราว์เซอร์ในแอป LINE)
 ขอวิดีโอเป็นช่วง ๆ และจะไม่เล่นวิดีโอถ้าเซิร์ฟเวอร์ตอบทั้งไฟล์แทนการตอบ 206
+
+ให้เบราว์เซอร์เก็บไฟล์ไว้ 1 ปี: ไฟล์ที่อัปโหลดได้ชื่อสุ่มไม่ซ้ำ (models.UniqueName) ชื่อเดิมจึงไม่มีวันเป็นไฟล์อื่น
 """
 
 import mimetypes
@@ -12,10 +14,11 @@ from typing import BinaryIO
 
 from django.conf import settings
 from django.http import FileResponse, Http404, HttpRequest, HttpResponse, StreamingHttpResponse
-from django.utils.http import http_date
+from django.utils.http import http_date, parse_http_date_safe
 
 RANGE = re.compile(r"bytes=(\d*)-(\d*)")
 CHUNK = 64 * 1024
+CACHE = "public, max-age=31536000"  # files never change under the same name (models.UniqueName)
 
 
 def _read(f: BinaryIO, length: int) -> Iterator[bytes]:
@@ -35,6 +38,11 @@ def serve_media(request: HttpRequest, path: str) -> HttpResponse | StreamingHttp
         raise Http404
     stat = full.stat()
     size = stat.st_size
+    since = parse_http_date_safe(request.headers.get("If-Modified-Since", ""))
+    if since is not None and int(stat.st_mtime) <= since:
+        unchanged = HttpResponse(status=304)
+        unchanged["Cache-Control"] = CACHE
+        return unchanged
     ctype = mimetypes.guess_type(full.name)[0] or "application/octet-stream"
 
     m = RANGE.fullmatch(request.headers.get("Range", "").strip())
@@ -58,5 +66,6 @@ def serve_media(request: HttpRequest, path: str) -> HttpResponse | StreamingHttp
     else:
         resp = FileResponse(full.open("rb"), content_type=ctype)
     resp["Accept-Ranges"] = "bytes"
+    resp["Cache-Control"] = CACHE
     resp["Last-Modified"] = http_date(stat.st_mtime)
     return resp
