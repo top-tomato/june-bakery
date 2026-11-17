@@ -46,7 +46,7 @@ export function CakeLayer({ models, heroSpot, stage, motion, onFail }: Props) {
           story: motion.current.story,
           active: () => motion.current.active,
           dragX: () => motion.current.dragX,
-          startedAt: motion.current.startedAt,
+          introAt: motion.current.introAt,
           onModelError: (i) => onFailRef.current(i),
         })
       })
