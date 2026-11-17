@@ -47,8 +47,10 @@ def _shrink(f: UploadedFile) -> ContentFile:
 @staff_member_required
 @require_GET
 def page(request: HttpRequest) -> HttpResponse:
+    from menu.backoffice import base_context
+
     items = [_item(g) for g in GalleryPhoto.objects.all()]
-    return render(request, "menu/gallery_upload.html", {"items": items})
+    return render(request, "menu/gallery_upload.html", base_context(request, "gallery", "Gallery") | {"items": items})
 
 
 @staff_member_required

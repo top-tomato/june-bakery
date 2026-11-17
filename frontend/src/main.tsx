@@ -5,6 +5,7 @@ import { createRouter, RouterProvider } from '@tanstack/react-router'
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { menuQueries, readBootstrap } from './api/menu'
+import { startHits } from './lib/hits'
 import { routeTree } from './routeTree.gen'
 
 // The rich menu opens its pages with ?from=richmenu (e.g. /gallery/?from=richmenu). LINE's browser has no page of ours
@@ -21,6 +22,9 @@ if (params.get('from') === 'richmenu') {
     history.pushState(null, '', here)
   }
 }
+
+// count visits for the shop summary (not while developing locally, unless ?hits)
+if (!/^(localhost|127\.0\.0\.1)$/.test(location.hostname) || location.search.includes('hits')) startHits()
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { refetchOnWindowFocus: false, staleTime: 60 * 1000 } },

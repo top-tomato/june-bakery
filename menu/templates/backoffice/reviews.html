@@ -1,0 +1,18 @@
+{% extends "backoffice/base.html" %}
+{% block content %}
+<form class="card-form" method="post">{% csrf_token %}<input type="hidden" name="action" value="add">
+  <b style="font:600 1rem Mitr,sans-serif">เพิ่มรีวิว</b>
+  <label for="rvText">ข้อความรีวิว (ขออนุญาตลูกค้าก่อนนะ)</label><textarea id="rvText" name="text" rows="3" required></textarea>
+  <label for="rvAuthor">ชื่อลูกค้า (ชื่อเล่นหรือย่อได้)</label><input id="rvAuthor" name="author" maxlength="60" required>
+  <button class="btn2" type="submit">+ เพิ่มรีวิว</button>
+</form>
+<p class="osum">ขึ้นหน้าเว็บส่วน "เสียงจากลูกค้า" เมื่อมีรีวิวที่แสดงอย่างน้อย 1 อัน</p>
+<div class="list">
+{% for r in reviews %}<div class="row{% if not r.is_active %} off{% endif %}" style="{% if not r.is_active %}opacity:.55{% endif %}"><div><div class="t">“{{ r.text }}”</div><div class="s">— {{ r.author }}{% if not r.is_active %} · ซ่อนอยู่{% endif %}</div></div>
+  <div style="display:flex;gap:4px;align-items:center">
+    <form method="post" class="inline">{% csrf_token %}<input type="hidden" name="action" value="toggle"><input type="hidden" name="id" value="{{ r.pk }}"><button class="del" title="{{ r.is_active|yesno:'ซ่อน,แสดง' }}">{{ r.is_active|yesno:'ซ่อน,แสดง' }}</button></form>
+    <form method="post" class="inline" onsubmit="return confirm('ลบรีวิวนี้?')">{% csrf_token %}<input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ r.pk }}"><button class="del" aria-label="ลบ">×</button></form>
+  </div></div>
+{% empty %}<p class="empty-note">ยังไม่มีรีวิว</p>{% endfor %}
+</div>
+{% endblock %}

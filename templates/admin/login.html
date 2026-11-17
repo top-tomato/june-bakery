@@ -59,7 +59,7 @@ input:focus{outline:none;border-color:var(--peach);box-shadow:0 0 0 3px rgba(243
       <input type="password" name="password" id="id_password" autocomplete="current-password" required>
       <button type="button" id="show" aria-label="แสดงรหัสผ่าน"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
     </div>
-    <input type="hidden" name="next" value="{{ next }}">
+    <input type="hidden" name="next" value="{% if not next or next == '/admin/' %}/admin/shop/{% else %}{{ next }}{% endif %}">{# signing in lands in the back office, not the bare Django admin #}
     <button class="go" type="submit">เข้าสู่ระบบ</button>
   </form>
   <p class="foot"><a href="/">← กลับหน้าเว็บ</a></p>

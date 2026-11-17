@@ -1,4 +1,5 @@
 import json
+from datetime import date, timedelta
 import re
 import tempfile
 from pathlib import Path
@@ -9,8 +10,9 @@ from django.core.files.uploadedfile import SimpleUploadedFile
 from django.template import Context, Template
 from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
+from django.utils import timezone
 
-from menu.models import GalleryPhoto, Product, Review, ShopInfo
+from menu.models import ClosedDay, DailyStat, Expense, GalleryPhoto, Order, Product, Review, ShopInfo
 
 # GIF ขนาด 1x1 พิกเซล ใช้แทนรูปขนมในเทสต์
 TINY_GIF = (
@@ -259,6 +261,9 @@ class GalleryUploadTests(MediaTestCase):
 
 
 class AdminLoginTests(TestCase):
+    def test_login_goes_to_the_back_office_by_default(self) -> None:
+        self.assertContains(self.client.get("/admin/login/"), 'name="next" value="/admin/shop/"')
+
     def test_login_page_in_the_shop_look(self) -> None:
         r = self.client.get("/admin/login/?next=/admin/gallery-upload/")
         self.assertContains(r, "เข้าสู่ระบบร้าน")
@@ -270,7 +275,112 @@ class AdminLoginTests(TestCase):
         get_user_model().objects.create_user("staff", password="pw-for-test-only", is_staff=True)
         r = self.client.post("/admin/login/?next=/admin/gallery-upload/", {"username": "staff", "password": "pw-for-test-only", "next": "/admin/gallery-upload/"})
         self.assertRedirects(r, "/admin/gallery-upload/")
-        self.assertContains(self.client.get("/admin/"), "อัปโหลดรูป Gallery")
+        self.assertContains(self.client.get("/admin/"), "หลังร้าน")
+
+
+class BackOfficeTests(MediaTestCase):
+    """หลังร้าน /admin/shop/ (menu/backoffice.py)"""
+
+    def setUp(self) -> None:
+        from django.contrib.auth import get_user_model
+
+        User = get_user_model()
+        self.staff = User.objects.create_user("staff", password="x", is_staff=True)
+        self.owner = User.objects.create_superuser("owner", password="x")
+        self.product = make_product(name_line1="ชิฟฟ่อน", name_line2="ใบเตย", price=45)
+        self.client.force_login(self.staff)
+
+    def test_staff_only(self) -> None:
+        from django.test import Client
+
+        anon = Client()
+        for name in ("summary", "orders", "expenses", "calendar", "menu", "reviews", "shop"):
+            self.assertEqual(anon.get(reverse(f"backoffice:{name}")).status_code, 302, name)
+            self.assertEqual(self.client.get(reverse(f"backoffice:{name}")).status_code, 200, name)
+        self.assertEqual(self.client.get(reverse("backoffice:staff")).status_code, 302)  # owner only
+
+    def test_sale_now_counts_in_summary(self) -> None:
+        r = self.client.post(reverse("backoffice:order-add"), {"kind": "now", "qty": "3", "channel": "store", "payment": "cash", "product": self.product.pk})
+        self.assertEqual(r.status_code, 302)
+        o = Order.objects.get()
+        self.assertEqual((o.total, o.channel, o.product_name), (135, "store", "ชิฟฟ่อนใบเตย"))
+        page = self.client.get(reverse("backoffice:summary")).content.decode()
+        self.assertIn("฿135", page)
+        self.assertIn("3 ชิ้น", page)
+
+    def test_pre_order_needs_date_and_name_and_skips_closed_days(self) -> None:
+        add = reverse("backoffice:order-add")
+        self.client.post(add, {"kind": "pre", "qty": "50", "pickup_date": "", "who": ""})
+        self.assertEqual(Order.objects.count(), 0)
+        ClosedDay.objects.create(date=date(2030, 1, 5))
+        self.client.post(add, {"kind": "pre", "qty": "50", "pickup_date": "2030-01-05", "pickup_time": "09:30", "who": "สัมมนา A"})
+        self.assertEqual(Order.objects.count(), 0)
+        self.client.post(add, {"kind": "pre", "qty": "50", "pickup_date": "2030-01-06", "pickup_time": "09:30", "who": "สัมมนา A", "note": "ชั้น 3"})
+        o = Order.objects.get()
+        self.assertEqual((o.kind, o.who, timezone.localtime(o.pickup_at).strftime("%Y-%m-%d %H:%M")), ("pre", "สัมมนา A", "2030-01-06 09:30"))
+        cal = self.client.get(reverse("backoffice:calendar") + "?m=2030-01&d=2030-01-06").content.decode()
+        self.assertIn("สัมมนา A", cal)
+
+    def test_order_filters(self) -> None:
+        Order.objects.create(kind="now", product_name="ก", qty=1, unit_price=45, channel="line")
+        Order.objects.create(kind="now", product_name="ข", qty=2, unit_price=45, channel="store", who="ร้าน B")
+        r = self.client.get(reverse("backoffice:orders") + "?via=store")
+        self.assertEqual(r.context["n"], 1)
+        r = self.client.get(reverse("backoffice:orders") + "?q=ร้าน")
+        self.assertEqual(r.context["total"], 90)
+
+    def test_expenses_add_and_delete(self) -> None:
+        self.client.post(reverse("backoffice:expense-add"), {"category": "ingredients", "amount": "1,280.50", "note": "แป้ง"})
+        e = Expense.objects.get()
+        self.assertEqual(str(e.amount), "1280.50")
+        self.client.post(reverse("backoffice:expense-add"), {"amount": "0"})
+        self.assertEqual(Expense.objects.count(), 1)
+        self.client.post(reverse("backoffice:expense-delete", args=[e.pk]))
+        self.assertEqual(Expense.objects.count(), 0)
+
+    def test_closed_day_shows_on_the_site(self) -> None:
+        d = timezone.localdate() + timedelta(days=3)
+        self.client.post(reverse("backoffice:closed-toggle"), {"date": d.isoformat()})
+        self.assertIn(d.isoformat(), self.client.get(reverse("menu:api-menu")).json()["closedDays"])
+        self.client.post(reverse("backoffice:closed-toggle"), {"date": d.isoformat()})
+        self.assertEqual(ClosedDay.objects.count(), 0)
+
+    def test_menu_reviews_shop(self) -> None:
+        pf = f"p{self.product.pk}"
+        self.client.post(reverse("backoffice:menu"), {"id": self.product.pk, f"{pf}-name_line1": "ชิฟฟ่อน", f"{pf}-name_line2": "ใบเตย", f"{pf}-price": "50", f"{pf}-description": "นุ่ม", f"{pf}-is_active": "on"})
+        self.product.refresh_from_db()
+        self.assertEqual(self.product.price, 50)
+        self.client.post(reverse("backoffice:reviews"), {"action": "add", "text": "อร่อย", "author": "ฝน"})
+        rv = Review.objects.get()
+        self.client.post(reverse("backoffice:reviews"), {"action": "toggle", "id": rv.pk})
+        rv.refresh_from_db()
+        self.assertFalse(rv.is_active)
+        self.client.post(reverse("backoffice:shop"), {"preorder_days": "2", "shelf_life": "2 วัน", "payment": "โอน", "hours": "", "about_title": "", "about_text": ""})
+        self.assertEqual(ShopInfo.load().preorder_days, 2)
+
+    def test_owner_adds_staff(self) -> None:
+        from django.contrib.auth import get_user_model
+
+        self.client.force_login(self.owner)
+        self.client.post(reverse("backoffice:staff"), {"action": "add", "username": "fon", "password1": "a-long-pass-123", "password2": "a-long-pass-123"})
+        u = get_user_model().objects.get(username="fon")
+        self.assertTrue(u.is_staff and not u.is_superuser)
+
+    def test_redirect_back_stays_on_our_pages(self) -> None:
+        r = self.client.post(reverse("backoffice:expense-add"), {"amount": "10", "next": "https://evil.example/"})
+        self.assertEqual(r["Location"], reverse("backoffice:expenses"))
+
+
+class HitCounterTests(TestCase):
+    def test_counts_by_day_and_source_ignores_bots(self) -> None:
+        url = reverse("menu:hit")
+        for _ in range(3):
+            self.client.post(url, '{"k":"visit","src":"line"}', content_type="text/plain")
+        self.client.post(url, '{"k":"tap","src":"weird"}', content_type="text/plain")
+        self.client.post(url, '{"k":"visit","src":"line"}', content_type="text/plain", headers={"User-Agent": "Googlebot/2.1"})
+        self.assertEqual(DailyStat.objects.get(kind="visit", source="line").count, 3)
+        self.assertEqual(DailyStat.objects.get(kind="tap").source, "other")
+        self.assertEqual(self.client.post(url, '{"k":"x"}', content_type="text/plain").status_code, 400)
 
 
 class ViteAssetsTagTests(SimpleTestCase):

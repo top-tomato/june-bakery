@@ -83,7 +83,7 @@ export function HomePage({ data }: { data: MenuData }) {
         {data.reviews.length > 0 && <Reviews reviews={data.reviews} above={above('reviews')} />}
         {data.about && <About about={data.about} above={above('about')} />}
         {data.gallery.length > 0 && <Gallery photos={data.gallery} above={above('gallery')} />}
-        <Where shop={shop} above={lastBg} />
+        <Where shop={shop} closedDays={data.closedDays} above={lastBg} />
         <End line={line} social={data.social} />
       </main>
     </>

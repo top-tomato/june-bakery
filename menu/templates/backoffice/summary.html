@@ -1,0 +1,50 @@
+{% extends "backoffice/base.html" %}
+{% load humanize %}
+{% block content %}
+<div class="seg" id="range">
+  <a class="fpill{% if r == '1' %} on{% endif %}" href="?r=1">วันนี้</a><a class="fpill{% if r == '7' %} on{% endif %}" href="?r=7">7 วัน</a><a class="fpill{% if r == '30' %} on{% endif %}" href="?r=30">เดือนนี้</a>
+</div>
+
+<div class="pick">
+  <h3>นัดรับวันนี้ <a href="{% url 'backoffice:calendar' %}">ดูปฏิทิน</a></h3>
+  {% for o in pick_today %}{% include "backoffice/_pickup.html" %}{% empty %}<p class="muted" style="font-size:.9rem">วันนี้ไม่มีนัดรับ</p>{% endfor %}
+  {% if pick_tomorrow %}<h3 style="margin-top:10px">พรุ่งนี้ <small class="muted" style="font:400 .8rem Anuphan">เตรียม {{ tomorrow_pcs }} ชิ้น</small></h3>{% for o in pick_tomorrow %}{% include "backoffice/_pickup.html" %}{% endfor %}{% endif %}
+</div>
+
+<div class="tiles">
+  <div class="tile hero"><div class="k"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>ยอดขาย · {{ range_label }}</div><div class="v">฿{{ sales|intcomma }}</div><div class="d">{{ sales_change|default:'' }}{% if not sales_change %}{{ orders_n }} ออเดอร์{% endif %}</div></div>
+  <div class="tile"><div class="k"><svg viewBox="0 0 24 24"><path d="M4 20h16M5 20v-7h14v7M5 13c2 0 2-2 3.5-2S10 13 12 13s2-2 3.5-2 1.5 2 3.5 2"/></svg>ขายได้</div><div class="v">{{ pcs }} ชิ้น</div><div class="d">{{ orders_n }} ออเดอร์</div></div>
+  <div class="tile"><div class="k"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>คนเข้าเว็บ</div><div class="v">{{ visits|intcomma }}</div><div class="d">{{ visits_change|default:'คน' }}</div></div>
+  <div class="tile"><div class="k"><svg viewBox="0 0 24 24"><path d="M12 4C7 4 3 7.2 3 11.2c0 3.6 3.2 6.6 7.5 7.1l-.4 2.2 3.8-2.4C18.4 17.8 21 14.8 21 11.2 21 7.2 17 4 12 4Z"/></svg>กดสั่งทาง LINE</div><div class="v">{{ taps|intcomma }}</div><div class="d">{{ tap_rate }}% ของคนเข้าเว็บ</div></div>
+</div>
+
+<h2>เงินเข้า-ออก <small>เดือนนี้</small></h2>
+<div class="money">
+  <div class="tile"><div class="k">รายรับ</div><div class="v">฿{{ income|intcomma }}</div></div>
+  <div class="tile"><div class="k">รายจ่าย</div><div class="v">฿{{ out|floatformat:0|intcomma }}</div></div>
+  <div class="tile profit"><div class="k">กำไร</div><div class="v"{% if profit < 0 %} style="color:var(--bad)"{% endif %}>฿{{ profit|floatformat:0|intcomma }}</div></div>
+</div>
+
+<div class="duo"><div>
+  <h2>ยอดขายรายวัน <small>30 วันล่าสุด · แตะแท่งดูตัวเลข</small></h2>
+  <div class="card">{{ sales_chart }}</div>
+</div><div>
+  <h2>คนเข้าเว็บรายวัน <small>30 วันล่าสุด</small></h2>
+  <div class="card">{{ visit_chart }}</div>
+</div></div>
+
+<div class="duo"><div>
+  <h2>จากเข้าเว็บ ถึงซื้อ <small>{{ range_label }}</small></h2>
+  <div class="card"><div class="funnel">{% for k, n, w in funnel %}<div class="frow"><span>{{ k }}</span><div class="track"><span style="width:{{ w|floatformat:1 }}%"></span></div><b>{{ n|intcomma }}</b></div>{% endfor %}</div></div>
+</div><div>
+  <h2>คนมาจากไหน <small>{{ range_label }}</small></h2>
+  <div class="card"><div class="funnel">{% for k, n, w in sources %}<div class="frow"><span>{{ k }}</span><div class="track"><span style="width:{{ w|floatformat:1 }}%"></span></div><b>{{ n|intcomma }}</b></div>{% empty %}<p class="muted" style="font-size:.9rem">ยังไม่มีข้อมูล (เริ่มนับตั้งแต่วันที่เปิดใช้)</p>{% endfor %}</div></div>
+</div></div>
+
+<h2>ล่าสุด <small><a class="muted" href="{% url 'backoffice:orders' %}">ดูออเดอร์ทั้งหมด</a></small></h2>
+<div class="list">
+  {% for o in recent_orders %}<div class="row"><div><div class="t">{{ o.product_name }} {{ o.qty }} ชิ้น<span class="tag">{{ o.get_channel_display }} · {{ o.get_payment_display }}</span>{% if o.kind == 'pre' %}<span class="kb">สั่งล่วงหน้า</span>{% endif %}</div><div class="s">{{ o.created_at|date:"j M H:i" }}{% if o.who %} · {{ o.who }}{% endif %}</div></div><div class="m">+฿{{ o.total|intcomma }}</div></div>{% endfor %}
+  {% for e in recent_exp %}<div class="row"><div><div class="t">{{ e.get_category_display }}{% if e.note %} · {{ e.note }}{% endif %}</div><div class="s">{{ e.date|date:"j M" }}</div></div><div class="m out">−฿{{ e.amount|floatformat:0|intcomma }}</div></div>{% endfor %}
+  {% if not recent_orders and not recent_exp %}<p class="empty-note">ยังไม่มีรายการ เริ่มจากหน้า <a href="{% url 'backoffice:orders' %}">ออเดอร์</a></p>{% endif %}
+</div>
+{% endblock %}

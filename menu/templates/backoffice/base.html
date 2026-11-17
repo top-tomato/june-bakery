@@ -1,0 +1,86 @@
+{% load static %}<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>{{ title }} · หลังร้าน June</title>
+<link rel="icon" href="{% static 'favicon.png' %}">
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'backoffice/backoffice.css' %}">
+<style>.brandbox .lg{-webkit-mask-image:url("{% static 'backoffice/login-logo.png' %}");mask-image:url("{% static 'backoffice/login-logo.png' %}")}</style>
+{% block head %}{% endblock %}
+</head>
+<body>
+{% url 'backoffice:summary' as u_summary %}{% url 'backoffice:orders' as u_orders %}{% url 'backoffice:expenses' as u_exp %}{% url 'backoffice:calendar' as u_cal %}
+<aside class="side" id="side" aria-label="เมนูหลังร้าน">
+  <div class="brandbox"><div class="lg" role="img" aria-label="June"></div><div><b>หลังร้าน</b><small>June Bakery</small></div></div>
+  <nav id="snav">
+    <a href="{{ u_summary }}"{% if active == 'summary' %} class="on"{% endif %}><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>สรุปร้าน</a>
+    <div class="grp">ขาย</div>
+    <a href="{{ u_orders }}"{% if active == 'orders' %} class="on"{% endif %}><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>ออเดอร์{% if today_orders %}<span class="badge">{{ today_orders }} วันนี้</span>{% endif %}</a>
+    <a href="{{ u_exp }}"{% if active == 'expenses' %} class="on"{% endif %}><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg>รายจ่าย</a>
+    <a href="{{ u_cal }}"{% if active == 'calendar' %} class="on"{% endif %}><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>ปฏิทิน{% if upcoming %}<span class="badge">{{ upcoming }} นัด</span>{% endif %}</a>
+    <div class="grp">หน้าเว็บ</div>
+    <a href="{% url 'gallery-upload' %}"{% if active == 'gallery' %} class="on"{% endif %}><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg>Gallery</a>
+    <a href="{% url 'backoffice:menu' %}"{% if active == 'menu' %} class="on"{% endif %}><svg viewBox="0 0 24 24"><path d="M4 20h16M5 20v-7h14v7M5 13c2 0 2-2 3.5-2S10 13 12 13s2-2 3.5-2 1.5 2 3.5 2M12 7v4"/></svg>เมนูขนม</a>
+    <a href="{% url 'backoffice:reviews' %}"{% if active == 'reviews' %} class="on"{% endif %}><svg viewBox="0 0 24 24"><path d="M12 4C7 4 3 7.2 3 11.2c0 3.6 3.2 6.6 7.5 7.1l-.4 2.2 3.8-2.4C18.4 17.8 21 14.8 21 11.2 21 7.2 17 4 12 4Z"/></svg>รีวิว</a>
+    <a href="{% url 'backoffice:shop' %}"{% if active == 'shop' %} class="on"{% endif %}><svg viewBox="0 0 24 24"><path d="M4 10 6 4h12l2 6M4 10h16v10H4ZM9 20v-5h6v5"/></svg>ข้อมูลร้าน</a>
+    {% if is_owner %}
+    <div class="grp">ตั้งค่า</div>
+    <a href="{% url 'backoffice:staff' %}"{% if active == 'staff' %} class="on"{% endif %}><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.8-3.6 3.2-5.4 6-5.4s5.2 1.8 6 5.4M16 4.6a3.2 3.2 0 0 1 0 6.3M18 14.8c1.6.6 2.6 2.4 3 5.2"/></svg>บัญชี staff</a>
+    <a href="{% url 'admin:index' %}"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg>ตั้งค่าเต็ม (Django)</a>
+    {% endif %}
+  </nav>
+  <nav class="me">
+    <a href="/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>ดูหน้าเว็บ</a>
+    <form method="post" action="{% url 'admin:logout' %}" class="inline">{% csrf_token %}<a href="#" onclick="this.closest('form').submit();return false"><svg viewBox="0 0 24 24"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 16l-4-4 4-4M6 12h10"/></svg>ออกจากระบบ <span style="margin-left:auto;font-size:.8rem;opacity:.6">{{ request.user.get_username }}</span></a></form>
+  </nav>
+</aside>
+<div class="sveil" id="sveil"></div>
+<header>
+  <button class="burger" id="burger" aria-label="เปิดเมนู"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  <h1>{{ title }}</h1>
+  {% block action %}{% endblock %}
+</header>
+<main>{% block content %}{% endblock %}</main>
+
+<div class="veil" id="veil"></div>
+{% with xbtn='<button class="sx" type="button" aria-label="ปิด" data-x><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>' %}
+<form class="sheet" id="order" method="post" action="{% url 'backoffice:order-add' %}" aria-label="บันทึกออเดอร์">{% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <h3>บันทึกออเดอร์{{ xbtn|safe }}</h3>
+  <div class="chips"><label><input type="radio" name="kind" value="now" checked>ขายเลย</label><label><input type="radio" name="kind" value="pre" id="kindPre">สั่งล่วงหน้า (สัมมนา / break)</label></div>
+  <div class="pre-only">
+    <div class="row2"><div><label for="pDate">วันรับ</label><input id="pDate" name="pickup_date" type="date" value="{{ sel.isoformat|default:'' }}"></div><div><label for="pTime">เวลารับ</label><input id="pTime" name="pickup_time" type="time" value="10:00"></div></div>
+    <label for="pWho">ชื่องาน / ลูกค้า</label><input id="pWho" name="who" maxlength="120" placeholder="เช่น สัมมนาบริษัท A · คุณฝน">
+    <label for="pNote">จด (ไม่ใส่ก็ได้)</label><input id="pNote" name="note" maxlength="160" placeholder="เช่น 50 ที่ แยกกล่อง ส่งชั้น 3">
+  </div>
+  {% if products|length > 1 %}<label for="oProduct">ขนม</label><select id="oProduct" name="product" class="sel">{% for p in products %}<option value="{{ p.pk }}" data-price="{{ p.price }}">{{ p.full_name }} ฿{{ p.price }}</option>{% endfor %}</select>{% elif products %}<input type="hidden" name="product" value="{{ products.0.pk }}" data-price="{{ products.0.price }}" id="oProduct">{% endif %}
+  <label>จำนวนชิ้น{% if products|length == 1 %} · {{ products.0.full_name }} ฿{{ products.0.price }}{% endif %}</label>
+  <div class="step"><button type="button" data-q="-1">−</button><output id="qty">1</output><button type="button" data-q="1">+</button><input type="hidden" name="qty" id="qtyIn" value="1"></div>
+  <label>สั่งทาง</label>
+  <div class="chips"><label><input type="radio" name="channel" value="line" checked>LINE</label><label><input type="radio" name="channel" value="store">หน้าร้าน</label><label><input type="radio" name="channel" value="other">อื่น ๆ</label></div>
+  <label>จ่ายด้วย</label>
+  <div class="chips"><label><input type="radio" name="payment" value="transfer" checked>โอน</label><label><input type="radio" name="payment" value="cash">เงินสด</label></div>
+  <div class="total"><span>รวม</span><b id="oTotal"></b></div>
+  <button class="save" type="submit">บันทึก</button>
+</form>
+<form class="sheet" id="expense" method="post" action="{% url 'backoffice:expense-add' %}" aria-label="บันทึกรายจ่าย">{% csrf_token %}
+  <input type="hidden" name="next" value="{{ request.get_full_path }}">
+  <h3>บันทึกรายจ่าย{{ xbtn|safe }}</h3>
+  <label>หมวด</label>
+  <div class="chips"><label><input type="radio" name="category" value="ingredients" checked>วัตถุดิบ</label><label><input type="radio" name="category" value="packaging">กล่อง/ถุง</label><label><input type="radio" name="category" value="rent">ค่าเช่า</label><label><input type="radio" name="category" value="utilities">ค่าน้ำไฟ</label><label><input type="radio" name="category" value="delivery">ค่าส่ง</label><label><input type="radio" name="category" value="other">อื่น ๆ</label></div>
+  <div class="row2"><div><label for="amt">จำนวนเงิน (บาท)</label><input id="amt" name="amount" inputmode="decimal" placeholder="เช่น 350" required></div><div><label for="eDate">วันที่</label><input id="eDate" name="date" type="date" value="{{ today.isoformat }}"></div></div>
+  <label for="memo">จดสั้น ๆ (ไม่ใส่ก็ได้)</label>
+  <input id="memo" name="note" maxlength="160" placeholder="เช่น แป้ง ไข่ กะทิ">
+  <button class="save" type="submit">บันทึก</button>
+</form>
+{% block sheets %}{% endblock %}
+{% endwith %}
+
+{% if messages %}<div class="msgs">{% for m in messages %}<p class="{{ m.tags }}">{{ m }}</p>{% endfor %}</div>{% endif %}
+<script src="{% static 'backoffice/backoffice.js' %}" defer></script>
+{% block script %}{% endblock %}
+</body>
+</html>

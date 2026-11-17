@@ -1,6 +1,5 @@
 {% extends "admin/base_site.html" %}
 {% comment %}
-  Every staff account sees a link to the easy gallery upload page (menu/gallery_upload.py) in the admin header,
-  even without per-table permissions.
+  Every staff account sees a link back to the back office (/admin/shop/) in the Django admin header.
 {% endcomment %}
-{% block userlinks %}<a href="/admin/gallery-upload/">อัปโหลดรูป Gallery</a> / {{ block.super }}{% endblock %}
+{% block userlinks %}<a href="/admin/shop/">หลังร้าน</a> / {{ block.super }}{% endblock %}
