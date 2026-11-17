@@ -6,7 +6,10 @@ from menu import views
 app_name = "menu"
 
 urlpatterns = [
-    path("", views.index, name="index"),
+    path("api/menu/", views.api_menu, name="api-menu"),
+    # หน้าของแอป React (TanStack Router จัดการเส้นทางต่อในเบราว์เซอร์) เพิ่มที่นี่เมื่อมีหน้าใหม่
+    path("", views.app, name="index"),
+    path("book/", views.app, name="book"),
 ]
 
 if settings.DEBUG:

@@ -16,6 +16,8 @@
 uv run python manage.py runserver    # เปิดเว็บในเครื่อง
 uv run python manage.py test         # รันเทสต์ ต้องผ่านก่อนรวม branch
 uv run python manage.py seed_menu    # ใส่เมนูตั้งต้น
+cd frontend && npm run build         # build หน้าบ้าน (typecheck + vite)
+cd frontend && npm run lint && npm run test:e2e   # ต้องผ่านก่อนรวม branch (e2e ต้องมี Django ที่พอร์ต 8765)
 ```
 
 ## ข้อควรรู้
@@ -23,4 +25,7 @@ uv run python manage.py seed_menu    # ใส่เมนูตั้งต้�
 - ลูกค้าสมัครและยืนยันตัวตนผ่าน LINE เท่านั้น ไม่ทำระบบสมัครสมาชิกหรือรหัสผ่านบนเว็บ
 - เว็บยังไม่รับออเดอร์หรือชำระเงินเอง ทุกปุ่มสั่งพาไปแชต LINE
 - ค่าลับ (Channel secret, access token, secret key) อยู่ใน `.env` หรือ secret ของผู้ให้บริการ ไม่ commit และไม่พิมพ์ในแชต
-- หน้าเว็บหลักเป็นไฟล์เดียว `menu/templates/menu/index.html` ข้อมูลขนมส่งเข้าไปเป็น JSON จาก `Product.as_payload()`
+- หน้าบ้านเป็น React + TanStack Router/Query ใน `frontend/` (Vite) Django ให้ API `/api/menu/` และหน้าเปล่า `app.html` ที่ฝังข้อมูลเมนูไว้ type ของข้อมูลอยู่ใน `frontend/src/api/menu.ts` ต้องตรงกับ `Product.as_payload()`
+- เขียนหน้าบ้านตามคู่มือใน `.claude/skills/` (react-best-practices, tanstack-*, three-best-practices)
+- กฎที่ได้จากการแก้กระตุกบนมือถือ: ความสูงใช้ `var(--vh)` ห้ามใช้ `vh`/`svh`/`lvh` ตรง ๆ (แอป LINE ยืดหดจอระหว่างเลื่อน), งานที่ทำทุกเฟรมลงทะเบียนกับ `onFrame` ใน `src/lib/frame.ts` (loop เดียว อ่านก่อนแล้วค่อยเขียน), ค่าที่เปลี่ยนทุกเฟรมเก็บใน ref ไม่ใช่ state, ของที่ลอยบนแผ่น fixed แล้วขยับตามหน้าเว็บด้วยโค้ดจะตามหน้าเว็บไม่ทันตอนหน้าเลื่อนเอง ต้องซ่อนก่อนช่วงนั้น
+- ห้ามใช้ emoji ในหน้าเว็บ ใช้ไอคอน SVG

@@ -5,6 +5,20 @@
 
 ## [Unreleased]
 
+### Changed
+- หน้าบ้านย้ายจาก template HTML ไฟล์เดียวไปเป็น React 19 + TypeScript + TanStack Router + TanStack Query (Vite) ในโฟลเดอร์ `frontend/` หน้าตาและการแก้กระตุกทั้งหมดยังเหมือนเดิม ส่วนที่ทำทุกเฟรมใช้ loop เดียวร่วมกัน (`src/lib/frame.ts`) three.js ย้ายจาก CDN มาเป็นแพ็กเกจ npm และแยกเป็นไฟล์ที่โหลดทีหลัง
+- Django เปลี่ยนเป็นให้ API `/api/menu/` กับหน้าเปล่า `app.html` ที่ฝังข้อมูลเมนูไว้ และมีเนื้อหาให้อ่านได้แม้ไม่มี JavaScript (เครื่องมือค้นหาก็อ่านได้) พร้อมรูปตัวอย่างตอนแชร์ลิงก์
+- ข้อมูลเมนูจาก `Product.as_payload()` เปลี่ยนชื่อ field ให้อ่านง่าย (`name`, `description`, `image`, `accent`, `highlights`)
+- รูปเมนูตั้งต้นใน `seed/img/` เปลี่ยนเป็นรูปจริงของร้าน
+- Dockerfile build หน้าบ้านด้วย Node ในขั้นแยก แล้วค่อยรวมเข้า image ของ Django
+
+### Added
+- หน้าสมุดเมนู `/book/` (จาก `mock/menu-book-v2.html`) ชื่อขนมในหน้าสแครปบุ๊กยังเป็นชื่อที่เดาจากรูป รอร้านยืนยัน
+- เทสต์ Playwright (`frontend/e2e/`) และเทสต์ Django สำหรับ API, หน้าเปล่า และ tag ของ Vite
+
+### Removed
+- `menu/templates/menu/index.html` และ `empty.html` (แทนด้วยแอป React)
+
 <<<<<<< HEAD
 ### Removed
 - ส่วน "หกชิ้น เลือกเองทุกช่อง" (จัดกล่อง 6 ชิ้น), ส่วน "อบมาใหม่ทุกวัน หมดทุกวัน" และปุ่ม "กล่อง (0)" บนแถบด้านบน ตามที่เจ้าของร้านขอ

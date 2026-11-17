@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>June — สมุดเมนู (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&family=Lobster&family=Itim&display=swap" rel="stylesheet">
+<style>
+:root{
+  --tea:#F3A18F;--cream:#FFF6E6;--indigo:#3E5D58;--indigo-2:#2C4540;--pink:#DCEBB5;--ink:#243B37;
+  --paper:#FFFBF2;--line:#E8DCC6;--kraft:#E9B9A6;
+  --display:"Mitr","Anuphan",system-ui,sans-serif;--body:"Anuphan",system-ui,sans-serif;--hand:"Itim","Anuphan",cursive;--mark:"Lobster","Mitr",cursive;
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{font-family:var(--body);color:var(--ink);background:var(--indigo);overflow:hidden;
+  display:grid;place-items:center;padding:16px;
+  background-image:radial-gradient(rgba(255,246,230,.07) 1.5px,transparent 1.6px);background-size:22px 22px}
+
+/* ---------- the notebook ---------- */
+.book{position:relative;width:min(100%,380px);aspect-ratio:3/4.3;max-height:calc(100svh - 110px);perspective:1600px}
+.book::after{content:"";position:absolute;left:6%;right:6%;bottom:-18px;height:30px;background:rgba(0,0,0,.28);filter:blur(14px);border-radius:50%;z-index:-1}
+/* spiral rings along the top */
+.rings{position:absolute;left:8%;right:8%;top:-14px;height:30px;display:flex;justify-content:space-between;z-index:60;pointer-events:none}
+.rings i{width:10px;height:30px;border-radius:6px;background:linear-gradient(90deg,#9aa8a5,#eef2f1 45%,#8d9b98);box-shadow:0 2px 2px rgba(0,0,0,.25)}
+
+.page{position:absolute;inset:0;border-radius:6px 6px 18px 18px;transform-origin:50% 0;transform-style:preserve-3d;
+  transition:transform .75s cubic-bezier(.6,.05,.25,1);will-change:transform}
+/* a flipped page swings up over the rings and drops behind the book (like a top-bound spiral notebook) */
+.page.flipped{transform:rotateX(-178deg);opacity:0;transition:transform .75s cubic-bezier(.6,.05,.25,1),opacity .15s linear .6s}
+.face{position:absolute;inset:0;border-radius:inherit;backface-visibility:hidden;overflow:hidden}
+.back{transform:rotateX(180deg);background:#F3EAD8}
+/* lined paper with a red margin and punched holes */
+.paper{background:
+   radial-gradient(circle at 50% 50%,var(--indigo) 5px,transparent 5.5px) 8% 14px/calc(84% / 15) 20px repeat-x,
+   linear-gradient(90deg,transparent 46px,#F3B6A8 46px,#F3B6A8 48px,transparent 48px),
+   repeating-linear-gradient(var(--paper) 0 31px,var(--line) 31px 32px);
+   background-color:var(--paper);box-shadow:inset 0 0 0 1px rgba(0,0,0,.04),inset 0 -6px 0 rgba(0,0,0,.04)}
+.inner{position:absolute;inset:42px 20px 22px 60px;display:flex;flex-direction:column}
+
+/* cover */
+.cover .face.front{background:var(--kraft);
+  background-image:radial-gradient(rgba(255,255,255,.22) 1px,transparent 1.2px),radial-gradient(rgba(120,60,40,.12) 1px,transparent 1.2px);
+  background-size:7px 7px,11px 11px;background-position:0 0,3px 5px;
+  box-shadow:inset 0 0 0 6px rgba(255,255,255,.18),inset 0 -8px 0 rgba(0,0,0,.08)}
+.cover .label{position:absolute;left:12%;right:12%;top:24%;background:var(--paper);border-radius:14px;padding:22px 14px 18px;text-align:center;
+  box-shadow:0 3px 0 rgba(0,0,0,.08);transform:rotate(-2deg)}
+.cover .label::before,.cover .label::after{content:"";position:absolute;top:-12px;width:64px;height:22px;background:rgba(220,235,181,.85);transform:rotate(-8deg)}
+.cover .label::before{left:-14px}.cover .label::after{right:-14px;transform:rotate(9deg);background:rgba(243,161,143,.75)}
+.cover .brand{font:400 3.6rem/1 var(--mark);color:var(--indigo)}
+.cover .sub{font:600 1.15rem var(--display);margin-top:6px}
+.cover .note{font:1rem var(--hand);opacity:.7;margin-top:2px}
+.sticker{position:absolute;right:9%;bottom:14%;width:96px;height:96px;border-radius:50%;background:var(--cream);display:grid;place-items:center;text-align:center;
+  font:600 .95rem/1.25 var(--display);color:var(--ink);transform:rotate(10deg);box-shadow:0 3px 0 rgba(0,0,0,.12);border:3px dashed var(--tea)}
+.tap{animation:nudge 1.8s ease-in-out infinite}
+@keyframes nudge{0%,100%{transform:rotate(10deg) scale(1)}50%{transform:rotate(6deg) scale(1.07)}}
+.doodle{position:absolute;font-size:1.6rem;opacity:.9}
+
+/* product page */
+.no{font:1rem var(--hand);color:#C9806E}
+.photo{position:relative;align-self:center;width:min(68%,34svh);aspect-ratio:1;margin:6px 0 12px;background:#fff;padding:8px 8px 26px;box-shadow:0 4px 10px rgba(0,0,0,.14);transform:rotate(var(--r,-3deg))}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo::before{content:"";position:absolute;left:50%;top:-12px;width:80px;height:24px;margin-left:-40px;background:var(--tape,rgba(220,235,181,.85));transform:rotate(-4deg)}
+.photo span{position:absolute;left:0;right:0;bottom:4px;text-align:center;font:.95rem var(--hand);opacity:.7}
+.name{font:600 1.45rem/1.15 var(--display)}
+.desc{font:1.05rem/1.45 var(--hand);margin-top:4px;opacity:.85}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chips b{font:600 .78rem var(--body);padding:2px 10px;border-radius:999px;background:var(--chip,#DCEBB5)}
+.foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.price{font:600 1.7rem var(--display);position:relative}
+.price::after{content:"";position:absolute;left:-6px;right:-6px;bottom:4px;height:10px;background:var(--hl,rgba(243,161,143,.45));z-index:-1;border-radius:4px}
+.order{font:600 .95rem var(--display);padding:10px 16px;border-radius:999px;background:#06C755;color:#fff;text-decoration:none;white-space:nowrap;box-shadow:0 3px 0 #04913E}
+
+/* last page */
+.soon{display:grid;place-items:center;text-align:center;gap:10px;height:100%}
+.soon h3{font:600 1.5rem var(--display)}
+.soon p{font:1.1rem var(--hand);opacity:.8}
+.again{font:600 .95rem var(--display);padding:9px 16px;border-radius:999px;border:2px solid var(--ink);background:none;color:var(--ink)}
+
+/* nav */
+.nav{position:fixed;left:0;right:0;bottom:max(16px,env(safe-area-inset-bottom));display:flex;justify-content:center;align-items:center;gap:14px;color:var(--cream)}
+.nav button{width:44px;height:44px;border-radius:50%;border:2px solid var(--cream);background:none;color:var(--cream);font-size:1.2rem}
+.nav button:disabled{opacity:.3}
+.dots{display:flex;gap:6px}.dots i{width:8px;height:8px;border-radius:50%;background:rgba(255,246,230,.35)}.dots i.on{background:var(--tea);width:20px;border-radius:5px}
+.hint{position:fixed;top:max(12px,env(safe-area-inset-top));left:0;right:0;text-align:center;color:var(--cream);opacity:.7;font:.9rem var(--hand)}
+@media (prefers-reduced-motion:reduce){.page{transition:none}.tap{animation:none}}
+</style>
+</head>
+<body>
+<div class="hint">แตะหรือปัดขึ้นเพื่อพลิกหน้า</div>
+<div class="book" id="book">
+  <div class="rings" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+</div>
+<div class="nav">
+  <button id="prev" aria-label="หน้าก่อน">↓</button>
+  <div class="dots" id="dots"></div>
+  <button id="next" aria-label="หน้าถัดไป">↑</button>
+</div>
+
+<script>
+const LINE_ID='@561hgrea';
+// same data the site gets from Product.as_payload() (seed values, price is still the placeholder)
+const F=[
+  {n:['ชิฟฟ่อน','มะพร้าวใบเตย'],d:'ชิฟฟ่อนใบเตยเนื้อนุ่ม หน้ามะพร้าวอ่อนอบสีทอง',price:45,img:'../seed/img/pandan.jpg',fl:'#C9DE98',L:['มะพร้าวอ่อนเป็นเส้น','หน้าอบสีทอง','เนื้อชิฟฟ่อนใบเตย']},
+  {n:['ขนมปังกระเทียม','ครีมชีส'],d:'ขนมปังกระเทียมอบร้อน ครีมชีสเยิ้มทุกแฉก',price:45,img:'../seed/img/garlic.jpg',fl:'#F3A18F',L:['กระเทียมและพาร์สลีย์','ครีมชีสเยิ้มทุกแฉก','ขนมปังอบสีทอง']},
+];
+const order=f=>`https://line.me/R/oaMessage/${encodeURIComponent(LINE_ID)}/?${encodeURIComponent('สนใจสั่ง '+f.n.join(''))}`;
+const tapes=['rgba(220,235,181,.85)','rgba(243,161,143,.7)','rgba(255,214,140,.8)'];
+
+const pages=[
+  `<div class="face front"><div class="label"><div class="brand">June</div><div class="sub">สมุดเมนูขนม</div><div class="note">อบใหม่ หอม นุ่มนาน</div></div>
+   <span class="doodle" style="left:12%;top:9%">🥥</span><span class="doodle" style="right:14%;top:12%;transform:rotate(14deg)">🧄</span><span class="doodle" style="left:16%;bottom:12%">🌿</span>
+   <div class="sticker tap">แตะ<br>เปิดสมุด</div></div>`,
+  ...F.map((f,i)=>`<div class="face front paper"><div class="inner">
+     <div class="no">เมนูที่ ${i+1}</div>
+     <div class="photo" style="--r:${i%2?3:-3}deg;--tape:${tapes[i%3]}"><img src="${f.img}" alt="${f.n.join('')}"><span>${f.n[0]} ♡</span></div>
+     <div class="name">${f.n[0]}<br>${f.n[1]}</div>
+     <div class="desc">${f.d}</div>
+     <div class="chips">${f.L.map(l=>`<b style="--chip:${f.fl}55">${l}</b>`).join('')}</div>
+     <div class="foot"><span class="price" style="--hl:${f.fl}99">฿${f.price}</span><a class="order" href="${order(f)}">สั่งทาง LINE</a></div>
+   </div></div>`),
+  `<div class="face front paper"><div class="inner"><div class="soon">
+     <div style="font-size:2.6rem">🧁</div><h3>เมนูใหม่เร็ว ๆ นี้</h3><p>อยากกินอะไร ทักมาบอกได้นะ</p>
+     <a class="order" href="https://line.me/R/oaMessage/${encodeURIComponent(LINE_ID)}/">ทักแอดมิน</a>
+     <button class="again" id="again">กลับไปหน้าปก</button>
+   </div></div></div>`,
+];
+const book=document.getElementById('book'),dots=document.getElementById('dots');
+// first page on top: highest z-index
+const els=pages.map((html,i)=>{const p=document.createElement('div');p.className='page'+(i===0?' cover':'');
+  p.innerHTML=html+'<div class="face back paper"></div>';p.style.zIndex=pages.length-i;book.append(p);return p});
+dots.innerHTML=pages.map(()=>'<i></i>').join('');
+let at=0;
+function show(n){
+  at=Math.max(0,Math.min(pages.length-1,n));
+  els.forEach((p,i)=>{const f=i<at;p.classList.toggle('flipped',f);
+    // flipped pages stack above the binding in reverse order so the latest one lies on top
+    setTimeout(()=>p.style.zIndex=f?100+i:pages.length-i,f?0:380)});
+  [...dots.children].forEach((d,i)=>d.classList.toggle('on',i===at));
+  prev.disabled=at===0;next.disabled=at===pages.length-1;
+}
+next.onclick=()=>show(at+1);prev.onclick=()=>show(at-1);
+book.addEventListener('click',e=>{if(e.target.closest('a,button'))return;show(at+1)});
+document.addEventListener('click',e=>{if(e.target.id==='again')show(0)});
+let y0=null;
+book.addEventListener('touchstart',e=>y0=e.touches[0].clientY,{passive:true});
+book.addEventListener('touchend',e=>{if(y0===null)return;const dy=e.changedTouches[0].clientY-y0;if(Math.abs(dy)>40)show(at+(dy<0?1:-1));y0=null});
+addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='ArrowRight')show(at+1);if(e.key==='ArrowDown'||e.key==='ArrowLeft')show(at-1)});
+show(0);
+</script>
+</body>
+</html>

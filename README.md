@@ -4,8 +4,9 @@
 
 ## สิ่งที่มีในเว็บ
 
-- **หน้าเมนู** (`/`): ขนมแต่ละเมนูพร้อมโมเดล 3D ถ้าเมนูไหนไม่มีโมเดลหรือเครื่องลูกค้าเปิด 3D ไม่ได้ จะแสดงรูปถ่ายแทน
-- **กล่อง 6 ชิ้น**: ลูกค้าเลือกขนมใส่กล่อง แล้วกดส่งรายการเข้าแชต LINE ของร้าน
+- **หน้าเมนู** (`/`): ขนมแต่ละเมนูพร้อมโมเดล 3D ถ้าเมนูไหนไม่มีโมเดลหรือเครื่องลูกค้าเปิด 3D ไม่ได้ จะแสดงรูปถ่ายแทน มีแผนที่หน้าร้านและช่องทางติดต่อ
+- **สมุดเมนู** (`/book/`): สมุดสันห่วงพลิกหน้าได้ มือถือแสดงทีละหน้า จอกว้างกางสองหน้า
+- **API** (`/api/menu/`): ข้อมูลเมนู ลิงก์ LINE และที่อยู่ร้าน เป็น JSON
 - **ปุ่มและ QR code ไป LINE**: สร้างจากค่า `LINE_OA_ID` เปลี่ยน ID แล้ว QR เปลี่ยนตาม
 - **หลังบ้าน** (`/admin/`): เพิ่ม แก้ ซ่อน และเรียงลำดับขนม
 
@@ -13,15 +14,25 @@
 
 - Python 3.12+ และ Django 5.2 จัดการ package ด้วย [uv](https://docs.astral.sh/uv/)
 - ฐานข้อมูล SQLite
-- หน้าเว็บเป็น HTML/CSS/JS ธรรมดาใน template เดียว ใช้ three.js (โหลดจาก CDN) แสดงโมเดล `.glb`
+- หน้าบ้าน: React 19 + TypeScript + TanStack Router (หน้าและลิงก์) + TanStack Query (ข้อมูลจาก API) build ด้วย Vite อยู่ในโฟลเดอร์ `frontend/`
+- three.js แสดงโมเดล `.glb` (แยกเป็นไฟล์ที่โหลดทีหลัง หน้าเว็บไม่ต้องรอ) และ WebGL เขียนเองสำหรับม่านครีมกับหยดครีม
+- Django ทำหน้าที่ API และหน้าเปล่าที่โหลดแอป React (ฝังข้อมูลเมนูไว้ในหน้าให้เลย หน้าแรกไม่ต้องเรียก API ซ้ำ)
 - ใช้งานจริงด้วย gunicorn + WhiteNoise ใน Docker
 
 ## โครงสร้าง
 
 ```
 config/            การตั้งค่าโปรเจกต์ (settings, urls)
-menu/              app หลัก: ตาราง Product, admin, view, template, เทสต์
-  templates/menu/  index.html (หน้าเว็บ), empty.html, phone_preview.html
+menu/              app หลัก: ตาราง Product, admin, API, เทสต์
+  templates/menu/  app.html (หน้าเปล่าของแอป React), phone_preview.html
+  templatetags/vite.py  ใส่ไฟล์ JS/CSS ที่ Vite build ลงในหน้า
+frontend/          แอป React + TanStack (Vite)
+  src/routes/      หน้าเว็บ (TanStack Router แบบไฟล์) index.tsx, book.tsx
+  src/features/    โค้ดของแต่ละหน้า home/ (ฉาก 3D, ม่านครีม, หยดครีม, ส่วนต่าง ๆ) book/
+  src/api/menu.ts  type ของข้อมูล + query ของ TanStack Query
+  src/lib/         ของใช้ร่วม: frame loop เดียวของทั้งหน้า, ความสูงจอแบบคงที่, WebGL helper
+  e2e/             เทสต์ Playwright
+.claude/skills/    คู่มือ React, TanStack และ three.js ให้ Claude Code ใช้ตอนเขียนโค้ด
   management/commands/seed_menu.py   คำสั่งใส่เมนูตั้งต้น
 seed/              รูปและโมเดล 3D ของเมนูตั้งต้น
 mock/              หน้าตัวอย่างที่ยังไม่ได้ลงโค้ดจริง (เช่น แชต LINE กับบอต)
@@ -31,20 +42,34 @@ Dockerfile, docker-entrypoint.sh, fly.toml   สำหรับ deploy
 
 ## เริ่มใช้งานในเครื่อง
 
+ต้องมี Python 3.12+ กับ [uv](https://docs.astral.sh/uv/) และ Node 22+
+
 ```bash
 uv sync
 uv run python manage.py migrate
 uv run python manage.py seed_menu          # ใส่เมนูตั้งต้น 2 รายการ
 uv run python manage.py createsuperuser    # บัญชีเข้า /admin/
+(cd frontend && npm ci && npm run build)   # build หน้าบ้านครั้งแรก
 uv run python manage.py runserver
 ```
 
 เปิด http://127.0.0.1:8000/ ส่วน http://127.0.0.1:8000/phone-preview/ แสดงหน้าเดียวกันในกรอบจอมือถือ (มีเฉพาะตอน debug)
 
+**แก้หน้าบ้านแบบเห็นผลทันที (hot reload):** เปิดสองหน้าต่าง
+
+```bash
+cd frontend && npm run dev                                         # Vite ที่พอร์ต 5173
+VITE_DEV_SERVER=http://localhost:5173 uv run python manage.py runserver   # Django โหลดโค้ดจาก Vite
+```
+
+**ทดสอบบนมือถือจริง:** รัน Django ที่ `0.0.0.0:8765` แล้วเปิด `http://<IP ของเครื่อง>:8765/` จากมือถือใน Wi-Fi เดียวกัน หน้าเว็บจะโชว์ตัววัด fps และส่งตัวเลขเข้า log ของ runserver (`GET /__dbg?...`) เอง สวิตช์อื่นใส่ต่อท้าย URL ได้ เช่น `?no3d`, `?lowres`, `?nodrips`, `?nomap`
+
 รันเทสต์:
 
 ```bash
-uv run python manage.py test
+uv run python manage.py test                 # Django: API, หน้าเปล่า, tag ของ Vite
+cd frontend && npm run typecheck && npm run lint
+cd frontend && npm run build && npm run test:e2e   # Playwright (ใช้ Chrome ในเครื่อง) ต้องรัน Django ที่พอร์ต 8765 ก่อน
 ```
 
 ## เพิ่มหรือแก้ขนม
@@ -54,8 +79,8 @@ uv run python manage.py test
 | ช่อง | ใช้ทำอะไร |
 |---|---|
 | ชื่อบรรทัดแรก / บรรทัดสอง | ชื่อเมนู แบ่งสองบรรทัดเพื่อจัดหัวข้อใหญ่บนเว็บ |
-| คำบรรยาย, ราคาต่อชิ้น | แสดงใต้ชื่อและในกล่อง 6 ชิ้น |
-| รูปขนม | รูปสี่เหลี่ยมจัตุรัส ใช้ในกล่อง การ์ด และแทนโมเดล 3D |
+| คำบรรยาย, ราคาต่อชิ้น | แสดงใต้ชื่อ ในส่วนเล่าเรื่อง และในสมุดเมนู |
+| รูปขนม | ใช้ในสมุดเมนู รูปตัวอย่างตอนแชร์ลิงก์ และแทนโมเดล 3D |
 | โมเดล 3D (.glb) | ไม่บังคับ ควรย่อให้เหลือราว 4 MB ก่อนอัปโหลด |
 | สีพื้นหลังประจำเมนู | รหัสสี `#RRGGBB` ของฉากเมนูนั้น |
 | จุดเด่น 1–3 | ข้อความที่มีเส้นชี้บนตัวขนม |
@@ -70,6 +95,7 @@ uv run python manage.py test
 | `DJANGO_ALLOWED_HOSTS` | ว่าง | โดเมนที่อนุญาต คั่นด้วยจุลภาค |
 | `DATA_DIR` | โฟลเดอร์โปรเจกต์ | ที่เก็บ `db.sqlite3` และ `media/` ตอนใช้งานจริงชี้ไปที่ดิสก์ถาวร |
 | `LINE_OA_ID` | `@561hgrea` | ID ของ LINE Official Account รวม `@` |
+| `VITE_DEV_SERVER` | ว่าง | ตอนพัฒนาหน้าบ้าน ตั้งเป็น `http://localhost:5173` เพื่อโหลดโค้ดจาก Vite แทนไฟล์ที่ build แล้ว |
 
 ## Deploy ขึ้น Fly.io
 

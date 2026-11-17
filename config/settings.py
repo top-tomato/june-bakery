@@ -134,6 +134,14 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Frontend (React + TanStack) built by Vite into frontend/dist. Django serves those files as static files and
+# reads frontend/dist/.vite/manifest.json to know which JS/CSS to put in the page (menu/templatetags/vite.py).
+FRONTEND_DIST = BASE_DIR / 'frontend' / 'dist'
+STATICFILES_DIRS = [FRONTEND_DIST] if FRONTEND_DIST.exists() else []
+VITE_MANIFEST = FRONTEND_DIST / '.vite' / 'manifest.json'
+# During development set VITE_DEV_SERVER=http://localhost:5173 and run `npm run dev` in frontend/ for hot reload
+VITE_DEV_SERVER = os.environ.get('VITE_DEV_SERVER', '').rstrip('/')
+
 MEDIA_URL = 'media/'
 MEDIA_ROOT = DATA_DIR / 'media'
 

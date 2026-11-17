@@ -1,9 +1,11 @@
 import json
 import re
 import tempfile
+from pathlib import Path
 
 from django.core.files.uploadedfile import SimpleUploadedFile
-from django.test import TestCase, override_settings
+from django.template import Context, Template
+from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
 from menu.models import Product
@@ -27,46 +29,93 @@ def make_product(**overrides: object) -> Product:
     return Product.objects.create(**fields)
 
 
-def menu_payload(html: str) -> list[dict[str, object]]:
-    match = re.search(r'<script id="menu-data" type="application/json">(.*?)</script>', html, re.S)
+def bootstrap(html: str) -> dict[str, object]:
+    match = re.search(r'<script id="bootstrap" type="application/json">(.*?)</script>', html, re.S)
     assert match is not None
     return json.loads(match.group(1))
 
 
-class IndexViewTests(TestCase):
+class MediaTestCase(TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
         media_root = cls.enterClassContext(tempfile.TemporaryDirectory())
         cls.enterClassContext(override_settings(MEDIA_ROOT=media_root))
 
-    def test_empty_menu_shows_placeholder_page(self) -> None:
-        response = self.client.get(reverse("menu:index"))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "menu/empty.html")
 
+class MenuApiTests(MediaTestCase):
     def test_lists_active_products_in_sort_order(self) -> None:
-        make_product(name_line1="สอง", name_line2="", sort_order=2, price=60)
+        make_product(name_line1="สอง", name_line2="", sort_order=2, price=60, highlight_1="กรอบ")
         make_product(name_line1="หนึ่ง", name_line2="", sort_order=1)
         make_product(name_line1="ซ่อน", name_line2="", is_active=False)
 
-        response = self.client.get(reverse("menu:index"))
+        data = self.client.get(reverse("menu:api-menu")).json()
 
-        payload = menu_payload(response.content.decode())
-        self.assertEqual([item["n"][0] for item in payload], ["หนึ่ง", "สอง"])
-        self.assertEqual(payload[1]["price"], 60)
-        self.assertEqual(payload[0]["model"], "")
+        self.assertEqual([p["name"][0] for p in data["products"]], ["หนึ่ง", "สอง"])
+        self.assertEqual(data["products"][1]["price"], 60)
+        self.assertEqual(data["products"][1]["highlights"], ["กรอบ"])  # empty highlights are dropped
+        self.assertEqual(data["products"][0]["model"], "")
 
     @override_settings(LINE_OA_ID="@junebakery")
-    def test_order_links_point_to_line_official(self) -> None:
-        make_product()
-        response = self.client.get(reverse("menu:index"))
-        self.assertContains(response, "https://line.me/R/ti/p/%40junebakery")
-        self.assertNotContains(response, "instagram.com")
-        self.assertContains(response, '<div class="qr"><svg')
-        self.assertContains(response, "@junebakery</b>")
+    def test_line_and_shop_details(self) -> None:
+        data = self.client.get(reverse("menu:api-menu")).json()
+        self.assertEqual(data["line"]["oaId"], "@junebakery")
+        self.assertEqual(data["line"]["addUrl"], "https://line.me/R/ti/p/%40junebakery")
+        self.assertTrue(data["line"]["qrSvg"].startswith("<svg"))
+        self.assertIn("13.767586,100.539543", data["shop"]["mapsUrl"])
 
-    def test_index_can_be_framed_by_phone_preview(self) -> None:
-        make_product()
+    def test_only_get(self) -> None:
+        self.assertEqual(self.client.post(reverse("menu:api-menu")).status_code, 405)
+
+
+class AppShellTests(MediaTestCase):
+    def test_embeds_the_menu_so_the_first_screen_needs_no_request(self) -> None:
+        make_product(name_line1="หนึ่ง", name_line2="")
+        response = self.client.get(reverse("menu:index"))
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(bootstrap(response.content.decode())["products"][0]["name"][0], "หนึ่ง")
+
+    def test_readable_without_javascript(self) -> None:
+        make_product(name_line1="ชิฟฟ่อน", name_line2="ใบเตย", price=45)
+        response = self.client.get(reverse("menu:index"))
+        self.assertContains(response, "<b>ชิฟฟ่อนใบเตย</b> ฿45")
+        self.assertContains(response, 'property="og:image"')
+
+    def test_book_route_uses_the_same_shell(self) -> None:
+        response = self.client.get(reverse("menu:book"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'id="bootstrap"')
+
+    def test_can_be_framed_by_phone_preview(self) -> None:
         response = self.client.get(reverse("menu:index"))
         self.assertEqual(response["X-Frame-Options"], "SAMEORIGIN")
+
+
+class ViteAssetsTagTests(SimpleTestCase):
+    def render(self) -> str:
+        return Template('{% load vite %}{% vite_assets "src/main.tsx" %}').render(Context())
+
+    @override_settings(VITE_DEV_SERVER="http://localhost:5173")
+    def test_dev_server(self) -> None:
+        html = self.render()
+        self.assertIn('src="http://localhost:5173/@vite/client"', html)
+        self.assertIn('src="http://localhost:5173/src/main.tsx"', html)
+        self.assertIn("@react-refresh", html)
+
+    def test_built_files_from_manifest(self) -> None:
+        manifest = {
+            "src/main.tsx": {"file": "app/main-abc.js", "css": ["app/main-abc.css"], "imports": ["_shared.js"]},
+            "_shared.js": {"file": "app/shared-def.js"},
+        }
+        with tempfile.TemporaryDirectory() as d:
+            path = Path(d) / "manifest.json"
+            path.write_text(json.dumps(manifest))
+            with override_settings(VITE_DEV_SERVER="", VITE_MANIFEST=path, DEBUG=True):
+                html = self.render()
+        self.assertIn('<link rel="stylesheet" href="/static/app/main-abc.css">', html)
+        self.assertIn('<link rel="modulepreload" href="/static/app/shared-def.js">', html)
+        self.assertIn('<script type="module" src="/static/app/main-abc.js"></script>', html)
+
+    @override_settings(VITE_DEV_SERVER="", VITE_MANIFEST=Path("/nonexistent/manifest.json"), DEBUG=True)
+    def test_missing_build_in_debug_is_a_comment_not_a_crash(self) -> None:
+        self.assertIn("frontend not built", self.render())

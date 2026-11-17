@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>June — สมุดเมนู กระดาษพลิกจริง (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&family=Lobster&family=Itim&display=swap" rel="stylesheet">
+<style>
+:root{
+  --tea:#F3A18F;--cream:#FFF6E6;--indigo:#3E5D58;--indigo-2:#2C4540;--ink:#243B37;
+  --paper:#FFFBF2;--line:#EADFCB;--kraft:#E9B9A6;
+  --display:"Mitr","Anuphan",system-ui,sans-serif;--body:"Anuphan",system-ui,sans-serif;--hand:"Itim","Anuphan",cursive;--mark:"Lobster","Mitr",cursive;
+  /* fine paper grain, generated once as an SVG noise image (no per-frame cost) */
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .35 0 0 0 0 .25 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{font-family:var(--body);color:var(--ink);background:var(--indigo);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:16px;
+  background-image:radial-gradient(rgba(255,246,230,.07) 1.5px,transparent 1.6px);background-size:22px 22px}
+.hint{color:var(--cream);opacity:.75;font:.95rem var(--hand)}
+
+/* ---------- the notebook ---------- */
+.stage{position:relative;width:min(calc(100vw - 48px),360px);margin-left:18px}
+/* stack of page edges peeking out on the right and bottom; gets thinner as you read (--left = pages still to read, 0..1) */
+.stack{position:absolute;inset:0;pointer-events:none;--left:1}
+.stack::before,.stack::after{content:"";position:absolute;border-radius:4px 14px 14px 4px}
+.stack::before{inset:0;transform:translate(calc(var(--left)*7px),calc(var(--left)*7px));background:
+  repeating-linear-gradient(90deg,#e9dcc4 0 1px,#fffaf0 1px 3px) right/8px 100% no-repeat,
+  repeating-linear-gradient(180deg,#e9dcc4 0 1px,#fffaf0 1px 3px) bottom/100% 8px no-repeat,#fffaf0;
+  box-shadow:0 18px 30px -8px rgba(0,0,0,.45);transition:transform .6s}
+/* hard back cover under everything */
+.stack::after{inset:0;transform:translate(10px,10px);background:#d99f8a;z-index:-1;box-shadow:0 22px 34px -10px rgba(0,0,0,.5)}
+
+#book{position:relative}
+.pg{background:var(--paper);overflow:hidden}
+.pg .in{position:absolute;inset:0;padding:30px 20px 20px 56px;display:flex;flex-direction:column;
+  /* holes punched along the spine, a red margin, ruled lines, paper grain, and the shadow where paper bends into the binding */
+  background:
+    linear-gradient(90deg,rgba(0,0,0,.16),rgba(0,0,0,.04) 18px,transparent 40px),
+    var(--grain),
+    radial-gradient(circle,var(--indigo) 5.5px,transparent 6px) 10px 22px/20px 44px repeat-y,
+    linear-gradient(90deg,transparent 44px,#F3B6A8 44px 46px,transparent 46px),
+    repeating-linear-gradient(var(--paper) 0 31px,var(--line) 31px 32px);
+  background-color:var(--paper)}
+/* covers: thick kraft board */
+.pg.cover .in{padding:0;align-items:center;justify-content:center;background:
+    linear-gradient(90deg,rgba(0,0,0,.18),transparent 30px),
+    var(--grain),
+    radial-gradient(circle,var(--indigo) 5.5px,transparent 6px) 10px 22px/20px 44px repeat-y,
+    radial-gradient(rgba(255,255,255,.2) 1px,transparent 1.2px) 0 0/7px 7px,
+    var(--kraft)}
+.label{position:relative;width:76%;background:var(--paper);border-radius:12px;padding:20px 12px 16px;text-align:center;transform:rotate(-2deg);box-shadow:0 3px 0 rgba(0,0,0,.08)}
+.label::before,.label::after{content:"";position:absolute;top:-11px;width:60px;height:20px;background:rgba(220,235,181,.85);transform:rotate(-8deg)}
+.label::before{left:-12px}.label::after{right:-12px;transform:rotate(9deg);background:rgba(243,161,143,.75)}
+.brand{font:400 3.3rem/1 var(--mark);color:var(--indigo)}
+.sub{font:600 1.1rem var(--display);margin-top:6px}
+.note{font:1rem var(--hand);opacity:.7}
+.sticker{position:absolute;right:10%;bottom:11%;width:88px;height:88px;border-radius:50%;background:var(--cream);display:grid;place-items:center;text-align:center;
+  font:600 .9rem/1.25 var(--display);transform:rotate(10deg);border:3px dashed var(--tea);box-shadow:0 3px 0 rgba(0,0,0,.12)}
+.doodle{position:absolute;font-size:1.5rem}
+
+.no{font:1rem var(--hand);color:#C9806E}
+.photo{position:relative;align-self:center;width:72%;aspect-ratio:1;margin:6px 0 12px;background:#fff;padding:7px 7px 24px;box-shadow:0 4px 10px rgba(0,0,0,.14);transform:rotate(var(--r,-3deg))}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.photo::before{content:"";position:absolute;left:50%;top:-11px;width:76px;height:22px;margin-left:-38px;background:var(--tape);transform:rotate(-4deg)}
+.photo span{position:absolute;left:0;right:0;bottom:3px;text-align:center;font:.9rem var(--hand);opacity:.7}
+.name{font:600 1.35rem/1.15 var(--display)}
+.desc{font:1rem/1.4 var(--hand);margin-top:4px;opacity:.85}
+.chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.chips b{font:600 .74rem var(--body);padding:2px 9px;border-radius:999px;background:var(--chip)}
+.foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.price{font:600 1.6rem var(--display);position:relative;z-index:0}
+.price::after{content:"";position:absolute;left:-6px;right:-6px;bottom:4px;height:10px;background:var(--hl);z-index:-1;border-radius:4px}
+.order{font:600 .9rem var(--display);padding:9px 14px;border-radius:999px;background:#06C755;color:#fff;text-decoration:none;white-space:nowrap;box-shadow:0 3px 0 #04913E}
+.soon{margin:auto 0;text-align:center;display:grid;gap:10px;justify-items:center}
+.soon h3{font:600 1.4rem var(--display)}.soon p{font:1.05rem var(--hand);opacity:.8}
+
+/* spiral rings: drawn over the spine and lined up with the punched holes (hole centres: x 20px, y 44px + 44px steps) */
+.rings{position:absolute;left:-16px;top:0;bottom:0;width:40px;z-index:20;pointer-events:none;
+  background:linear-gradient(180deg,transparent 0 18px,#7f8d8a 18px,#f1f4f3 21px,#9aa8a5 24px,#6f7c79 26px,transparent 26px) 0 22px/40px 44px repeat-y;
+  -webkit-mask:linear-gradient(180deg,transparent 30px,#000 30px calc(100% - 20px),transparent calc(100% - 20px));
+          mask:linear-gradient(180deg,transparent 30px,#000 30px calc(100% - 20px),transparent calc(100% - 20px));
+  border-radius:8px;filter:drop-shadow(1px 2px 1px rgba(0,0,0,.35))}
+.nav{display:flex;align-items:center;gap:14px;color:var(--cream)}
+.nav button{width:44px;height:44px;border-radius:50%;border:2px solid var(--cream);background:none;color:var(--cream);font-size:1.2rem}
+.count{font:1rem var(--hand);min-width:60px;text-align:center}
+</style>
+</head>
+<body>
+<div class="hint">ลากมุมกระดาษ หรือปัดซ้ายเพื่อพลิก</div>
+<div class="stage">
+  <div class="stack" id="stack"></div>
+  <div id="book"></div>
+  <div class="rings" aria-hidden="true"></div>
+</div>
+<div class="nav"><button id="prev" aria-label="หน้าก่อน">←</button><span class="count" id="count"></span><button id="next" aria-label="หน้าถัดไป">→</button></div>
+
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+<script>
+const LINE_ID='@561hgrea';
+const F=[
+  {n:['ชิฟฟ่อน','มะพร้าวใบเตย'],d:'ชิฟฟ่อนใบเตยเนื้อนุ่ม หน้ามะพร้าวอ่อนอบสีทอง',price:45,img:'../seed/img/pandan.jpg',fl:'#C9DE98',L:['มะพร้าวอ่อนเป็นเส้น','หน้าอบสีทอง','เนื้อชิฟฟ่อนใบเตย']},
+  {n:['ขนมปังกระเทียม','ครีมชีส'],d:'ขนมปังกระเทียมอบร้อน ครีมชีสเยิ้มทุกแฉก',price:45,img:'../seed/img/garlic.jpg',fl:'#F3A18F',L:['กระเทียมและพาร์สลีย์','ครีมชีสเยิ้มทุกแฉก','ขนมปังอบสีทอง']},
+];
+const order=f=>`https://line.me/R/oaMessage/${encodeURIComponent(LINE_ID)}/?${encodeURIComponent('สนใจสั่ง '+f.n.join(''))}`;
+const tapes=['rgba(220,235,181,.85)','rgba(243,161,143,.7)','rgba(255,214,140,.8)'];
+const pages=[
+  `<div class="pg cover" data-density="hard"><div class="in">
+     <span class="doodle" style="left:20%;top:9%">🥥</span><span class="doodle" style="right:12%;top:12%;transform:rotate(14deg)">🧄</span><span class="doodle" style="left:22%;bottom:10%">🌿</span>
+     <div class="label"><div class="brand">June</div><div class="sub">สมุดเมนูขนม</div><div class="note">อบใหม่ หอม นุ่มนาน</div></div>
+     <div class="sticker">ลากมุม<br>เปิดสมุด</div></div></div>`,
+  ...F.map((f,i)=>`<div class="pg"><div class="in">
+     <div class="no">เมนูที่ ${i+1}</div>
+     <div class="photo" style="--r:${i%2?3:-3}deg;--tape:${tapes[i%3]}"><img src="${f.img}" alt="${f.n.join('')}"><span>${f.n[0]} ♡</span></div>
+     <div class="name">${f.n[0]}<br>${f.n[1]}</div>
+     <div class="desc">${f.d}</div>
+     <div class="chips">${f.L.map(l=>`<b style="--chip:${f.fl}55">${l}</b>`).join('')}</div>
+     <div class="foot"><span class="price" style="--hl:${f.fl}99">฿${f.price}</span><a class="order" href="${order(f)}">สั่งทาง LINE</a></div>
+   </div></div>`),
+  `<div class="pg"><div class="in"><div class="soon"><div style="font-size:2.4rem">🧁</div><h3>เมนูใหม่เร็ว ๆ นี้</h3><p>อยากกินอะไร ทักมาบอกได้นะ</p>
+     <a class="order" href="https://line.me/R/oaMessage/${encodeURIComponent(LINE_ID)}/">ทักแอดมิน</a></div></div></div>`,
+  `<div class="pg cover" data-density="hard"><div class="in"><div class="label"><div class="brand" style="font-size:2.2rem">ขอบคุณนะ</div><div class="note">June · อบใหม่ทุกวัน</div></div></div></div>`,
+];
+const book=document.getElementById('book');book.innerHTML=pages.join('');
+const pf=new St.PageFlip(book,{
+  width:360,height:520,size:'stretch',minWidth:260,maxWidth:420,minHeight:380,maxHeight:600,
+  usePortrait:true,showCover:true,drawShadow:true,maxShadowOpacity:.45,flippingTime:850,
+  mobileScrollSupport:false,swipeDistance:20,showPageCorners:true,
+});
+pf.loadFromHTML(book.querySelectorAll('.pg'));
+const stack=document.getElementById('stack'),count=document.getElementById('count'),N=pages.length;
+function upd(i){count.textContent=`${i+1} / ${N}`;stack.style.setProperty('--left',Math.max(0,1-i/(N-1)).toFixed(2));prev.disabled=i===0;next.disabled=i===N-1}
+pf.on('flip',e=>upd(e.data));upd(0);
+next.onclick=()=>pf.flipNext();prev.onclick=()=>pf.flipPrev();
+addEventListener('keydown',e=>{if(e.key==='ArrowRight')pf.flipNext();if(e.key==='ArrowLeft')pf.flipPrev()});
+</script>
+</body>
+</html>

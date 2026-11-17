@@ -32,13 +32,14 @@ class Product(models.Model):
         return f"{self.name_line1}{self.name_line2}"
 
     def as_payload(self) -> dict[str, object]:
-        """ข้อมูลที่หน้าเว็บใช้วาดเมนูนี้"""
+        """ข้อมูลเมนูนี้สำหรับ API /api/menu/ (หน้าบ้าน React ใช้ type เดียวกันใน frontend/src/api/menu.ts)"""
         return {
-            "n": [self.name_line1, self.name_line2],
-            "d": self.description,
+            "id": self.pk,
+            "name": [self.name_line1, self.name_line2],
+            "description": self.description,
             "price": self.price,
-            "img": self.image.url,
+            "image": self.image.url,
             "model": self.model_3d.url if self.model_3d else "",
-            "fl": self.accent_color,
-            "L": [self.highlight_1, self.highlight_2, self.highlight_3],
+            "accent": self.accent_color,
+            "highlights": [h for h in (self.highlight_1, self.highlight_2, self.highlight_3) if h],
         }
