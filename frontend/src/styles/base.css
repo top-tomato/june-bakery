@@ -182,17 +182,17 @@ section {
 }
 .june-logo.intro .ltr {
   animation:
-    june-ltr-in 0.7s cubic-bezier(0.33, 0, 0.2, 1) calc(0.15s + var(--k) * 0.14s) both,
-    june-ltr-wave 1.6s cubic-bezier(0.45, 0, 0.55, 1) calc(1s + var(--k) * 0.14s) infinite;
+    june-ltr-in 0.5s cubic-bezier(0.33, 0, 0.2, 1) calc(0.1s + var(--k) * 0.1s) both,
+    june-ltr-wave 1.2s cubic-bezier(0.45, 0, 0.55, 1) calc(0.65s + var(--k) * 0.1s) infinite;
 }
 .june-logo.intro .flut {
-  animation: june-flutter 1.6s cubic-bezier(0.45, 0, 0.55, 1) calc(1s + var(--fd)) infinite;
+  animation: june-flutter 1.2s cubic-bezier(0.45, 0, 0.55, 1) calc(0.65s + var(--fd)) infinite;
 }
 /* the two marks over the e: pop in, then hop with the e's turn in the wave and wiggle a little more, like steam */
 .june-logo.intro .tick {
   animation:
-    june-pop 0.5s cubic-bezier(0.3, 1.8, 0.5, 1) calc(var(--t0) + var(--i)) both,
-    june-tick-wave 1.6s cubic-bezier(0.45, 0, 0.55, 1) calc(1s + 3 * 0.14s + var(--ti)) infinite;
+    june-pop 0.45s cubic-bezier(0.3, 1.8, 0.5, 1) calc(0.55s + var(--ti)) both,
+    june-tick-wave 1.2s cubic-bezier(0.45, 0, 0.55, 1) calc(1.02s + var(--ti)) infinite;
 }
 .june-logo .t1 { --ti: 0s; }
 .june-logo .t2 { --ti: 0.07s; }
@@ -211,10 +211,11 @@ section {
   42% { transform: scale(1.015, 0.98); }
 }
 @keyframes june-tick-wave {
-  0%, 64%, 100% { transform: none; }
-  20% { transform: translateY(-9%) rotate(-5deg) scale(0.97, 1.06); }
-  34% { transform: translateY(-16%) rotate(4deg); }
-  48% { transform: translateY(2%) rotate(-2deg) scale(1.03, 0.97); }
+  0%, 70%, 100% { transform: none; }
+  16% { transform: translateY(-30%) rotate(-10deg) scale(0.95, 1.08); }
+  32% { transform: translateY(-55%) rotate(9deg); }
+  48% { transform: translateY(6%) rotate(-5deg) scale(1.06, 0.94); }
+  60% { transform: translateY(-6%) rotate(2deg); }
 }
 @keyframes june-flutter {
   0%, 100% { transform: none; }
