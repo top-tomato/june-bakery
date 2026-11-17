@@ -451,6 +451,7 @@ window.T0=performance.now();requestAnimationFrame(()=>{intro();frame()});
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/+esm';
 import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js/+esm';
 import {RoomEnvironment} from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/environments/RoomEnvironment.js/+esm';
+import {MeshoptDecoder} from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/libs/meshopt_decoder.module.js/+esm';
 const calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
 const R=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),alpha:true,antialias:true});
 R.setPixelRatio(Math.min(devicePixelRatio,innerWidth<700?1.5:2));R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=.9;
@@ -464,7 +465,7 @@ size();addEventListener('resize',size);
 const MODELS=window.F.map(f=>({url:f.model})),items=[];
 MODELS.forEach((m,i)=>{
   const grp=new THREE.Group();grp.visible=false;scene.add(grp);const it={grp};items.push(it);if(!m.url)return;
-  new GLTFLoader().load(m.url,g=>{
+  new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(m.url,g=>{
     let mesh;g.scene.traverse(o=>{if(o.isMesh)mesh=o});
     grp.add(new THREE.Mesh(mesh.geometry,mesh.material));
     it.loaded=true;grp.visible=true;document.documentElement.dataset['model'+i]='ok';
