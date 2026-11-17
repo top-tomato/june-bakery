@@ -839,3 +839,29 @@ main .steps b {
 .dbg-nomap .map {
   display: none !important;
 }
+
+/* Small reveal as sections scroll in (mock/text-reveal.html): headings fade in rising ~12px, list items follow one by
+   one (--i). Plays once (HomePage adds .in). Only opacity + transform; body text never waits. */
+.reveal {
+  opacity: 0;
+  transform: translateY(12px);
+  transition:
+    opacity 0.6s ease-out,
+    transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+  transition-delay: calc(var(--i, 0) * 90ms);
+}
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+/* the kicker line is a little faded by design (main .kicker) */
+main .kicker.reveal.in {
+  opacity: 0.8;
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}

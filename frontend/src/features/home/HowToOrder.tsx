@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import type { MenuData } from '@/api/menu'
 import { Drips } from './Drips'
 
@@ -13,16 +14,18 @@ export function HowToOrder({ order, shopName, above }: { order: MenuData['order'
     <section className="how" id="how" data-nav="dark">
       <Drips count={22} color={above} />
       <div className="wrap">
-        <p className="kicker">วิธีสั่ง</p>
-        <h2 className="sec-title">ง่าย ๆ 3 ขั้น</h2>
+        <p className="kicker reveal">วิธีสั่ง</p>
+        <h2 className="sec-title reveal" style={{ '--i': 1 } as CSSProperties}>
+          ง่าย ๆ 3 ขั้น
+        </h2>
         <ol className="steps">
-          <li>
+          <li className="reveal" style={{ '--i': 2 } as CSSProperties}>
             <b>ทัก LINE</b>บอกจำนวน และวันที่อยากรับ
           </li>
-          <li>
+          <li className="reveal" style={{ '--i': 3 } as CSSProperties}>
             <b>ร้านตอบกลับ</b>ยืนยันออเดอร์ให้ในแชต
           </li>
-          <li>
+          <li className="reveal" style={{ '--i': 4 } as CSSProperties}>
             <b>รับที่หน้าร้าน</b>
             {shopName}
           </li>

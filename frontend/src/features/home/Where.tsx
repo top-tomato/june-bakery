@@ -30,7 +30,7 @@ export function Where({ shop, closedDays, above }: Props) {
     <section className="where" id="where" data-nav="light">
       <Drips count={24} color={above} />
       <div>
-        <h2>
+        <h2 className="reveal">
           แวะหยิบได้
           <br />
           ที่หน้าร้าน

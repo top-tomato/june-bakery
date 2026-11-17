@@ -1,5 +1,5 @@
 import './home.css'
-import { useCallback, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type { MenuData } from '@/api/menu'
 import { calm, viewportHeight } from '@/lib/env'
 import { invalidateFrame } from '@/lib/frame'
@@ -46,6 +46,21 @@ export function HomePage({ data }: { data: MenuData }) {
   const onFail = useCallback((what: 'all' | number) => {
     setNoGl((prev) => (what === 'all' || prev === 'all' ? 'all' : new Set(prev).add(what)))
   }, [])
+
+  // headings and lists fade up once as their section scrolls in (.reveal in home.css)
+  useEffect(() => {
+    const io = new IntersectionObserver(
+      (entries) =>
+        entries.forEach((e) => {
+          if (!e.isIntersecting) return
+          e.target.classList.add('in')
+          io.unobserve(e.target)
+        }),
+      { rootMargin: '0px 0px -12% 0px' },
+    )
+    document.querySelectorAll('main .reveal:not(.in)').forEach((el) => io.observe(el))
+    return () => io.disconnect()
+  }, [data])
 
   const models = useMemo(() => products.map((p) => p.model), [products])
   const product = products[active]

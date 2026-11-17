@@ -43,7 +43,7 @@ export function End({ line, social }: { line: MenuData['line']; social: MenuData
   return (
     <section className="end" id="end" data-nav="dark">
       <Drips count={26} />
-      <h2>อยากชิมแล้วใช่ไหม ทักมาสั่งได้เลย</h2>
+      <h2 className="reveal">อยากชิมแล้วใช่ไหม ทักมาสั่งได้เลย</h2>
       <a className="btn" href={line.addUrl} target="_blank" rel="noopener">
         ทักสั่งทาง LINE
       </a>

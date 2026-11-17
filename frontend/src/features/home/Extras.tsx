@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { Link } from '@tanstack/react-router'
 import type { MenuData } from '@/api/menu'
 import { Snapshots } from '@/features/gallery/Snapshots'
@@ -10,11 +11,13 @@ export function Reviews({ reviews, above }: { reviews: MenuData['reviews']; abov
     <section className="reviews" id="reviews" data-nav="light">
       <Drips count={22} color={above} />
       <div className="wrap">
-        <p className="kicker">คนที่ลองแล้ว</p>
-        <h2 className="sec-title">เสียงจากลูกค้า</h2>
+        <p className="kicker reveal">คนที่ลองแล้ว</p>
+        <h2 className="sec-title reveal" style={{ '--i': 1 } as CSSProperties}>
+          เสียงจากลูกค้า
+        </h2>
         <div className="quotes">
-          {reviews.map((r) => (
-            <figure key={r.id} className="quote">
+          {reviews.map((r, k) => (
+            <figure key={r.id} className="quote reveal" style={{ '--i': 2 + Math.min(k, 3) } as CSSProperties}>
               <blockquote>“{r.text}”</blockquote>
               <figcaption>— {r.author}</figcaption>
             </figure>
@@ -32,8 +35,12 @@ export function About({ about, above }: { about: NonNullable<MenuData['about']>;
       <div className={about.photo ? 'wrap about-grid' : 'wrap'}>
         {about.photo && <img className="about-photo" src={about.photo} alt="" loading="lazy" decoding="async" />}
         <div>
-          <p className="kicker">เรื่องของ June</p>
-          {about.title && <h2 className="sec-title">{about.title}</h2>}
+          <p className="kicker reveal">เรื่องของ June</p>
+          {about.title && (
+            <h2 className="sec-title reveal" style={{ '--i': 1 } as CSSProperties}>
+              {about.title}
+            </h2>
+          )}
           <p className="about-text">{about.text}</p>
         </div>
       </div>
@@ -50,8 +57,10 @@ export function Gallery({ photos, above }: { photos: MenuData['gallery']; above:
     <section className="gallery" id="gallery" data-nav="dark">
       <Drips count={22} color={above} />
       <div className="wrap">
-        <p className="kicker">Gallery</p>
-        <h2 className="sec-title">จากครัว June</h2>
+        <p className="kicker reveal">Gallery</p>
+        <h2 className="sec-title reveal" style={{ '--i': 1 } as CSSProperties}>
+          จากครัว June
+        </h2>
         <p className="gal-sub">อบเสร็จ ถ่ายเก็บไว้ทุกวัน</p>
         <Snapshots items={photos.slice(0, SHOWN)} />
         <div className="more">
