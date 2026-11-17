@@ -467,7 +467,8 @@ MODELS.forEach((m,i)=>{
   const grp=new THREE.Group();grp.visible=false;scene.add(grp);const it={grp};items.push(it);if(!m.url)return;
   new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load(m.url,g=>{
     let mesh;g.scene.traverse(o=>{if(o.isMesh)mesh=o});
-    grp.add(new THREE.Mesh(mesh.geometry,mesh.material));
+    // keep the node transform: compressed models store their real size/position there
+    g.scene.updateMatrixWorld(true);const m3=new THREE.Mesh(mesh.geometry,mesh.material);m3.applyMatrix4(mesh.matrixWorld);grp.add(m3);
     it.loaded=true;grp.visible=true;document.documentElement.dataset['model'+i]='ok';
   },undefined,e=>{document.documentElement.dataset['model'+i]='error';window.GLERR[i]=true;window.photo();console.error(e)});
 });
