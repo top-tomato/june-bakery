@@ -1,19 +1,19 @@
 import { useEffect, useRef, useState } from 'react'
+import { JuneLogo } from '@/components/JuneLogo'
 import { onFrame } from '@/lib/frame'
 import { clamp } from '@/lib/math'
 import { CURTAIN_MS, createCurtain } from './gl/curtain'
-import { curtainWillPlay, markCurtainPlayed } from './intro'
+import { CURTAIN_HOLD_MS, curtainWillPlay, markCurtainPlayed } from './intro'
 
-const COUNT_MS = 850
+/** the count runs as long as the logo takes to open (base.css `.june-logo.intro`) */
+const COUNT_MS = 850 + CURTAIN_HOLD_MS
 
-
-/** Cream curtain + "June" logo filling up 0–100% while the page starts. Removes itself when done. */
+/** Cream curtain + "June" logo opening its palm leaves while the count runs 0–100%. Removes itself when done. */
 export function Curtain() {
   const [done, setDone] = useState(() => !curtainWillPlay())
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const countRef = useRef<HTMLDivElement>(null)
   const pctRef = useRef<HTMLSpanElement>(null)
-  const fillRef = useRef<HTMLSpanElement>(null)
   const loadRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -22,22 +22,21 @@ export function Curtain() {
     if (!canvas) return
     const curtain = createCurtain(canvas)
     if (curtain) canvas.classList.add('gl')
-    else canvas.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, delay: 1800, fill: 'forwards' }) // no WebGL
+    else canvas.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 600, delay: 1800 + CURTAIN_HOLD_MS, fill: 'forwards' }) // no WebGL
 
     const t0 = performance.now()
     const off = onFrame({
       write: ({ t }) => {
         const ms = t - t0
-        curtain?.draw(ms)
+        curtain?.draw(ms - CURTAIN_HOLD_MS)
         const p = clamp(ms / COUNT_MS)
         if (pctRef.current) pctRef.current.textContent = `${Math.round(p * 100)}%`
-        if (fillRef.current) fillRef.current.style.clipPath = `inset(${(1 - p) * 100}% 0 0 0)`
         if (loadRef.current) loadRef.current.style.transform = `translateY(${Math.sin(ms / 180) * 2}px)`
         if (p >= 1 && countRef.current) countRef.current.style.opacity = '0'
       },
     })
     markCurtainPlayed()
-    const timer = setTimeout(() => setDone(true), CURTAIN_MS)
+    const timer = setTimeout(() => setDone(true), CURTAIN_MS + CURTAIN_HOLD_MS)
     return () => {
       off()
       clearTimeout(timer)
@@ -51,8 +50,7 @@ export function Curtain() {
       <canvas ref={canvasRef} className="curtain" aria-hidden="true" />
       <div ref={countRef} className="intro-count" aria-hidden="true">
         <div ref={loadRef} className="load">
-          <span className="logo-mask ghost" />
-          <span ref={fillRef} className="logo-mask fill" />
+          <JuneLogo className="go intro" />
         </div>
         <span ref={pctRef}>0%</span>
       </div>

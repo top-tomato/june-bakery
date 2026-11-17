@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react'
 import type { MenuData } from '@/api/menu'
 import { ChatIcon, FacebookIcon, InstagramIcon } from '@/components/icons'
+import { JuneLogo } from '@/components/JuneLogo'
 import { onFrame } from '@/lib/frame'
 import { clamp, ease } from '@/lib/math'
 import { Drips } from './Drips'
@@ -8,11 +9,14 @@ import { Drips } from './Drips'
 export function End({ line, social }: { line: MenuData['line']; social: MenuData['social'] }) {
   const markRef = useRef<HTMLDivElement>(null)
 
-  // the big logo rises as it scrolls into view
+  // the big logo rises as it scrolls into view; its palm opens once on the way up, then sways while on screen
   useEffect(() => {
     const mark = markRef.current
     if (!mark) return
-    let top = 0, height = 0
+    const logo = mark.querySelector('.june-logo')
+    let top = 0, height = 0, opened = false
+    const io = new IntersectionObserver((entries) => logo?.classList.toggle('paused', !entries[0]?.isIntersecting))
+    io.observe(mark)
     const off = onFrame({
       read: ({ scrolled }) => {
         if (!scrolled) return
@@ -21,10 +25,19 @@ export function End({ line, social }: { line: MenuData['line']; social: MenuData
         height = r.height
       },
       write: ({ scrolled, vh }) => {
-        if (scrolled) mark.style.setProperty('--m', ease(clamp((vh - top + height * 0.45) / (vh * 0.6))).toFixed(3))
+        if (!scrolled) return
+        const m = ease(clamp((vh - top + height * 0.45) / (vh * 0.6)))
+        mark.style.setProperty('--m', m.toFixed(3))
+        if (!opened && m > 0.15) {
+          opened = true
+          logo?.classList.replace('wait', 'go')
+        }
       },
     })
-    return off
+    return () => {
+      off()
+      io.disconnect()
+    }
   }, [])
 
   return (
@@ -63,7 +76,7 @@ export function End({ line, social }: { line: MenuData['line']; social: MenuData
         </p>
       </div>
       <div ref={markRef} className="mark" aria-hidden="true">
-        <span className="logo-mask" />
+        <JuneLogo className="wait" />
       </div>
       <p className="note">หน้าตัวอย่าง: ราคาและชื่อเมนูบางรายการเป็นข้อมูลจำลอง ต้องแก้เป็นข้อมูลจริงก่อนใช้งาน</p>
     </section>
