@@ -1,0 +1,382 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>June — สแครปบุ๊กกลายเป็นสมุด (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@400;500;600&family=Itim&display=swap" rel="stylesheet">
+<style>
+/* Option A: the landing page's gallery as one scrapbook page — taped polaroids on dot-grid paper.
+   Nothing to flip, so a thumb scrolling the page never fights a page-turn. The full flip book is a separate page. */
+:root{--tea:#F3A18F;--cream:#FFF6E6;--paper:#FFFBF3;--indigo:#3E5D58;--ink:#2F4A45;--peach:#F3A18F;
+  --display:"Mitr","Anuphan",system-ui,sans-serif;--body:"Anuphan",system-ui,sans-serif;--hand:"Itim","Mitr",cursive;
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .35 0 0 0 0 .25 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--body);background:var(--indigo);color:var(--ink)}
+.sb-note{background:#1c2b28;color:var(--cream);padding:12px 16px;font-size:.9rem;text-align:center}
+.gallery{position:relative;padding:72px clamp(14px,5vw,80px) 88px;background:var(--grain),radial-gradient(circle,rgba(47,74,69,.2) .9px,transparent 1.3px) 0 0/18px 18px,var(--paper)}
+.sb-wrap{max-width:1040px;margin:0 auto}
+.sb-kicker{font:400 1.1rem var(--hand);color:var(--peach)}
+h2{font:600 clamp(2rem,6vw,3.4rem)/1.15 var(--display);margin:4px 0 6px}
+.sb-sub{font:1.05rem var(--hand);opacity:.8;margin-bottom:34px}
+/* collage */
+.sb-board{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 22px;align-items:start}
+.sb-snap{position:relative;background:#fff;padding:10px 10px 0;box-shadow:0 6px 14px rgba(0,0,0,.14);transform:rotate(var(--r,0deg))}
+.sb-snap img,.sb-snap video{display:block;width:100%;aspect-ratio:var(--ar,1);object-fit:cover;background:#eee}
+.sb-snap p{font:1.05rem var(--hand);text-align:center;padding:8px 0 10px}
+.sb-tape{position:absolute;top:-12px;left:50%;width:84px;height:24px;margin-left:-42px;background:rgba(243,161,143,.55);transform:rotate(-5deg)}
+.sb-tape.sb-g{background:rgba(201,222,152,.75);transform:rotate(4deg)}
+.sb-snap.sb-tall{grid-row:span 2}
+.sb-snap.sb-video .sb-badge{position:absolute;top:18px;left:18px;font:600 .75rem var(--display);background:rgba(36,59,55,.8);color:var(--cream);padding:2px 10px;border-radius:999px}
+.sb-doodle{position:absolute;width:64px;opacity:.9}
+.sb-dd{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.sb-dd.sb-peach{stroke:var(--peach)}
+.sb-more{display:flex;justify-content:center;margin-top:40px}
+.sb-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:999px;background:var(--ink);color:var(--cream);font:600 1rem var(--display);text-decoration:none}
+.sb-ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media (max-width:720px){.sb-board{grid-template-columns:repeat(2,1fr);gap:22px 14px}.sb-snap p{font-size:.95rem}.sb-doodle{display:none}}
+
+/* ---- photo book overlay ---- */
+
+/* Research-based rules for this version:
+   - restrained base + 1–2 cute accents  -> cream paper, ink line drawings, one peach accent
+   - 3 colours from the shop, 2 fonts    -> cream / deep green / peach; Mitr + Itim (handwriting)
+   - hand-drawn line art, no emoji       -> inline SVG doodles in one stroke style
+   - whitespace + clear hierarchy        -> one cake per spread: photo page left, details page right
+   - subtle tactile paper                -> static grain + dot grid, gutter shadow at the rings */
+:root{
+  --cream:#FFF6E6;--paper:#FFFBF3;--ink:#2F4A45;--peach:#F3A18F;--peach-soft:#F9D3C8;--board:#E7B3A0;
+  --display:"Mitr",system-ui,sans-serif;--hand:"Itim","Mitr",cursive;
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .35 0 0 0 0 .25 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.album{position:fixed;inset:0;z-index:50;font-family:var(--display);color:var(--ink);background:#3E5D58;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  padding:max(12px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  background-image:var(--grain)}
+.album .hint{color:var(--cream);opacity:.75;font:1rem var(--hand)}
+
+/* stage holds the two-page spread; while closed it slides so the closed cover sits in the middle */
+/* page is 360 x 680. Wide screens show the two-page spread; narrow screens (phones) get one page
+   sized in JS to fill the height (see SINGLE below). */
+.stage{position:relative;width:min(100%,1000px,calc((100svh - 120px) * 1.06))}
+@media (max-width:700px){.hint{font-size:.9rem}}
+@media (max-height:520px){.hint{display:none}.stage{width:min(100%,1000px,calc((100svh - 70px) * 1.06))}}
+.shift{position:relative;transition:transform .7s cubic-bezier(.5,0,.2,1)}
+.shift.closed-front{transform:translateX(-25%)}
+.shift.closed-back{transform:translateX(25%)}
+/* page edges stacked under each half; the side you have read grows, the side to come shrinks */
+.edges{position:absolute;inset:0;pointer-events:none}
+.edges i{position:absolute;top:0;bottom:0;width:50%;border-radius:6px;background:
+  repeating-linear-gradient(180deg,#eadcc6 0 1px,#fffaf1 1px 3px) 0 100%/100% var(--t) no-repeat,#fffaf1;
+  box-shadow:0 16px 28px -10px rgba(0,0,0,.45);transition:transform .6s,opacity .3s}
+.edges .l{left:0;transform:translate(calc(var(--l)*-6px),calc(var(--l)*6px));--t:calc(var(--l)*6px)}
+.edges .r{right:0;transform:translate(calc(var(--r)*6px),calc(var(--r)*6px));--t:calc(var(--r)*6px)}
+#book{position:relative}
+
+/* ---------- paper ---------- */
+.pg{background:var(--paper)}
+.in{position:absolute;inset:0;container-type:size;overflow:hidden;background:
+   var(--grain),
+   radial-gradient(circle,rgba(47,74,69,.22) .9px,transparent 1.3px) 0 0/16px 16px,
+   var(--paper)}
+/* the bend into the rings + punched holes on the inner edge */
+.pg.left .in{box-shadow:inset -22px 0 22px -18px rgba(0,0,0,.28)}
+.pg.right .in{box-shadow:inset 22px 0 22px -18px rgba(0,0,0,.28)}
+.pg .in::after{content:"";position:absolute;top:10px;bottom:10px;width:16px;
+  background:radial-gradient(circle,#2b3a37 3.6px,#4a5f5b 4.4px,transparent 4.9px) 50% 0/16px 28px no-repeat space}
+.pg.left .in::after{right:4px}.pg.right .in::after,.pg.cover .in::after{left:4px}
+.stage:not(.single) .pg.cover.back .in::after{left:auto;right:4px}
+.pad{position:absolute;inset:7cqh 9cqw 6cqh 9cqw;display:flex;flex-direction:column}
+.pg.right .pad{left:13cqw}.pg.left .pad{right:13cqw}
+
+/* covers: thick board */
+.cover .in,.pg.inside .in{background:var(--grain),radial-gradient(rgba(255,255,255,.18) 1px,transparent 1.3px) 0 0/8px 8px,var(--board)}
+/* inside of a cover: bare board, a touch darker than the outside */
+.pg.inside .in{filter:brightness(.96)}
+.cover .pad{align-items:center;justify-content:center;text-align:center}
+.plate{background:var(--paper);border-radius:10px;padding:8cqh 8cqw 7cqh;width:100%;box-shadow:0 3px 0 rgba(0,0,0,.08)}
+.logo{width:62cqw;aspect-ratio:1000/660;margin:0 auto;background:var(--ink);-webkit-mask:url(img/logo.png) center/contain no-repeat;mask:url(img/logo.png) center/contain no-repeat}  /* the real logo (white PNG) inked in the book's colour */
+.brand{font:500 18cqw/1 var(--display);letter-spacing:.02em}
+.brand em{font:400 1em/1 var(--hand);color:var(--peach);font-style:normal}
+.kicker{font:400 6.5cqw var(--hand);opacity:.8;margin-top:3cqh}
+.rule{width:30%;height:2px;background:var(--ink);opacity:.25;margin:4cqh auto}
+.cap{font:400 6cqw var(--hand)}
+
+/* doodles share one stroke style */
+.dd{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.dd.peach{stroke:var(--peach)}
+svg.d{position:absolute;overflow:visible}
+
+/* text */
+.h-hand{font:400 7.5cqw/1.3 var(--hand)}
+.h-num{font:400 6cqw var(--hand);color:var(--peach)}
+.h-name{font:600 11cqw/1.1 var(--display);margin-top:2cqh}
+.h-desc{font:400 6.2cqw/1.45 var(--hand);margin-top:3cqh;opacity:.85}
+.notes{list-style:none;padding:0;margin-top:4cqh;display:grid;gap:1.6cqh}
+.notes li{font:400 5.8cqw/1.3 var(--hand);display:flex;gap:2.5cqw;align-items:flex-start}
+.notes li::before{content:"";flex:none;width:3.4cqw;height:3.4cqw;margin-top:1.2cqw;border:2px solid var(--peach);border-radius:50%}
+.buy{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:3cqw}
+.price{position:relative;font:600 11cqw/1 var(--display);padding:2cqw 4cqw}
+.price svg{position:absolute;inset:-12% -14%;width:128%;height:124%}
+.order{font:500 5.2cqw var(--display);color:var(--cream);background:var(--ink);text-decoration:none;padding:2.6cqw 4.5cqw;border-radius:999px;white-space:nowrap}
+
+/* photo page: one big photo, a paper-corner mount, a handwritten caption */
+.photo{position:relative;width:100%;aspect-ratio:4/5;margin-top:4cqh;border-radius:4px;background:#e9e2d4 center/cover;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.photo i{position:absolute;width:12cqw;height:12cqw;background:var(--ink);opacity:.85;clip-path:polygon(0 0,100% 0,0 100%)}
+.photo i:nth-child(1){left:-2cqw;top:-2cqw}
+.photo i:nth-child(2){right:-2cqw;top:-2cqw;transform:scaleX(-1)}
+.photo i:nth-child(3){left:-2cqw;bottom:-2cqw;transform:scaleY(-1)}
+.photo i:nth-child(4){right:-2cqw;bottom:-2cqw;transform:scale(-1)}
+.caption{font:400 6.5cqw var(--hand);margin-top:3.5cqh;text-align:center}
+
+/* scrapbook pages: two snapshots per page with handwritten captions */
+.snaps{display:grid;gap:4cqh;margin-top:3cqh;flex:1;grid-template-rows:1fr 1fr}
+.snap{position:relative;display:flex;flex-direction:column;min-height:0;transform:rotate(var(--r))}
+.snap .ph{flex:1;min-height:0;background:#e9e2d4 center/cover;border:2.2cqw solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+.snap .tape{position:absolute;top:-2.2cqh;left:50%;width:22cqw;height:3.6cqh;margin-left:-11cqw;background:rgba(243,161,143,.55);transform:rotate(-4deg)}
+.snap p{font:400 5.6cqw/1.2 var(--hand);text-align:center;margin-top:1.2cqh}
+/* video snapshot fills its slot like a photo */
+.snap video.ph{width:100%;object-fit:cover;display:block}
+/* contents */
+.toc{list-style:none;padding:0;margin-top:5cqh;display:grid;gap:3cqh}
+.toc button{all:unset;cursor:pointer;display:flex;align-items:baseline;gap:2cqw;width:100%;font:500 7cqw var(--display)}
+.toc button span{flex:1;border-bottom:2px dotted rgba(47,74,69,.35);transform:translateY(-1cqw)}
+.toc button b{font:400 6.5cqw var(--hand);color:var(--peach)}
+.steps{list-style:none;padding:0;margin-top:4cqh;display:grid;gap:3cqh;counter-reset:s}
+.steps li{counter-increment:s;font:400 6.2cqw/1.35 var(--hand);display:flex;gap:3cqw}
+.steps li::before{content:counter(s);flex:none;width:8cqw;height:8cqw;border-radius:50%;background:var(--peach-soft);display:grid;place-items:center;font:600 4.6cqw var(--display)}
+
+/* page-flip puts the whole book in its own layer (.stf__parent has transform, .stf__block has perspective),
+   so the rings are moved inside .stf__block next to the pages. Pages rest at startZIndex+3/+4 and the turning
+   page is +5; with startZIndex 10 the rings (15, placed before the pages) sit above resting pages and under the turning one. */
+/* wire rings down the spine: one 28px tile per ring, each end drops into a page hole (holes: 12px from the spine,
+   centred at 14px + 28px steps — same numbers as the hole pattern above). Drawn as SVG: shaded wire, highlight, soft shadow. */
+.rings{position:absolute;left:50%;top:10px;bottom:10px;width:44px;margin-left:-22px;z-index:15;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='28'%3E%3Cdefs%3E%0A%3ClinearGradient id='w' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%233d4846'/%3E%3Cstop offset='.22' stop-color='%239aa7a4'/%3E%3Cstop offset='.5' stop-color='%23c9d2d0'/%3E%3Cstop offset='.78' stop-color='%239aa7a4'/%3E%3Cstop offset='1' stop-color='%233d4846'/%3E%3C/linearGradient%3E%0A%3Cfilter id='b' x='-20%25' y='-60%25' width='140%25' height='220%25'%3E%3CfeGaussianBlur stdDeviation='1.1'/%3E%3C/filter%3E%3C/defs%3E%0A%3Cpath d='M11 17.5Q22 13 33 17.5' fill='none' stroke='%23000' stroke-opacity='.28' stroke-width='3.4' stroke-linecap='round' filter='url(%23b)'/%3E%0A%3Cpath d='M10 14Q22 7.5 34 14' fill='none' stroke='url(%23w)' stroke-width='3.2' stroke-linecap='round'/%3E%0A%3Cpath d='M14 11.6Q22 8.4 30 11.6' fill='none' stroke='%23fff' stroke-opacity='.85' stroke-width='.9' stroke-linecap='round'/%3E%0A%3Ccircle cx='10' cy='14' r='2.2' fill='%232b3533'/%3E%3Ccircle cx='34' cy='14' r='2.2' fill='%232b3533'/%3E%3C/svg%3E") 0 0/44px 28px no-repeat space}
+
+/* tap a page to read it full size (the spread is small on phones) */
+.zoom{position:fixed;inset:0;z-index:100;background:rgba(30,46,43,.86);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom));opacity:0;pointer-events:none;transition:opacity .25s}
+.zoom.on{opacity:1;pointer-events:auto}
+.zoom .sheet{position:relative;width:min(94vw,calc((100svh - 110px) * .516),480px);aspect-ratio:330/640;border-radius:6px;overflow:hidden;
+  box-shadow:0 20px 40px rgba(0,0,0,.45);transform:scale(.92);transition:transform .25s}
+.zoom.on .sheet{transform:none}
+.zoom .sheet .pg{position:absolute;inset:0;display:block}
+.zoom .close{font:500 1rem var(--display);color:var(--cream);background:none;border:2px solid var(--cream);border-radius:999px;padding:8px 22px}
+.stage.single .pg .in{box-shadow:inset 22px 0 22px -18px rgba(0,0,0,.28)}
+.stage.single .pg .in::after{left:4px;right:auto}
+.stage.single .pg.left .pad{left:13cqw;right:9cqw}
+.stage.single .rings{left:0;width:34px;margin-left:-16px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='28'%3E%3Cdefs%3E%0A%3ClinearGradient id='w' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23eef2f1'/%3E%3Cstop offset='.45' stop-color='%23a9b5b2'/%3E%3Cstop offset='1' stop-color='%2356625f'/%3E%3C/linearGradient%3E%0A%3Cfilter id='b' x='-30%25' y='-60%25' width='160%25' height='220%25'%3E%3CfeGaussianBlur stdDeviation='1'/%3E%3C/filter%3E%3C/defs%3E%0A%3Cpath d='M3.5 14.5C3 21 9 24.5 16 23' fill='none' stroke='%234a5654' stroke-width='3' stroke-linecap='round'/%3E%0A%3Cpath d='M18 18.5Q23 16.5 29 17.5' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='3' stroke-linecap='round' filter='url(%23b)'/%3E%0A%3Cpath d='M28 14C22 3.5 5 3.5 3.5 14.5' fill='none' stroke='url(%23w)' stroke-width='3.2' stroke-linecap='round'/%3E%0A%3Cpath d='M22 8.2C17 5.6 9 6 6.2 10.5' fill='none' stroke='%23fff' stroke-opacity='.9' stroke-width='.9' stroke-linecap='round'/%3E%0A%3Ccircle cx='28' cy='14' r='2.2' fill='%232b3533'/%3E%3C/svg%3E") 0 0/34px 28px no-repeat space}
+/* closed book on a wide screen: only one page is there, so the rings wrap round its edge like on a phone */
+.stage:not(.single) .shift.closed-front .rings{width:34px;margin-left:-16px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='28'%3E%3Cdefs%3E%0A%3ClinearGradient id='w' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23eef2f1'/%3E%3Cstop offset='.45' stop-color='%23a9b5b2'/%3E%3Cstop offset='1' stop-color='%2356625f'/%3E%3C/linearGradient%3E%0A%3Cfilter id='b' x='-30%25' y='-60%25' width='160%25' height='220%25'%3E%3CfeGaussianBlur stdDeviation='1'/%3E%3C/filter%3E%3C/defs%3E%0A%3Cpath d='M3.5 14.5C3 21 9 24.5 16 23' fill='none' stroke='%234a5654' stroke-width='3' stroke-linecap='round'/%3E%0A%3Cpath d='M18 18.5Q23 16.5 29 17.5' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='3' stroke-linecap='round' filter='url(%23b)'/%3E%0A%3Cpath d='M28 14C22 3.5 5 3.5 3.5 14.5' fill='none' stroke='url(%23w)' stroke-width='3.2' stroke-linecap='round'/%3E%0A%3Cpath d='M22 8.2C17 5.6 9 6 6.2 10.5' fill='none' stroke='%23fff' stroke-opacity='.9' stroke-width='.9' stroke-linecap='round'/%3E%0A%3Ccircle cx='28' cy='14' r='2.2' fill='%232b3533'/%3E%3C/svg%3E") 0 0/34px 28px no-repeat space}
+.stage:not(.single) .shift.closed-back .rings{width:34px;margin-left:-18px;transform:scaleX(-1);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='28'%3E%3Cdefs%3E%0A%3ClinearGradient id='w' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23eef2f1'/%3E%3Cstop offset='.45' stop-color='%23a9b5b2'/%3E%3Cstop offset='1' stop-color='%2356625f'/%3E%3C/linearGradient%3E%0A%3Cfilter id='b' x='-30%25' y='-60%25' width='160%25' height='220%25'%3E%3CfeGaussianBlur stdDeviation='1'/%3E%3C/filter%3E%3C/defs%3E%0A%3Cpath d='M3.5 14.5C3 21 9 24.5 16 23' fill='none' stroke='%234a5654' stroke-width='3' stroke-linecap='round'/%3E%0A%3Cpath d='M18 18.5Q23 16.5 29 17.5' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='3' stroke-linecap='round' filter='url(%23b)'/%3E%0A%3Cpath d='M28 14C22 3.5 5 3.5 3.5 14.5' fill='none' stroke='url(%23w)' stroke-width='3.2' stroke-linecap='round'/%3E%0A%3Cpath d='M22 8.2C17 5.6 9 6 6.2 10.5' fill='none' stroke='%23fff' stroke-opacity='.9' stroke-width='.9' stroke-linecap='round'/%3E%0A%3Ccircle cx='28' cy='14' r='2.2' fill='%232b3533'/%3E%3C/svg%3E") 0 0/34px 28px no-repeat space}
+.stage.single .edges .l{display:none}
+.stage.single .edges .r{width:100%}
+.stage.single .shift{transform:none}
+.album .nav{display:flex;align-items:center;gap:14px;color:var(--cream)}
+.album .nav button{width:44px;height:44px;border-radius:50%;border:2px solid var(--cream);background:none;color:var(--cream);font-size:1.15rem}
+.album .nav button:disabled{opacity:.3}
+.count{font:1rem var(--hand);min-width:76px;text-align:center}
+
+/* morph timing */
+::view-transition-group(album){animation-duration:.6s;animation-timing-function:cubic-bezier(.4,0,.2,1)}
+::view-transition-old(album),::view-transition-new(album){animation-duration:.6s;height:100%;object-fit:cover}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.4s}
+.album[hidden]{display:none}
+.album .back{position:absolute;left:12px;top:max(10px,env(safe-area-inset-top));z-index:5;color:var(--cream);font:500 .95rem var(--display);background:rgba(0,0,0,.18);border:0;border-radius:999px;padding:6px 14px;cursor:pointer}
+/* narrow screens: the back button takes the top line, so the hint moves away */
+@media (max-width:699px){.album .hint{visibility:hidden}}
+</style>
+</head>
+<body>
+
+<p class="sb-note">mock: กด "เปิดสมุดรูปทั้งเล่ม" → รูปบินมารวมกองกลางจอ → ใบบนสุดกลายเป็นสมุด → ปกเปิดเอง · "← กลับ" เล่นย้อนกลับ</p>
+<section class="gallery" id="gallery">
+  <div class="sb-wrap" style="position:relative">
+    <svg class="sb-doodle" viewBox="0 0 100 100" style="right:0;top:-10px"><path class="sb-dd sb-peach" d="M50 10l5 35 35 5-35 5-5 35-5-35-35-5 35-5Z"/></svg>
+    <div class="sb-kicker">สมุดรูป</div>
+    <h2>จากครัว June</h2>
+    <p class="sb-sub">อบเสร็จ ถ่ายเก็บไว้ทุกวัน</p>
+    <div class="sb-board" id="board">
+      <figure class="sb-snap sb-tall" style="--r:-2deg;--ar:4/5"><span class="sb-tape"></span><img src="img/shop-12.jpg" alt=""><p>ชิฟฟ่อนมะพร้าวใบเตย</p></figure>
+      <figure class="sb-snap sb-video sb-tall" style="--r:2deg;--ar:9/16"><span class="sb-tape sb-g"></span>
+        <video src="img/snackbox.mp4" poster="img/snackbox-poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
+        <span class="sb-badge">วิดีโอ</span><p>Snack box</p></figure>
+      <figure class="sb-snap" style="--r:3deg"><span class="sb-tape"></span><img src="img/shop-05.jpg" alt=""><p>ออกจากเตา</p></figure>
+      <figure class="sb-snap" style="--r:-3deg"><span class="sb-tape sb-g"></span><img src="img/shop-14.jpg" alt=""><p>วันที่ครัวยุ่ง</p></figure>
+      <figure class="sb-snap" style="--r:1.5deg"><span class="sb-tape"></span><img src="img/shop-13.jpg" alt=""><p>จัดโต๊ะ</p></figure>
+      <figure class="sb-snap" style="--r:-1.5deg"><span class="sb-tape sb-g"></span><img src="img/shop-10.jpg" alt=""><p>หลายหน้าตา</p></figure>
+    </div>
+    <div class="sb-more"><a class="sb-btn" href="#album" id="openAlbum"><svg class="sb-ic" viewBox="0 0 24 24"><path d="M4 5h7a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4Z"/><path d="M20 5h-7a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h7Z"/></svg>เปิดสมุดรูปทั้งเล่ม</a></div>
+  </div>
+</section>
+
+<div class="album" id="album" hidden>
+<button class="back" id="back" type="button">← กลับ</button>
+
+<div class="hint">สมุดรูปจากครัว June · ปัดหรือลากมุมเพื่อพลิก</div>
+<div class="stage">
+  <div class="shift closed-front" id="shift">
+    <div class="edges" id="edges"><i class="l"></i><i class="r"></i></div>
+    <div id="book"></div>
+    <div class="rings" id="rings" aria-hidden="true"></div>
+  </div>
+</div>
+<div class="zoom" id="zoom" aria-hidden="true"><div class="sheet" id="sheet"></div><button class="close" id="zclose">ปิด</button></div>
+<div class="nav"><button id="prev" aria-label="หน้าก่อน">←</button><span class="count" id="count"></span><button id="next" aria-label="หน้าถัดไป">→</button></div>
+
+</div>
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+<script>
+const LINE_ID='@561hgrea';
+const lineURL=t=>`https://line.me/R/oaMessage/${encodeURIComponent(LINE_ID)}/${t?'?'+encodeURIComponent(t):''}`;
+// Option B: the whole album as a flip notebook (same engine as the menu book). Two snapshots per page;
+// the snack-box reel plays silently on its own page. Photos from the shop's LINE album (Downloads/collections).
+const SHOTS=[
+  ['img/shop-12.jpg','ชิฟฟ่อนมะพร้าวใบเตย'],['img/shop-05.jpg','ออกจากเตา'],
+  ['img/shop-07.jpg','อุ่น ๆ'],['img/shop-14.jpg','วันที่ครัวยุ่ง'],
+  ['img/shop-13.jpg','จัดโต๊ะ'],['img/shop-10.jpg','หลายหน้าตา'],
+  ['img/shop-11.jpg',''],['img/shop-02.jpg',''],
+  ['img/shop-08.jpg',''],['img/shop-15.jpg',''],
+  ['img/shop-03.jpg',''],['img/shop-09.jpg',''],
+  ['img/shop-04.jpg',''],['img/shop-01.jpg',''],
+];
+const D={
+  sparkle:'<path class="dd peach" d="M50 10l5 35 35 5-35 5-5 35-5-35-35-5 35-5Z"/>',
+  whisk:'<path class="dd" d="M50 96V58"/><path class="dd" d="M50 58C26 40 30 6 50 6s24 34 0 52Z"/><path class="dd" d="M50 58C40 40 42 10 50 6M50 58c10-18 8-48 0-52"/>',
+  leaf:'<path class="dd" d="M8 92C28 66 58 34 94 8C74 42 46 72 8 92Z"/><path class="dd" d="M8 92C40 64 64 40 94 8"/><path class="dd" d="M30 92C44 70 60 52 78 36"/>',
+};
+const svg=(k,css)=>`<svg class="d" viewBox="0 0 100 100" style="${css}" aria-hidden="true">${D[k]}</svg>`;
+const snap=([img,cap],j,k)=>`<div class="snap" style="--r:${(j+k)%2?2.5:-2.5}deg"><span class="tape"></span><div class="ph" style="background-image:url('${img}')"></div><p>${cap||'&nbsp;'}</p></div>`;
+const P=[];
+P.push(`<div class="pg cover" data-density="hard"><div class="in"><div class="pad">
+  ${svg('leaf','left:10%;top:8%;width:22cqw;transform:rotate(-10deg)')}${svg('whisk','right:8%;bottom:4%;width:14cqw;transform:rotate(16deg)')}
+  <div class="plate"><div class="logo" role="img" aria-label="June"></div><div class="rule"></div><div class="kicker">สมุดรูปจากครัว</div></div>
+  <div class="cap" style="margin-top:7cqh;opacity:.8">ลากมุมขวาล่างเพื่อเปิด →</div></div></div></div>`);
+// inside cover: the snack-box reel, full page
+P.push(`<div class="pg left"><div class="in"><div class="pad">
+  <div class="h-num">วิดีโอ</div><div class="h-name" style="font-size:9cqw;margin-top:0">Snack box</div>
+  <div class="snaps" style="grid-template-rows:1fr"><div class="snap" style="--r:-1.5deg"><span class="tape"></span>
+    <video class="ph" src="img/snackbox.mp4" poster="img/snackbox-poster.jpg" autoplay muted loop playsinline preload="metadata"></video><p>ทำเสร็จ แพ็กใส่กล่อง</p></div></div>
+</div></div></div>`);
+for(let k=0;k<SHOTS.length/2;k++){
+  P.push(`<div class="pg ${k%2?'left':'right'}"><div class="in"><div class="pad">
+    <div class="h-num">หน้า ${k+1}</div>
+    <div class="snaps" style="margin-top:2cqh">${SHOTS.slice(k*2,k*2+2).map((s,j)=>snap(s,j,k)).join('')}</div>
+  </div></div></div>`);
+}
+P.push(`<div class="pg ${(SHOTS.length/2)%2?'left':'right'}"><div class="in"><div class="pad" style="justify-content:center;text-align:center;align-items:center">
+  ${svg('sparkle','position:relative;width:20cqw;margin-bottom:4cqh')}
+  <div class="h-name" style="font-size:9cqw">ติดตามรูปใหม่</div><div class="h-desc">Instagram ของร้าน</div></div></div></div>`);
+P.push(`<div class="pg cover back" data-density="hard"><div class="in"><div class="pad">
+  <div class="plate"><div class="brand" style="font-size:13cqw">ขอบคุณนะ</div><div class="rule"></div><div class="kicker">June · อบใหม่ทุกวัน</div></div></div></div></div>`);
+let pf=null;
+function buildBook(){
+if(pf)return;
+const stageEl=document.querySelector('.stage');
+// Same rule as frontend/src/features/book/layout.ts: work out whether a spread fits this screen, then give page-flip a
+// fixed page size (a 1280x720 laptop at 100% used to get a ~1200px-tall page that ran off the screen).
+const RATIO=360/680;
+function layout(w,h){const aw=w-24,ah=h-(h<560?70:130),sw=Math.floor(Math.min(aw/2,ah*RATIO)),one=Math.floor(Math.min(aw,ah*RATIO)),single=sw<Math.min(300,one),pw=single?one:sw;return{single,pageW:pw,pageH:Math.round(pw/RATIO)}}
+const L=layout(innerWidth,innerHeight),SINGLE=L.single;
+stageEl.style.width=(SINGLE?L.pageW:L.pageW*2)+'px';
+const size={width:L.pageW,height:L.pageH,size:'fixed'};
+// Like a real notebook: the inside of each cover is bare board and the paper starts on the right-hand page.
+// Phones show one page at a time, so they skip the bare insides. page-flip needs an even page count: an odd count gets an "order on LINE" page rather than a blank sheet.
+const INSIDE=`<div class="pg inside" data-density="hard"><div class="in"></div></div>`,SHEET=`<div class="pg"><div class="in"><div class="pad" style="justify-content:center;align-items:center;text-align:center">
+  ${svg('whisk','position:relative;width:16cqw;margin-bottom:4cqh')}
+  <div class="h-name" style="font-size:9cqw">อยากชิมแล้ว?</div><div class="h-desc" style="margin:2cqh 0 5cqh">ทักมาสั่งทาง LINE ได้เลย</div>
+  <a class="order" href="${lineURL('สนใจสั่งชิฟฟ่อนมะพร้าวใบเตย')}">สั่งทาง LINE</a></div></div></div>`;   // fills the odd slot instead of a blank sheet
+const body=P.slice(1,-1);
+const pages=SINGLE?[P[0],...body,...(body.length%2?[SHEET]:[]),P.at(-1)]:[P[0],INSIDE,...body,...(body.length%2?[SHEET]:[]),INSIDE,P.at(-1)];
+const book=document.getElementById('book');book.innerHTML=pages.join('');
+// left/right from the position (with showCover, odd index = left page), so holes and the gutter shadow sit on the spine side
+book.querySelectorAll('.pg').forEach((el,i)=>{if(el.classList.contains('cover'))return;el.classList.remove('left','right');el.classList.add(i%2?'left':'right')});
+// a different layout (rotation, window resize) rebuilds the book
+pf=new St.PageFlip(book,{
+  ...size,
+  usePortrait:true,showCover:true,startZIndex:10,drawShadow:true,maxShadowOpacity:.4,flippingTime:900,
+  mobileScrollSupport:false,swipeDistance:20,showPageCorners:true,disableFlipByClick:true,
+});
+pf.loadFromHTML(book.querySelectorAll('.pg'));
+book.querySelector('.stf__block').prepend(document.getElementById('rings'));
+const N=pages.length,shift=document.getElementById('shift'),edges=document.getElementById('edges');
+function upd(i){
+  shift.classList.toggle('closed-front',i===0);shift.classList.toggle('closed-back',i===N-1);
+  const read=i/(N-1);edges.style.setProperty('--l',read.toFixed(2));edges.style.setProperty('--r',(1-read).toFixed(2));
+  // A side's stack is the pages under it. One spread from a cover there is nothing under that side but the cover board,
+  // and while flipping onto the cover it would show as a blank sheet — so hide it from there, instantly (no fade).
+  // and a closed book (either cover) hides every page under the cover board
+  edges.querySelector('.l').style.opacity=i<=1||i===N-1?0:1;edges.querySelector('.r').style.opacity=i===0||i>=N-(SINGLE?2:3)?0:1;   // wide: the spread before the back cover has the bare inside on the right, nothing under it
+  const single=stageEl.classList.contains('single');
+  const off=SINGLE?0:1,tot=N-2-2*off,a=Math.max(1,i-off),z=Math.min(i+1-off,tot);
+  count.textContent=i===0?'ปกหน้า':i===N-1?'ปกหลัง':single?`หน้า ${a} / ${tot}`:a===z?`หน้า ${a}`:`หน้า ${a}–${z}`;
+  prev.disabled=i===0;next.disabled=i===N-1;
+}
+pf.on('flip',e=>upd(e.data));upd(0);
+let bookState='read';pf.on('changeState',e=>bookState=e.data);
+const setOrient=o=>{stageEl.classList.toggle('single',o==='portrait');upd(pf.getCurrentPageIndex())};
+pf.on('changeOrientation',e=>setOrient(e.data));setOrient(pf.getOrientation());
+const flipBack=()=>{const s=pf.getSettings();s.disableFlipByClick=false;pf.flipPrev();s.disableFlipByClick=true};   // flipPrev fakes a click at the left edge, which disableFlipByClick ignores on phones
+next.onclick=()=>pf.flipNext();prev.onclick=flipBack;
+const zoom=document.getElementById('zoom'),sheet=document.getElementById('sheet');
+function openZoom(pg){const c=pg.cloneNode(true);c.removeAttribute('style');
+  c.className=[...c.classList].filter(k=>!k.startsWith('stf__')&&!k.startsWith('--')).join(' ');   // drop page-flip's own classes (they hide/position the page)
+ c.querySelectorAll('[style*="display: none"]').forEach(x=>x.style.display='');
+  sheet.replaceChildren(c);zoom.classList.add('on');zoom.setAttribute('aria-hidden','false')}
+function closeZoom(){zoom.classList.remove('on');zoom.setAttribute('aria-hidden','true')}
+zclose.onclick=closeZoom;zoom.addEventListener('click',e=>{if(e.target===zoom)closeZoom()});
+sheet.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b){closeZoom();pf.flip(+b.dataset.go)}});
+book.addEventListener('click',e=>{
+  const b=e.target.closest('[data-go]');if(b){pf.flip(+b.dataset.go);return}
+  if(e.target.closest('a,button'))return;
+  const pg=e.target.closest('.pg');if(pg&&!pg.classList.contains('cover')&&bookState==='read'&&!stageEl.classList.contains('single'))openZoom(pg);
+});
+addEventListener('keydown',e=>{if(e.key==='Escape')closeZoom();if(e.key==='ArrowRight')pf.flipNext();if(e.key==='ArrowLeft')flipBack()});
+
+}
+
+/* Scrapbook -> book, the same on a phone and a PC:
+   1. the photos on screen fly to the middle and land in a small messy stack (Web Animations, transform only)
+   2. the View Transitions API morphs the top card of the stack into the closed book (two small, similar shapes,
+      so the morph reads clearly even on a phone, where the whole grid is taller than the screen)
+   3. the cover opens by itself.  "← กลับ" plays it backwards.  No view transitions -> instant swap. */
+const album=document.getElementById('album'),board=document.getElementById('board'),shiftEl=document.getElementById('shift');
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+let pile=[],topCard=null;
+const swap=(open)=>{album.hidden=!open;document.documentElement.style.overflow=open?'hidden':'';if(open)buildBook()};
+const wait=(ms)=>new Promise(r=>setTimeout(r,ms));
+function gather(){
+  const cx=innerWidth/2,cy=innerHeight/2,target=Math.min(innerWidth*.62,280);
+  const cards=[...board.querySelectorAll('.sb-snap')].filter(el=>{const r=el.getBoundingClientRect();return r.bottom>0&&r.top<innerHeight});
+  pile=cards.map((el,k)=>{
+    const r=el.getBoundingClientRect(),s=target/r.width,rot=[-7,5,-3,8,-5,3][k%6];
+    el.style.zIndex=10+k;el.style.position='relative';
+    return el.animate([{transform:getComputedStyle(el).transform==='none'?'none':getComputedStyle(el).transform},
+      {transform:`translate(${cx-(r.left+r.width/2)}px,${cy-(r.top+r.height/2)}px) scale(${s}) rotate(${rot}deg)`}],
+      {duration:520,delay:k*45,easing:'cubic-bezier(.3,.7,.2,1)',fill:'forwards'});
+  });
+  topCard=cards[cards.length-1];
+  return Promise.all(pile.map(a=>a.finished));
+}
+function ungather(){pile.forEach(a=>{a.reverse()});return Promise.all(pile.map(a=>a.finished)).then(()=>{pile.forEach(a=>a.cancel());board.querySelectorAll('.sb-snap').forEach(el=>{el.style.zIndex='';el.style.position=''});pile=[]})}
+async function openAlbum(){
+  if(reduce||!document.startViewTransition){swap(true);return}
+  await gather();
+  topCard.style.viewTransitionName='album';
+  const t=document.startViewTransition(()=>{topCard.style.viewTransitionName='';swap(true);shiftEl.style.viewTransitionName='album'});
+  await t.finished;shiftEl.style.viewTransitionName='';
+  await wait(150);pf.flipNext();
+}
+async function closeAlbum(){
+  if(reduce||!document.startViewTransition||!topCard){swap(false);return}
+  if(pf.getCurrentPageIndex()!==0){const st=pf.getSettings();st.disableFlipByClick=false;pf.flip(0);st.disableFlipByClick=true;await wait(900)}   // close the book first (same page-flip quirk as flipBack)
+  shiftEl.style.viewTransitionName='album';
+  const t=document.startViewTransition(()=>{shiftEl.style.viewTransitionName='';swap(false);topCard.style.viewTransitionName='album'});
+  await t.finished;topCard.style.viewTransitionName='';
+  await ungather();
+}
+document.getElementById('openAlbum').addEventListener('click',e=>{e.preventDefault();openAlbum()});
+document.getElementById('back').addEventListener('click',closeAlbum);
+</script>
+</body>
+</html>

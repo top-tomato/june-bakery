@@ -1,5 +1,6 @@
 import { useEffect, type RefObject } from 'react'
-import { fullName, type Product } from '@/api/menu'
+import { fullName, lineChatUrl, type Product } from '@/api/menu'
+import { ChatIcon } from '@/components/icons'
 import logo from '@/assets/logo.png'
 import { viewportHeight } from '@/lib/env'
 import type { HomeMotion } from './motion'
@@ -13,9 +14,10 @@ interface Props {
   /** photo to show on the spot when there's no 3D for this cake */
   photo: string | null
   motion: RefObject<HomeMotion>
+  lineOaId: string
 }
 
-export function Hero({ products, active, onPick, onOpen, spotRef, photo, motion }: Props) {
+export function Hero({ products, active, onPick, onOpen, spotRef, photo, motion, lineOaId }: Props) {
   const product = products[active]
 
   // arrow keys switch cakes while the hero is on screen
@@ -64,25 +66,37 @@ export function Hero({ products, active, onPick, onOpen, spotRef, photo, motion 
       </div>
       <div className="edge l" />
       <div className="edge r" />
-      <button type="button" className="arrow l" aria-label="เมนูก่อนหน้า" disabled={active === 0} onClick={() => onPick(active - 1)}>
-        ←
-      </button>
-      <button
-        type="button"
-        className="arrow r"
-        aria-label="เมนูถัดไป"
-        disabled={active === products.length - 1}
-        onClick={() => onPick(active + 1)}
-      >
-        →
-      </button>
+      {products.length > 1 && (
+        <>
+          <button type="button" className="arrow l" aria-label="เมนูก่อนหน้า" disabled={active === 0} onClick={() => onPick(active - 1)}>
+            ←
+          </button>
+          <button
+            type="button"
+            className="arrow r"
+            aria-label="เมนูถัดไป"
+            disabled={active === products.length - 1}
+            onClick={() => onPick(active + 1)}
+          >
+            →
+          </button>
+        </>
+      )}
       <div className="pick">
-        <h2>{fullName(product)}</h2>
+        <h2>
+          {fullName(product)} <span className="price-chip">฿{product.price}</span>
+        </h2>
         <p>{product.description}</p>
-        <p className="hint">ลากเพื่อหมุนดู กดลูกศรเพื่อเปลี่ยนเมนู</p>
-        <button type="button" className="btn" onClick={onOpen}>
-          ดูใกล้ ๆ รอบชิ้น
-        </button>
+        <p className="hint">{products.length > 1 ? 'ลากเพื่อหมุนดู กดลูกศรเพื่อเปลี่ยนเมนู' : 'ลากเพื่อหมุนดูรอบชิ้น'}</p>
+        <div className="ctas">
+          <a className="btn" href={lineChatUrl(lineOaId, `สนใจสั่ง ${fullName(product)}`)} target="_blank" rel="noopener">
+            <ChatIcon />
+            สั่งทาง LINE
+          </a>
+          <button type="button" className="btn ghost" onClick={onOpen}>
+            ดูใกล้ ๆ รอบชิ้น
+          </button>
+        </div>
       </div>
     </section>
   )

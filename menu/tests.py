@@ -3,12 +3,14 @@ import re
 import tempfile
 from pathlib import Path
 
+from django.conf import settings
+from django.core.exceptions import ValidationError
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.template import Context, Template
 from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 
-from menu.models import Product
+from menu.models import GalleryPhoto, Product, Review, ShopInfo
 
 # GIF ขนาด 1x1 พิกเซล ใช้แทนรูปขนมในเทสต์
 TINY_GIF = (
@@ -70,6 +72,44 @@ class MenuApiTests(MediaTestCase):
             social = self.client.get(reverse("menu:api-menu")).json()["social"]
         self.assertEqual(social, {"instagram": "https://www.instagram.com/june"})
 
+    def test_optional_sections_are_empty_until_filled_in(self) -> None:
+        data = self.client.get(reverse("menu:api-menu")).json()
+        self.assertEqual(data["order"], {"preorderDays": None, "shelfLife": "", "payment": ""})
+        self.assertIsNone(data["about"])
+        self.assertEqual(data["reviews"], [])
+        self.assertEqual(data["gallery"], [])
+        self.assertEqual(data["shop"]["hours"], "ทักถามทาง LINE ได้เลย")
+
+    def test_filled_in_sections(self) -> None:
+        info = ShopInfo.load()
+        info.preorder_days = 1
+        info.shelf_life = "2 วันในตู้เย็น"
+        info.hours = "ทุกวัน 9:00–17:00"
+        info.about_text = "ทำเองทุกชิ้น"
+        info.save()
+        Review.objects.create(text="นุ่มมาก", author="ฝน")
+        Review.objects.create(text="ซ่อน", author="x", is_active=False)
+        GalleryPhoto.objects.create(image=SimpleUploadedFile("g.gif", TINY_GIF, content_type="image/gif"), caption="ชิ้นแรก")
+
+        data = self.client.get(reverse("menu:api-menu")).json()
+
+        self.assertEqual(data["order"]["preorderDays"], 1)
+        self.assertEqual(data["order"]["shelfLife"], "2 วันในตู้เย็น")
+        self.assertEqual(data["shop"]["hours"], "ทุกวัน 9:00–17:00")
+        self.assertEqual(data["about"]["text"], "ทำเองทุกชิ้น")
+        self.assertEqual([r["author"] for r in data["reviews"]], ["ฝน"])
+        self.assertEqual(data["gallery"][0]["caption"], "ชิ้นแรก")
+        self.assertEqual(data["gallery"][0]["video"], "")
+
+    def test_gallery_video_must_be_mp4_or_webm(self) -> None:
+        g = GalleryPhoto(image=SimpleUploadedFile("g.gif", TINY_GIF, content_type="image/gif"), video=SimpleUploadedFile("v.mov", b"x"))
+        with self.assertRaises(ValidationError):
+            g.full_clean()
+
+    def test_shop_info_is_a_single_row(self) -> None:
+        self.assertEqual(ShopInfo.load().pk, ShopInfo.load().pk)
+        self.assertEqual(ShopInfo.objects.count(), 1)
+
     def test_only_get(self) -> None:
         self.assertEqual(self.client.post(reverse("menu:api-menu")).status_code, 405)
 
@@ -87,14 +127,47 @@ class AppShellTests(MediaTestCase):
         self.assertContains(response, "<b>ชิฟฟ่อนใบเตย</b> ฿45")
         self.assertContains(response, 'property="og:image"')
 
-    def test_book_route_uses_the_same_shell(self) -> None:
-        response = self.client.get(reverse("menu:book"))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'id="bootstrap"')
+    def test_book_routes_use_the_same_shell(self) -> None:
+        for name in ("menu:book", "menu:gallery"):
+            response = self.client.get(reverse(name))
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'id="bootstrap"')
 
     def test_can_be_framed_by_phone_preview(self) -> None:
         response = self.client.get(reverse("menu:index"))
         self.assertEqual(response["X-Frame-Options"], "SAMEORIGIN")
+
+
+class MediaServeTests(MediaTestCase):
+    """Safari on iPhone (and LINE's browser) only plays a video if the server answers byte ranges with 206."""
+
+    def setUp(self) -> None:
+        Path(settings.MEDIA_ROOT, "gallery").mkdir(parents=True, exist_ok=True)
+        Path(settings.MEDIA_ROOT, "gallery", "v.mp4").write_bytes(bytes(range(256)) * 4)  # 1024 bytes
+
+    def get(self, path: str, **headers: str):
+        return self.client.get(f"/media/{path}", headers=headers)
+
+    def test_whole_file(self) -> None:
+        r = self.get("gallery/v.mp4")
+        self.assertEqual(r.status_code, 200)
+        self.assertEqual(r["Accept-Ranges"], "bytes")
+        self.assertEqual(r["Content-Type"], "video/mp4")
+        self.assertEqual(len(b"".join(r.streaming_content)), 1024)
+
+    def test_byte_range(self) -> None:
+        r = self.get("gallery/v.mp4", Range="bytes=0-1")
+        self.assertEqual(r.status_code, 206)
+        self.assertEqual(r["Content-Range"], "bytes 0-1/1024")
+        self.assertEqual(b"".join(r.streaming_content), bytes([0, 1]))
+        self.assertEqual(self.get("gallery/v.mp4", Range="bytes=1000-")["Content-Range"], "bytes 1000-1023/1024")
+        self.assertEqual(self.get("gallery/v.mp4", Range="bytes=-24")["Content-Range"], "bytes 1000-1023/1024")
+        self.assertEqual(self.get("gallery/v.mp4", Range="bytes=2000-").status_code, 416)
+
+    def test_no_escaping_the_media_folder(self) -> None:
+        self.assertEqual(self.get("../config/settings.py").status_code, 404)
+        self.assertEqual(self.get("gallery").status_code, 404)
+        self.assertEqual(self.get("gallery/missing.mp4").status_code, 404)
 
 
 class ViteAssetsTagTests(SimpleTestCase):

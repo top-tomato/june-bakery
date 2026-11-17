@@ -6,9 +6,12 @@ import { CURTAIN_MS, createCurtain } from './gl/curtain'
 
 const COUNT_MS = 850
 
+// Once per page load: coming back to the homepage from another route (e.g. the photo book) doesn't replay it.
+let played = false
+
 /** Cream curtain + "June" logo filling up 0–100% while the page starts. Removes itself when done. */
 export function Curtain() {
-  const [done, setDone] = useState(calm)
+  const [done, setDone] = useState(() => calm || played)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const countRef = useRef<HTMLDivElement>(null)
   const pctRef = useRef<HTMLSpanElement>(null)
@@ -35,6 +38,7 @@ export function Curtain() {
         if (p >= 1 && countRef.current) countRef.current.style.opacity = '0'
       },
     })
+    played = true
     const timer = setTimeout(() => setDone(true), CURTAIN_MS)
     return () => {
       off()
@@ -47,7 +51,7 @@ export function Curtain() {
   return (
     <>
       <canvas ref={canvasRef} className="curtain" aria-hidden="true" />
-      <div ref={countRef} className="count" aria-hidden="true">
+      <div ref={countRef} className="intro-count" aria-hidden="true">
         <div ref={loadRef} className="load">
           <span className="logo-mask ghost" />
           <span ref={fillRef} className="logo-mask fill" />

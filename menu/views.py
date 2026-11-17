@@ -8,7 +8,7 @@ from django.views.decorators.cache import cache_control
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.http import require_GET
 
-from menu.models import Product
+from menu.models import GalleryPhoto, Product, Review, ShopInfo
 
 # หน้าร้าน (มีสาขาเดียว) พิกัดจากแผนที่ที่เจ้าของร้านส่งมา
 SHOP = {
@@ -28,6 +28,7 @@ def line_qr_svg(url: str) -> str:
 def menu_data() -> dict[str, object]:
     """ข้อมูลทั้งหมดที่หน้าบ้านใช้ ทั้งใน API และที่ฝังไว้ในหน้าตอนโหลดครั้งแรก"""
     line_add_url = f"https://line.me/R/ti/p/{quote(settings.LINE_OA_ID)}"
+    info = ShopInfo.load().as_payload()
     return {
         "products": [product.as_payload() for product in Product.objects.filter(is_active=True)],
         "line": {
@@ -39,8 +40,14 @@ def menu_data() -> dict[str, object]:
         "social": {k: v for k, v in {"instagram": settings.SHOP_INSTAGRAM_URL, "facebook": settings.SHOP_FACEBOOK_URL}.items() if v},
         "shop": {
             **SHOP,
+            "hours": info["hours"] or SHOP["hours"],
             "mapsUrl": f"https://www.google.com/maps/search/?api=1&query={SHOP['lat']},{SHOP['lng']}",
         },
+        # filled in Django admin; the page hides whatever is still empty
+        "order": {"preorderDays": info["preorderDays"], "shelfLife": info["shelfLife"], "payment": info["payment"]},
+        "about": info["about"],
+        "reviews": [r.as_payload() for r in Review.objects.filter(is_active=True)],
+        "gallery": [g.as_payload() for g in GalleryPhoto.objects.filter(is_active=True)],
     }
 
 
