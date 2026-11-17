@@ -144,13 +144,8 @@
 .book-page .pg.left .pad {
   right: 13cqw;
 }
-.book-page .cover .in,
-.book-page .pg.inside .in {
+.book-page .cover .in {
   background: var(--grain), radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1.3px) 0 0 / 8px 8px, var(--board);
-}
-/* inside of a cover (wide screens): bare board, a touch darker than the outside */
-.book-page .pg.inside .in {
-  filter: brightness(0.96);
 }
 .book-page .cover .pad {
   align-items: center;
@@ -513,26 +508,3 @@
   text-align: center;
 }
 
-/* photo book (/gallery) bits on top of the menu book's paper */
-.book-page .logo {
-  width: 62cqw;
-  aspect-ratio: 1000 / 660;
-  margin: 0 auto;
-  /* the real logo is a white PNG: use its shape, ink it in the book's colour */
-  background: var(--bink);
-  -webkit-mask: var(--logo) center / contain no-repeat;
-  mask: var(--logo) center / contain no-repeat;
-}
-.book-page .centered {
-  display: grid;
-  justify-items: center;
-  text-align: center;
-}
-.book-page .snaps.one {
-  grid-template-rows: 1fr;
-}
-.book-page .snap video.ph {
-  width: 100%;
-  object-fit: cover;
-  display: block;
-}

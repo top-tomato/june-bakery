@@ -1,0 +1,67 @@
+/* /gallery page (mock/gallery-all.html) */
+.gal-top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: max(10px, env(safe-area-inset-top)) 16px 10px;
+  background: rgba(255, 251, 243, 0.92);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid #eee3d1;
+}
+.gal-back {
+  color: var(--ink);
+  text-decoration: none;
+  font: 500 0.95rem var(--display);
+}
+.gal-logo {
+  width: 62px;
+  color: var(--ink);
+}
+.gal-line {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--ink);
+  color: var(--cream);
+  padding: 8px 14px;
+  border-radius: 999px;
+  font: 500 0.85rem var(--display);
+  text-decoration: none;
+}
+.gal-line .ic {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+}
+.gal-page {
+  min-height: calc(var(--vh) * 100);
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 34px clamp(14px, 5vw, 60px) 90px;
+  color: var(--ink);
+}
+body:has(.gal-page) {
+  background: radial-gradient(circle, rgba(47, 74, 69, 0.2) 0.9px, transparent 1.3px) 0 0 / 18px 18px, #fffbf3;
+}
+.gal-empty {
+  text-align: center;
+  padding: 60px 0;
+  opacity: 0.7;
+}
+.gal-end {
+  text-align: center;
+  margin-top: 60px;
+}
+.gal-end p {
+  font: 1.2rem var(--hand);
+  margin-bottom: 14px;
+}
+.gal-end .btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}

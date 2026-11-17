@@ -9,6 +9,9 @@ const COUNT_MS = 850
 // Once per page load: coming back to the homepage from another route (e.g. the photo book) doesn't replay it.
 let played = false
 
+/** ms until the curtain uncovers the page, for things that should appear as it lifts (0 if it won't play) */
+export const introDelayMs = () => (calm || played ? 0 : 1600)
+
 /** Cream curtain + "June" logo filling up 0–100% while the page starts. Removes itself when done. */
 export function Curtain() {
   const [done, setDone] = useState(() => calm || played)

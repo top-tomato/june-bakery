@@ -35,12 +35,3 @@ export function ChatIcon() {
     </svg>
   )
 }
-
-export function BookIcon() {
-  return (
-    <svg className="ic" viewBox="0 0 24 24" aria-hidden="true" style={{ fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinejoin: 'round' }}>
-      <path d="M4 5h7a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4Z" />
-      <path d="M20 5h-7a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h7Z" />
-    </svg>
-  )
-}
