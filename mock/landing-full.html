@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>June — หน้าแรกแบบเต็ม (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&family=Itim&display=swap" rel="stylesheet">
+<style>
+/* Full landing page for a one-cake shop (research: hero + CTA, product story, price, how to order, reviews, about,
+   gallery, shop + map, FAQ, footer CTA). Same palette/fonts as the live site. Sections marked .todo need real data. */
+:root{--tea:#F3A18F;--cream:#FFF6E6;--indigo:#3E5D58;--ink:#243B37;--pandan:#C9DE98;--pink:#DCEBB5;
+  --display:"Mitr","Anuphan",system-ui,sans-serif;--body:"Anuphan",system-ui,sans-serif;--hand:"Itim","Mitr",cursive}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--body);background:var(--indigo);color:var(--cream);line-height:1.6}
+h1,h2,h3{font-family:var(--display);font-weight:600;line-height:1.2}
+section{position:relative;padding:96px clamp(16px,6vw,96px)}
+.wrap{max-width:1080px;margin:0 auto}
+.kicker{font:400 1.05rem var(--hand);opacity:.8}
+.sec-title{font-size:clamp(2rem,6vw,3.6rem);margin:6px 0 28px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:999px;font:600 1rem var(--display);text-decoration:none;background:var(--cream);color:var(--ink)}
+.btn.dark{background:var(--ink);color:var(--cream)}
+.btn.ghost{background:none;border:2px solid currentColor;color:inherit}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.todo{position:relative;outline:2px dashed rgba(243,161,143,.9);outline-offset:6px;border-radius:12px}
+.todo::after{content:"รอข้อมูลจริง";position:absolute;top:-14px;right:10px;font:600 .72rem var(--display);background:var(--tea);color:var(--ink);padding:2px 10px;border-radius:999px}
+/* cream drip edge between sections (static picture of the live WebGL drips) */
+.drip{position:absolute;left:0;right:0;top:-1px;height:70px;color:var(--from);pointer-events:none}
+.drip svg{width:100%;height:100%;display:block}
+.note{background:#1c2b28;color:var(--cream);padding:12px 16px;font-size:.9rem;text-align:center}
+
+/* 1 hero */
+.hero{min-height:100svh;display:grid;place-items:center;text-align:center;padding-top:64px;background:var(--indigo)}
+.hero .logo{height:72px}
+.hero h1{font-size:clamp(2.2rem,7vw,4.4rem);margin-top:14px}
+.hero .cake{width:min(64vw,340px);aspect-ratio:1;border-radius:50%;margin:26px auto 18px;background:center/cover url(../seed/img/pandan.jpg);box-shadow:0 20px 40px rgba(0,0,0,.35);border:6px solid var(--cream)}
+.hero .tag3d{font:.8rem var(--hand);opacity:.7}
+.hero .name{font:600 1.5rem var(--display)}
+.hero .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:12px 0 22px}
+.hero .chips span{font-size:.85rem;padding:3px 12px;border-radius:999px;background:rgba(255,246,230,.12)}
+.hero .ctas{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
+
+/* 2 story */
+.story{background:var(--pandan);color:var(--ink);--from:var(--indigo)}
+.story .grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.story .plate{aspect-ratio:1;border-radius:50%;background:var(--cream);display:grid;place-items:center}
+.story .plate div{width:78%;aspect-ratio:1;border-radius:50%;background:center/cover url(../seed/img/pandan.jpg)}
+.story ul{list-style:none;padding:0;margin-top:18px;display:grid;gap:10px}
+.story li{display:flex;gap:10px;align-items:center;font-weight:600}
+.story li::before{content:"";width:12px;height:12px;border-radius:50%;border:3px solid var(--ink)}
+
+/* 3 price */
+.price{background:var(--cream);color:var(--ink);--from:var(--pandan)}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}
+.card{background:#fff;border-radius:22px;padding:22px;box-shadow:0 10px 0 rgba(36,59,55,.08)}
+.card b{display:block;font:600 1.2rem var(--display)}
+.card .p{font:600 2.4rem var(--display);margin:6px 0}
+.card small{opacity:.7}
+
+/* 4 how to order */
+.how{background:var(--pink);color:var(--ink);--from:var(--cream)}
+.steps{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:s}
+.step{background:var(--cream);border-radius:22px;padding:22px;counter-increment:s;position:relative}
+.step::before{content:counter(s);position:absolute;top:-16px;left:18px;width:36px;height:36px;border-radius:50%;background:var(--tea);display:grid;place-items:center;font:600 1.1rem var(--display)}
+.step b{display:block;font:600 1.15rem var(--display);margin:8px 0 4px}
+.lead{margin-top:20px;font-weight:600}
+
+/* 5 reviews */
+.reviews{background:var(--indigo);--from:var(--pink)}
+.quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.quote{background:rgba(255,246,230,.08);border-radius:22px;padding:22px}
+.quote p{font:1.15rem/1.5 var(--hand)}
+.quote small{display:block;margin-top:10px;opacity:.7}
+.stars{color:var(--tea);letter-spacing:2px}
+
+/* 6 about */
+.about{background:var(--cream);color:var(--ink);--from:var(--indigo)}
+.about .grid{display:grid;grid-template-columns:.9fr 1.1fr;gap:40px;align-items:center}
+.about .photo{aspect-ratio:4/5;border-radius:24px;background:#e9e2d4;display:grid;place-items:center;color:#a99;font:1rem var(--hand)}
+.about p{font-size:1.1rem;margin-top:10px}
+
+/* 7 gallery */
+.gallery{background:var(--cream);color:var(--ink);padding-top:0}
+.shots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.shots div{aspect-ratio:1;border-radius:16px;background:#e9e2d4 center/cover;display:grid;place-items:center;color:#a99;font:.9rem var(--hand)}
+
+/* 8 where */
+.where{background:var(--indigo);--from:var(--cream)}
+.where .grid{display:grid;grid-template-columns:1fr 1.3fr;gap:36px;align-items:start}
+.where .map{border-radius:24px;overflow:hidden;aspect-ratio:4/3;background:center/cover url(../frontend/src/assets/where-map.webp)}
+.shop{border-top:2px solid rgba(255,243,220,.18);border-bottom:2px solid rgba(255,243,220,.18);padding:14px 0;margin-bottom:18px}
+.shop b{display:block;font:600 1.3rem var(--display);color:var(--tea)}
+
+/* 9 FAQ */
+.faq{background:var(--cream);color:var(--ink);--from:var(--indigo)}
+details{border-bottom:2px solid rgba(36,59,55,.12);padding:16px 0}
+summary{font:600 1.1rem var(--display);cursor:pointer;list-style:none;display:flex;justify-content:space-between;gap:12px}
+summary::after{content:"+";font-size:1.4rem;line-height:1}
+details[open] summary::after{content:"–"}
+details p{margin-top:8px;opacity:.85}
+
+/* 10 footer */
+.end{background:var(--tea);color:var(--ink);text-align:center;--from:var(--cream)}
+.end h2{font-size:clamp(2rem,6vw,3.6rem)}
+.social{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:22px}
+.social a{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:2px solid rgba(36,59,55,.45);color:var(--ink);text-decoration:none;font:500 .95rem var(--display)}
+
+@media (max-width:760px){
+  section{padding:72px 18px}
+  .story .grid,.about .grid,.where .grid{grid-template-columns:1fr}
+  .steps,.quotes{grid-template-columns:1fr}
+  .shots{grid-template-columns:repeat(2,1fr)}
+  .steps{gap:26px}
+}
+</style>
+</head>
+<body>
+<p class="note">mock: หน้าแรกแบบเต็มสำหรับชิฟฟ่อนอย่างเดียว · กรอบเส้นประสีส้ม = ข้อความ/รูปตัวอย่าง รอข้อมูลจริงจากร้าน · บนเว็บจริง ขนมยังเป็น 3D และม่าน/หยดครีมยังขยับเหมือนเดิม</p>
+
+<!-- 1 hero -->
+<section class="hero">
+  <div>
+    <img class="logo" src="../frontend/src/assets/logo.png" alt="June">
+    <h1>อบใหม่ หอม นุ่มนาน</h1>
+    <div class="cake" role="img" aria-label="ชิฟฟ่อนมะพร้าวใบเตย"></div>
+    <div class="tag3d">(บนเว็บจริงเป็นขนม 3D หมุนได้)</div>
+    <div class="name">ชิฟฟ่อนมะพร้าวใบเตย</div>
+    <div class="chips"><span>อบใหม่ทุกวัน</span><span>ใกล้อนุสาวรีย์ชัยฯ</span></div>
+    <div class="ctas">
+      <a class="btn" href="#"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4C7 4 3 7.2 3 11.2c0 3.6 3.2 6.6 7.5 7.1l-.4 2.2c-.1.4.3.7.7.5l3.4-2.6C18.4 17.8 21 14.8 21 11.2 21 7.2 17 4 12 4Z"/></svg>สั่งทาง LINE</a>
+      <a class="btn ghost" href="#">ดูใกล้ ๆ รอบชิ้น</a>
+    </div>
+  </div>
+</section>
+
+<!-- 2 story -->
+<section class="story">
+  <div class="drip"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v18c-30 0-40 30-62 30s-20-24-48-24-22 40-52 40-24-30-52-30-20 18-46 18-30-26-60-26-24 44-56 44-28-36-56-36-24 20-50 20-30-24-58-24-26 36-54 36-24-28-52-28-24 16-48 16-28-22-56-22-20 30-48 30-26-20-56-20V0Z"/></svg></div>
+  <div class="wrap grid">
+    <div class="plate"><div></div></div>
+    <div>
+      <div class="kicker">เมนูเดียวที่ตั้งใจทำ</div>
+      <h2 class="sec-title">ชิฟฟ่อน<br>มะพร้าวใบเตย</h2>
+      <p>ชิฟฟ่อนใบเตยเนื้อนุ่ม หน้ามะพร้าวอ่อนอบสีทอง</p>
+      <ul><li>มะพร้าวอ่อนเป็นเส้น</li><li>หน้าอบสีทอง</li><li>เนื้อชิฟฟ่อนใบเตย</li></ul>
+    </div>
+  </div>
+</section>
+
+<!-- 3 price -->
+<section class="price">
+  <div class="drip"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v22c-40 0-30 28-64 28s-26-30-56-30-20 36-50 36-30-26-60-26-22 22-50 22-26-34-58-34-24 40-54 40-26-28-54-28-28 18-52 18-30-24-58-24-20 32-50 32-28-22-56-22-24 14-50 14-26-26-54-26V0Z"/></svg></div>
+  <div class="wrap">
+    <div class="kicker">ขนาดและราคา</div>
+    <h2 class="sec-title">เลือกได้ตามโอกาส</h2>
+    <div class="cards">
+      <div class="card"><b>ชิ้นเดี่ยว</b><div class="p">฿45</div><small>ราคาบนเว็บตอนนี้</small></div>
+      <div class="card todo"><b>กล่อง / ถาด</b><div class="p">฿—</div><small>ถ้ามีขนาดอื่น ใส่ตรงนี้</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 how to order -->
+<section class="how">
+  <div class="drip"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v18c-30 0-40 30-62 30s-20-24-48-24-22 40-52 40-24-30-52-30-20 18-46 18-30-26-60-26-24 44-56 44-28-36-56-36-24 20-50 20-30-24-58-24-26 36-54 36-24-28-52-28-24 16-48 16-28-22-56-22-20 30-48 30-26-20-56-20V0Z"/></svg></div>
+  <div class="wrap">
+    <div class="kicker">วิธีสั่ง</div>
+    <h2 class="sec-title">ง่าย ๆ 3 ขั้น</h2>
+    <div class="steps">
+      <div class="step"><b>ทัก LINE</b>บอกจำนวน และวันที่อยากรับ</div>
+      <div class="step todo"><b>ร้านยืนยัน</b>แจ้งยอด และวิธีจ่ายเงิน</div>
+      <div class="step"><b>รับที่หน้าร้าน</b>10 พหลโยธิน ใกล้อนุสาวรีย์ชัยฯ</div>
+    </div>
+    <p class="lead todo" style="display:inline-block;padding:4px 10px">สั่งล่วงหน้าอย่างน้อย — วัน</p>
+  </div>
+</section>
+
+<!-- 5 reviews -->
+<section class="reviews">
+  <div class="drip"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v22c-40 0-30 28-64 28s-26-30-56-30-20 36-50 36-30-26-60-26-22 22-50 22-26-34-58-34-24 40-54 40-26-28-54-28-28 18-52 18-30-24-58-24-20 32-50 32-28-22-56-22-24 14-50 14-26-26-54-26V0Z"/></svg></div>
+  <div class="wrap">
+    <div class="kicker">คนที่ลองแล้ว</div>
+    <h2 class="sec-title">เสียงจากลูกค้า</h2>
+    <div class="quotes todo">
+      <div class="quote"><div class="stars">★★★★★</div><p>“ตัวอย่างข้อความรีวิว เอามาจากแชต LINE หรือคอมเมนต์ IG ของลูกค้าจริง”</p><small>— ชื่อลูกค้า (ขออนุญาตก่อน)</small></div>
+      <div class="quote"><div class="stars">★★★★★</div><p>“ตัวอย่างข้อความรีวิวที่สอง”</p><small>— ชื่อลูกค้า</small></div>
+      <div class="quote"><div class="stars">★★★★★</div><p>“ตัวอย่างข้อความรีวิวที่สาม”</p><small>— ชื่อลูกค้า</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 about -->
+<section class="about">
+  <div class="drip"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v18c-30 0-40 30-62 30s-20-24-48-24-22 40-52 40-24-30-52-30-20 18-46 18-30-26-60-26-24 44-56 44-28-36-56-36-24 20-50 20-30-24-58-24-26 36-54 36-24-28-52-28-24 16-48 16-28-22-56-22-20 30-48 30-26-20-56-20V0Z"/></svg></div>
+  <div class="wrap grid">
+    <div class="photo todo">รูปคนทำขนม หรือในครัว</div>
+    <div class="todo" style="padding:8px">
+      <div class="kicker">เรื่องของ June</div>
+      <h2 class="sec-title">ตัวอย่างหัวข้อ</h2>
+      <p>เล่าสั้น ๆ 2–3 บรรทัด ว่าใครทำ เริ่มทำเพราะอะไร และชิฟฟ่อนชิ้นนี้พิเศษตรงไหน</p>
+    </div>
+  </div>
+</section>
+
+<!-- 7 gallery -->
+<section class="gallery">
+  <div class="wrap">
+    <div class="kicker">รูปชิฟฟ่อน</div>
+    <h2 class="sec-title" style="font-size:clamp(1.6rem,4vw,2.4rem)">อบใหม่ทุกวันแบบนี้</h2>
+    <div class="shots">
+      <div style="background-image:url(../seed/img/pandan.jpg)"></div>
+      <div class="todo">รอรูป</div><div class="todo">รอรูป</div><div class="todo">รอรูป</div>
+    </div>
+  </div>
+</section>
+
+<!-- 8 where -->
+<section class="where">
+  <div class="drip"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v22c-40 0-30 28-64 28s-26-30-56-30-20 36-50 36-30-26-60-26-22 22-50 22-26-34-58-34-24 40-54 40-26-28-54-28-28 18-52 18-30-24-58-24-20 32-50 32-28-22-56-22-24 14-50 14-26-26-54-26V0Z"/></svg></div>
+  <div class="wrap grid">
+    <div>
+      <div class="kicker">หน้าร้าน</div>
+      <h2 class="sec-title">แวะหยิบได้<br>ที่หน้าร้าน</h2>
+      <div class="shop"><b>หน้าร้าน June</b>10 พหลโยธิน · ใกล้อนุสาวรีย์ชัยสมรภูมิ<br><span class="todo" style="display:inline-block;padding:0 8px;margin-top:6px">เปิด — ถึง — (วันไหนบ้าง)</span></div>
+      <a class="btn" href="#"><svg class="ic" viewBox="0 0 24 24"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.6"/></svg>นำทางด้วย Google Maps</a>
+    </div>
+    <div class="map" role="img" aria-label="แผนที่"></div>
+  </div>
+</section>
+
+<!-- 9 FAQ -->
+<section class="faq">
+  <div class="drip"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v18c-30 0-40 30-62 30s-20-24-48-24-22 40-52 40-24-30-52-30-20 18-46 18-30-26-60-26-24 44-56 44-28-36-56-36-24 20-50 20-30-24-58-24-26 36-54 36-24-28-52-28-24 16-48 16-28-22-56-22-20 30-48 30-26-20-56-20V0Z"/></svg></div>
+  <div class="wrap">
+    <div class="kicker">ถามบ่อย</div>
+    <h2 class="sec-title">ก่อนสั่ง ลองดูตรงนี้</h2>
+    <div class="todo" style="padding:4px 12px">
+      <details open><summary>เก็บได้กี่วัน ต้องแช่เย็นไหม</summary><p>คำตอบจากร้าน</p></details>
+      <details><summary>ต้องสั่งล่วงหน้ากี่วัน</summary><p>คำตอบจากร้าน</p></details>
+      <details><summary>มีส่งไหม</summary><p>คำตอบจากร้าน</p></details>
+      <details><summary>มีส่วนผสมที่แพ้ได้ไหม (เช่น ไข่ นม แป้งสาลี)</summary><p>คำตอบจากร้าน</p></details>
+      <details><summary>จ่ายเงินยังไง</summary><p>คำตอบจากร้าน</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- 10 footer -->
+<section class="end">
+  <div class="drip"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v22c-40 0-30 28-64 28s-26-30-56-30-20 36-50 36-30-26-60-26-22 22-50 22-26-34-58-34-24 40-54 40-26-28-54-28-28 18-52 18-30-24-58-24-20 32-50 32-28-22-56-22-24 14-50 14-26-26-54-26V0Z"/></svg></div>
+  <div class="wrap">
+    <h2>อยากชิมแล้วใช่ไหม ทักมาสั่งได้เลย</h2>
+    <p style="margin-top:18px"><a class="btn dark" href="#">ทักสั่งทาง LINE</a></p>
+    <h3 style="margin-top:28px;font-size:1rem;opacity:.8">ติดต่อร้าน</h3>
+    <div class="social">
+      <a href="#"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4C7 4 3 7.2 3 11.2c0 3.6 3.2 6.6 7.5 7.1l-.4 2.2c-.1.4.3.7.7.5l3.4-2.6C18.4 17.8 21 14.8 21 11.2 21 7.2 17 4 12 4Z"/></svg>LINE @561hgrea</a>
+      <a href="#"><svg class="ic" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".6" fill="currentColor"/></svg>Instagram</a>
+      <a href="#"><svg class="ic" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M15.5 8h-1.6c-1.2 0-1.9.8-1.9 2v10M10 13h5"/></svg>Facebook</a>
+    </div>
+  </div>
+</section>
+</body>
+</html>
