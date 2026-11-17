@@ -9,7 +9,10 @@ import { routeTree } from './routeTree.gen'
 
 // Opened straight onto an inner page (the rich menu's Gallery button opens /gallery/ in LINE's browser): there is no
 // page behind it, so "back" closed the browser. Put the homepage underneath, so back goes home instead.
-if (/^\/(gallery|book)\/?$/.test(location.pathname) && history.length <= 2 && !document.referrer) {
+// (Not gated on document.referrer: LINE's browser may report one. Someone arriving from elsewhere gets home first on
+// "back", then where they came from.)
+const cameFromHere = document.referrer.startsWith(location.origin)
+if (/^\/(gallery|book)\/?$/.test(location.pathname) && history.length <= 2 && !cameFromHere) {
   const here = location.pathname + location.search + location.hash
   history.replaceState(null, '', '/')
   history.pushState(null, '', here)
