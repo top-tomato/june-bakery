@@ -1,12 +1,4 @@
 import { fullName, lineChatUrl, type MenuData } from '@/api/menu'
-import shop01 from '@/assets/book/shop-01.jpg'
-import shop02 from '@/assets/book/shop-02.jpg'
-import shop03 from '@/assets/book/shop-03.jpg'
-import shop04 from '@/assets/book/shop-04.jpg'
-import shop08 from '@/assets/book/shop-08.jpg'
-import shop09 from '@/assets/book/shop-09.jpg'
-import shop11 from '@/assets/book/shop-11.jpg'
-import shop15 from '@/assets/book/shop-15.jpg'
 
 /**
  * The menu book's pages as HTML (mock/menu-book-v2.html). page-flip takes over and moves these elements itself, so they
@@ -30,13 +22,6 @@ const RING =
   '<svg viewBox="0 0 100 60" preserveAspectRatio="none" aria-hidden="true"><path class="dd peach" style="stroke-width:2.6" d="M10 34C8 12 90 6 94 28 98 52 12 58 6 34 4 20 30 10 62 9"/></svg>'
 const CAKE_DOODLES: Doodle[] = ['leaf', 'garlic', 'coconut', 'cake']
 
-// More from the shop's LINE album. Names were guessed from the photos — the owner still has to confirm them.
-const MORE = [
-  { title: 'เค้กทั้งก้อน', sub: 'สั่งล่วงหน้า', items: [[shop11, 'แครอทเค้กครีมชีส'], [shop02, 'เค้กช็อกโกแลตสตรอว์เบอร์รี']] },
-  { title: 'เค้กทั้งก้อน', sub: '(ต่อ)', items: [[shop08, 'เค้กส้ม'], [shop15, 'พายอบ']] },
-  { title: 'ของฝาก', sub: 'แพ็กสวยพร้อมให้', items: [[shop03, 'คุกกี้ในกระปุก'], [shop04, 'บาร์ถั่วคาราเมล']] },
-  { title: 'ของฝาก', sub: '(ต่อ)', items: [[shop09, 'กล่องเค้กรวมรส'], [shop01, 'เครื่องดื่มขวด']] },
-] as const
 
 const page = (cls: string, body: string, hard = false) =>
   `<div class="pg ${cls}"${hard ? ' data-density="hard"' : ''}><div class="in"><div class="pad"${cls.includes('center') ? ' style="justify-content:center"' : ''}>${body}</div></div></div>`
@@ -44,8 +29,7 @@ const page = (cls: string, body: string, hard = false) =>
 export function buildPages({ products, line }: MenuData): string[] {
   const chat = (text?: string) => esc(lineChatUrl(line.oaId, text))
   const cakePage = (i: number) => 3 + i * 2
-  const morePage = 3 + products.length * 2
-  const howPage = morePage + MORE.length
+  const howPage = 3 + products.length * 2
   const P: string[] = []
 
   P.push(
@@ -72,7 +56,6 @@ export function buildPages({ products, line }: MenuData): string[] {
       'right',
       `<div class="h-num">สารบัญ</div><div class="h-name" style="font-size:9cqw">วันนี้มีอะไรบ้าง</div>
       <ul class="toc">${products.map((p, i) => `<li><button type="button" data-go="${cakePage(i)}">${esc(fullName(p))}<span></span><b>${cakePage(i)}</b></button></li>`).join('')}
-        <li><button type="button" data-go="${morePage}">เค้กทั้งก้อน &amp; ของฝาก<span></span><b>${morePage}</b></button></li>
         <li><button type="button" data-go="${howPage}">วิธีสั่ง<span></span><b>${howPage + 1}</b></button></li></ul>
       ${doodle('coconut', 'right:12%;bottom:7%;width:24cqw')}`,
     ),
@@ -98,15 +81,6 @@ export function buildPages({ products, line }: MenuData): string[] {
       ),
     )
   })
-  MORE.forEach((m, k) =>
-    P.push(
-      page(
-        k % 2 ? 'right' : 'left',
-        `<div class="h-num">${m.sub}</div><div class="h-name" style="font-size:9cqw;margin-top:0">${m.title}</div>
-        <div class="snaps">${m.items.map(([img, cap], j) => `<div class="snap" style="--r:${(j + k) % 2 ? 2.5 : -2.5}deg"><span class="tape"></span><div class="ph" style="background-image:url('${img}')"></div><p>${cap}</p></div>`).join('')}</div>`,
-      ),
-    ),
-  )
   P.push(
     page(
       'left center',

@@ -64,22 +64,26 @@ export function Hero({ products, active, onPick, onOpen, spotRef, photo, motion 
       </div>
       <div className="edge l" />
       <div className="edge r" />
-      <button type="button" className="arrow l" aria-label="เมนูก่อนหน้า" disabled={active === 0} onClick={() => onPick(active - 1)}>
-        ←
-      </button>
-      <button
-        type="button"
-        className="arrow r"
-        aria-label="เมนูถัดไป"
-        disabled={active === products.length - 1}
-        onClick={() => onPick(active + 1)}
-      >
-        →
-      </button>
+      {products.length > 1 && (
+        <>
+          <button type="button" className="arrow l" aria-label="เมนูก่อนหน้า" disabled={active === 0} onClick={() => onPick(active - 1)}>
+            ←
+          </button>
+          <button
+            type="button"
+            className="arrow r"
+            aria-label="เมนูถัดไป"
+            disabled={active === products.length - 1}
+            onClick={() => onPick(active + 1)}
+          >
+            →
+          </button>
+        </>
+      )}
       <div className="pick">
         <h2>{fullName(product)}</h2>
         <p>{product.description}</p>
-        <p className="hint">ลากเพื่อหมุนดู กดลูกศรเพื่อเปลี่ยนเมนู</p>
+        <p className="hint">{products.length > 1 ? 'ลากเพื่อหมุนดู กดลูกศรเพื่อเปลี่ยนเมนู' : 'ลากเพื่อหมุนดูรอบชิ้น'}</p>
         <button type="button" className="btn" onClick={onOpen}>
           ดูใกล้ ๆ รอบชิ้น
         </button>

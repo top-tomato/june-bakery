@@ -37,7 +37,7 @@ test('home: switching cakes updates the hero and the story', async ({ page }) =>
   await expect(page.locator('.curtain')).toHaveCount(0, { timeout: 8000 })
   const first = await page.locator('.pick h2').textContent()
   const next = page.getByRole('button', { name: 'เมนูถัดไป' })
-  test.skip(await next.isDisabled(), 'only one cake on the menu')
+  test.skip((await next.count()) === 0, 'only one cake on the menu')
   await next.click()
   await expect(page.locator('.pick h2')).not.toHaveText(first ?? '')
 })
