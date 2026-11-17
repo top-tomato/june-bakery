@@ -24,6 +24,7 @@ class ShopInfoAdmin(admin.ModelAdmin):
     fieldsets = (
         ("สั่งและรับ (ใต้ 'วิธีสั่ง')", {"fields": ("preorder_days", "shelf_life", "payment", "hours")}),
         ("เรื่องของร้าน (ซ่อนไว้จนกว่าจะใส่ข้อความ)", {"fields": ("about_title", "about_text", "about_photo")}),
+        ("โซเชียล (ปุ่มท้ายหน้าเว็บ · ชื่อ IG ในลายน้ำรูป)", {"fields": ("instagram_url", "facebook_url")}),
     )
 
     def has_add_permission(self, request: HttpRequest) -> bool:

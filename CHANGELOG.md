@@ -5,6 +5,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- หน้าตั้งค่าเต็ม (Django admin) → ข้อมูลร้าน ไม่มีช่องลิงก์ Instagram / Facebook
+
 ## [0.7.0] - 2026-11-18
 
 ### Added
