@@ -573,6 +573,10 @@ addEventListener('pointerup',()=>down=null);
 let sm=0;
 function tick(t){
   requestAnimationFrame(tick);
+  // The cake is drawn on a fixed full-screen canvas and moved by JS to follow the page. That only stays in step while the
+  // story section is pinned. Right after it un-pins (just above the map) phones scroll the page natively while JS
+  // trails by a frame or two, so the cake visibly jumped on fast scrolls. Shrink it away before the pin lets go.
+  const outro=calm?(window.S3?.p>=.999?1:0):ease(clamp(((window.S3?.p||0)-.9)/.09));
   const S=window.S3||{a:0,p:0,b:0},rects=window.R3,h=rects?rects.h:spot.getBoundingClientRect(),st=rects?rects.st:stage.getBoundingClientRect();
   // cakes scrolled away: clear once and hide the full-screen canvas. Clearing it every frame kept a full-screen
   // layer changing on top of the page, which phones had to re-composite on every scroll frame (jank in the map section).
@@ -585,7 +589,7 @@ function tick(t){
   items.forEach((it,i)=>{
     const dI=i-sm,near=1-Math.min(1,Math.abs(dI)),d=calm?1:clamp((t-(window.T0||0)-2500-i*200)/900),drop=-(1-outC(d))*innerHeight*.12,grow=lerp(.6,1,outBack(d));
     it.grp.position.set((cx+dI*gap-CW/2)*wpp,-(cy-drop-CH/2)*wpp,0);
-    const hide=(1-near)*ease(clamp(scrollY/(innerHeight*.3)));it.grp.visible=!!it.loaded&&hide<.99&&d>0;it.grp.scale.setScalar(px*wpp*(.55+.45*near)*(1-hide)*grow);
+    const hide=(1-near)*ease(clamp(scrollY/(innerHeight*.3)));it.grp.visible=!!it.loaded&&hide<.99&&d>0&&outro<.995;it.grp.scale.setScalar(px*wpp*(.55+.45*near)*(1-hide)*grow*(1-outro));
     const free=((calm?0:t*.0004)+dragX+i*1.3+(1-d)*1.5)%(Math.PI*2);
     it.grp.rotation.set(lerp(.5,.75,S.a)-Math.sin(S.p*Math.PI)*.35*near,lerp(free,.35,k)+ease(clamp((S.p-.15)/.8))*Math.PI*2*near,0);
   });
