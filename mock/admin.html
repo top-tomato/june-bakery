@@ -53,7 +53,19 @@ header h1{flex:1}
 .ocards{display:grid;gap:8px}
 .ocard{display:grid;grid-template-columns:1fr auto;gap:4px 10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
 .ocard .t{font-size:.95rem}.ocard .s{font-size:.8rem;color:var(--muted)}.ocard .m{font:500 1rem Mitr,sans-serif;text-align:right;grid-row:span 2;align-self:center}
-@media (max-width:640px){.fgrp{overflow-x:auto;max-width:100%}.search{max-width:none}}
+.fbtn{display:none;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font:500 .88rem Mitr,sans-serif;color:var(--ink);cursor:pointer;white-space:nowrap}
+.fbtn svg{width:16px;height:16px;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;fill:none}
+.fbtn span:not(:empty){background:var(--ink);color:var(--cream);border-radius:99px;padding:0 7px;font-size:.75rem}
+.achips{display:none;flex-wrap:wrap;gap:6px;margin:-2px 0 8px}
+.achips button{display:inline-flex;align-items:center;gap:6px;border:0;background:var(--ink);color:var(--cream);border-radius:999px;padding:5px 10px 5px 12px;font:500 .8rem Mitr,sans-serif;cursor:pointer}
+/* phones: one row of time range, then search + a "ตัวกรอง" button; type and channel live in a sheet */
+@media (max-width:640px){
+  .filters [data-f=kind],.filters [data-f=via]{display:none}
+  .filters [data-f=range]{width:100%;display:flex}.filters [data-f=range] button{flex:1}
+  .search{max-width:none;min-width:0}
+  .fbtn{display:inline-flex}
+  .achips:not(:empty){display:flex}
+}
 /* each page's own "add" button, top right next to the title */
 .act{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:9px 16px;background:var(--cream);color:var(--ink);font:500 .92rem Mitr,sans-serif;cursor:pointer;white-space:nowrap}
 .act[hidden]{display:none}
@@ -253,7 +265,9 @@ h2 small{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
     <div class="fgrp" data-f="kind"><button data-v="all" class="on">ทุกแบบ</button><button data-v="now">ขายเลย</button><button data-v="pre">สั่งล่วงหน้า</button></div>
     <div class="fgrp" data-f="via"><button data-v="all" class="on">ทุกช่องทาง</button><button data-v="LINE">LINE</button><button data-v="หน้าร้าน">หน้าร้าน</button><button data-v="อื่น ๆ">อื่น ๆ</button></div>
     <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="oq" placeholder="ค้นชื่องาน / ลูกค้า"></label>
+    <button class="fbtn" id="fbtn" type="button"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>ตัวกรอง<span id="fcount"></span></button>
   </div>
+  <div class="achips" id="achips"></div>
   <p class="osum" id="osum"></p>
   <div id="olist"></div>
 </section>
@@ -306,6 +320,14 @@ h2 small{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
   <div class="chips" data-g="pay"><button class="on">โอน</button><button>เงินสด</button></div>
   <div class="total"><span>รวม</span><b id="oTotal">฿45</b></div>
   <button class="save" data-save="order">บันทึก</button>
+</section>
+<section class="sheet" id="fsheet" aria-label="ตัวกรองออเดอร์">
+  <h3>ตัวกรอง<button class="sx" type="button" aria-label="ปิด" data-x><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></h3>
+  <label>แบบ</label>
+  <div class="chips" data-of="kind"><button data-v="all">ทุกแบบ</button><button data-v="now">ขายเลย</button><button data-v="pre">สั่งล่วงหน้า</button></div>
+  <label>ช่องทาง</label>
+  <div class="chips" data-of="via"><button data-v="all">ทุกช่องทาง</button><button data-v="LINE">LINE</button><button data-v="หน้าร้าน">หน้าร้าน</button><button data-v="อื่น ๆ">อื่น ๆ</button></div>
+  <div class="row2" style="margin-top:18px"><button class="save" style="background:#efe7d8;color:var(--ink);margin:0" id="fclear">ล้างตัวกรอง</button><button class="save" style="margin:0" id="fdone">ดูผล</button></div>
 </section>
 <section class="sheet" id="expense" aria-label="บันทึกรายจ่าย">
   <h3>บันทึกรายจ่าย<button class="sx" type="button" aria-label="ปิด" data-x><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></h3>
@@ -483,6 +505,23 @@ function renderOrders(){
 }
 document.getElementById('ofilters').addEventListener('click',e=>{const b=e.target.closest('.fgrp button');if(!b)return;const g=b.parentElement;g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));OF[g.dataset.f]=g.dataset.f==='range'?+b.dataset.v:b.dataset.v;renderOrders()});
 document.getElementById('oq').addEventListener('input',e=>{OF.q=e.target.value;renderOrders()});
+/* phone filter sheet: works on a draft, applied with "ดูผล"; active filters show as chips with x */
+const LABEL={kind:{now:'ขายเลย',pre:'สั่งล่วงหน้า'},via:{LINE:'LINE','หน้าร้าน':'หน้าร้าน','อื่น ๆ':'อื่น ๆ'}};
+let draft={};
+const syncChips=(root,state)=>root.querySelectorAll('[data-of]').forEach(g=>g.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===state[g.dataset.of])));
+function setFilter(k,v){OF[k]=v;document.querySelectorAll(`.filters [data-f=${k}] button`).forEach(b=>b.classList.toggle('on',b.dataset.v===v));renderOrders();renderActive()}
+function renderActive(){
+  const act=['kind','via'].filter(k=>OF[k]!=='all');
+  document.getElementById('fcount').textContent=act.length||'';
+  document.getElementById('achips').innerHTML=act.map(k=>`<button data-clear="${k}">${LABEL[k][OF[k]]}<span aria-hidden="true">×</span></button>`).join('');
+}
+document.getElementById('achips').onclick=e=>{const b=e.target.closest('[data-clear]');if(b)setFilter(b.dataset.clear,'all')};
+document.getElementById('fbtn').onclick=()=>{draft={kind:OF.kind,via:OF.via};const sh=document.getElementById('fsheet');syncChips(sh,draft);openSheet('fsheet')};
+document.getElementById('fsheet').addEventListener('click',e=>{const b=e.target.closest('[data-of] button');if(!b)return;draft[b.parentElement.dataset.of]=b.dataset.v;syncChips(document.getElementById('fsheet'),draft)});
+document.getElementById('fclear').onclick=()=>{draft={kind:'all',via:'all'};syncChips(document.getElementById('fsheet'),draft)};
+document.getElementById('fdone').onclick=()=>{setFilter('kind',draft.kind);setFilter('via',draft.via);close()};
+document.getElementById('ofilters').addEventListener('click',()=>setTimeout(renderActive));
+renderActive();
 addEventListener('resize',renderOrders);renderOrders();
 document.getElementById('etable').innerHTML=expenses.map(e=>`<tr><td>${e.ago}</td><td>${e.t}</td><td>${e.m||'-'}</td><td class="r">${baht(e.amt)}</td></tr>`).join('');
 </script>
