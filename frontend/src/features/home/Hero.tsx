@@ -1,8 +1,9 @@
-import { useEffect, type RefObject } from 'react'
+import { useEffect, useRef, useState, type CSSProperties, type RefObject } from 'react'
 import { fullName, lineChatUrl, priceLabel, type Product } from '@/api/menu'
 import { ChatIcon } from '@/components/icons'
-import logo from '@/assets/logo.png'
+import { JuneLogo } from '@/components/JuneLogo'
 import { viewportHeight } from '@/lib/env'
+import { introDelayMs } from './intro'
 import type { HomeMotion } from './motion'
 
 interface Props {
@@ -19,6 +20,18 @@ interface Props {
 
 export function Hero({ products, active, onPick, onOpen, spotRef, photo, motion, lineOaId }: Props) {
   const product = products[active]
+  const hasProduct = product !== undefined
+  const logoRef = useRef<SVGSVGElement>(null)
+  const [logoDelay] = useState(introDelayMs) // the palm opens as the curtain lifts; decided once, before the curtain marks itself played
+
+  // the logo only sways while the hero is on screen
+  useEffect(() => {
+    const logo = logoRef.current
+    if (!logo) return
+    const io = new IntersectionObserver((entries) => logo.classList.toggle('paused', !entries[0]?.isIntersecting))
+    io.observe(logo)
+    return () => io.disconnect()
+  }, [hasProduct])
 
   // arrow keys switch cakes while the hero is on screen
   useEffect(() => {
@@ -56,7 +69,7 @@ export function Hero({ products, active, onPick, onOpen, spotRef, photo, motion,
   if (!product) return null
   return (
     <section className="hero" id="flavors" data-nav="light">
-      <img className="logo" src={logo} alt="June" />
+      <JuneLogo ref={logoRef} className="logo go" role="img" aria-label="June" aria-hidden={false} style={{ '--t0': `${logoDelay}ms` } as CSSProperties} />
       <h1>
         <span>อบใหม่ หอม</span>
         <span>นุ่มนาน</span>
