@@ -1,0 +1,15 @@
+{% extends "backoffice/base.html" %}
+{% block content %}
+<table class="tbl"><thead><tr><th>ชื่อผู้ใช้</th><th>สิทธิ์</th><th>เข้าล่าสุด</th><th></th></tr></thead><tbody>
+{% for u in people %}<tr{% if not u.is_active %} style="opacity:.55"{% endif %}><td>{{ u.username }}</td><td>{% if u.is_superuser %}เจ้าของ{% else %}staff{% endif %}{% if not u.is_active %} · ปิดอยู่{% endif %}</td><td>{{ u.last_login|date:"j M H:i"|default:"-" }}</td>
+<td class="r">{% if not u.is_superuser %}<form method="post" class="inline">{% csrf_token %}<input type="hidden" name="action" value="toggle"><input type="hidden" name="id" value="{{ u.pk }}"><button class="del">{{ u.is_active|yesno:'ปิดการเข้าใช้,เปิดใช้' }}</button></form>{% endif %}</td></tr>{% endfor %}
+</tbody></table>
+<form class="card-form" method="post" style="margin-top:16px">{% csrf_token %}<input type="hidden" name="action" value="add">
+  <b style="font:600 1rem Mitr,sans-serif">เพิ่ม staff</b>
+  <p class="muted" style="font-size:.88rem">staff เข้าได้ทุกเมนูในหลังร้าน ยกเว้นหน้านี้และตั้งค่าเต็ม · ตั้งรหัสผ่านแล้วบอก staff เอง อย่าส่งในแชตกลุ่ม</p>
+  <label for="{{ form.username.id_for_label }}">ชื่อผู้ใช้</label>{{ form.username }}{{ form.username.errors }}
+  <div class="row2"><div><label for="{{ form.password1.id_for_label }}">รหัสผ่าน</label>{{ form.password1 }}</div><div><label for="{{ form.password2.id_for_label }}">รหัสผ่านอีกครั้ง</label>{{ form.password2 }}</div></div>
+  {{ form.password2.errors }}{{ form.password1.errors }}
+  <button class="btn2" type="submit">+ เพิ่ม staff</button>
+</form>
+{% endblock %}

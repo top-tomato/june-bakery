@@ -1,14 +1,16 @@
+from datetime import timedelta
 from urllib.parse import quote
 
 import segno
 from django.conf import settings
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
+from django.utils import timezone
 from django.views.decorators.cache import cache_control
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.http import require_GET
 
-from menu.models import GalleryPhoto, Product, Review, ShopInfo
+from menu.models import ClosedDay, GalleryPhoto, Product, Review, ShopInfo
 
 # หน้าร้าน (มีสาขาเดียว) พิกัดจากแผนที่ที่เจ้าของร้านส่งมา
 SHOP = {
@@ -29,6 +31,7 @@ def menu_data() -> dict[str, object]:
     """ข้อมูลทั้งหมดที่หน้าบ้านใช้ ทั้งใน API และที่ฝังไว้ในหน้าตอนโหลดครั้งแรก"""
     line_add_url = f"https://line.me/R/ti/p/{quote(settings.LINE_OA_ID)}"
     info = ShopInfo.load().as_payload()
+    today = timezone.localdate()
     return {
         "products": [product.as_payload() for product in Product.objects.filter(is_active=True)],
         "line": {
@@ -47,6 +50,8 @@ def menu_data() -> dict[str, object]:
         "order": {"preorderDays": info["preorderDays"], "shelfLife": info["shelfLife"], "payment": info["payment"]},
         "about": info["about"],
         "reviews": [r.as_payload() for r in Review.objects.filter(is_active=True)],
+        # days the shop is closed in the next 30 days (back office calendar); shown on the site
+        "closedDays": [d.isoformat() for d in ClosedDay.objects.filter(date__gte=today, date__lte=today + timedelta(days=30)).values_list("date", flat=True)],
         "gallery": [g.as_payload() for g in GalleryPhoto.objects.filter(is_active=True)],
     }
 

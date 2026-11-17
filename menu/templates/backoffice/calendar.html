@@ -1,0 +1,18 @@
+{% extends "backoffice/base.html" %}
+{% block action %}<button class="act" data-open="order" data-pre="1" data-date="{{ sel.isoformat }}"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>เพิ่มนัดรับ</span></button>{% endblock %}
+{% block content %}
+<div class="cal">
+  <div class="cal-h"><a class="calnav" href="?m={{ prev_m }}&d={{ sel.isoformat }}" aria-label="เดือนก่อน">‹</a><b>{{ month_label }}</b><a class="calnav" href="?m={{ next_m }}&d={{ sel.isoformat }}" aria-label="เดือนถัดไป">›</a></div>
+  <div class="grid7">
+    <div class="dw">อา</div><div class="dw">จ</div><div class="dw">อ</div><div class="dw">พ</div><div class="dw">พฤ</div><div class="dw">ศ</div><div class="dw">ส</div>
+    {% for c in cells %}<a class="dc{% if c.out %} out{% endif %}{% if c.today %} today{% endif %}{% if c.sel %} sel{% endif %}{% if c.closed %} closed{% endif %}" href="?m={{ m }}&d={{ c.iso }}"><span>{{ c.d.day }}</span>{% if c.n %}<span class="cnt">{{ c.n }}</span>{% elif c.closed %}<span class="off">หยุด</span>{% endif %}</a>{% endfor %}
+  </div>
+  <div class="legend"><span><i style="background:var(--peach)"></i>มีนัดรับ (ตัวเลข = จำนวนนัด)</span><span><i style="background:repeating-linear-gradient(135deg,#f3e1da 0 3px,#fbefea 3px 6px)"></i>ร้านหยุด</span></div>
+</div>
+<div class="daypanel">
+  <h3>{{ sel_label }}</h3>
+  <form method="post" action="{% url 'backoffice:closed-toggle' %}" class="switch">{% csrf_token %}<input type="hidden" name="date" value="{{ sel.isoformat }}"><input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <div><b>ร้านหยุดวันนี้</b><small>ขึ้นบนหน้าเว็บด้วยว่าวันนี้ร้านหยุด</small></div><button class="tg{% if sel_closed %} on{% endif %}" aria-label="ร้านหยุดวันนี้" aria-pressed="{{ sel_closed|yesno:'true,false' }}"></button></form>
+  <div class="pick">{% for o in sel_orders %}{% include "backoffice/_pickup.html" %}{% empty %}<p class="muted" style="font-size:.9rem">ไม่มีนัดรับ</p>{% endfor %}</div>
+</div>
+{% endblock %}

@@ -1,6 +1,8 @@
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import FileExtensionValidator
 from django.db import models
+from django.utils import timezone
 
 
 class UniqueName:
@@ -197,3 +199,104 @@ class GalleryPhoto(models.Model):
             raise ValidationError("ใส่รูปหรือวิดีโออย่างน้อยหนึ่งอย่าง")
         if self.video and self.video.size > 20 * 1024 * 1024:
             raise ValidationError({"video": "วิดีโอใหญ่เกิน 20 MB ลองย่อไฟล์ก่อน"})
+
+
+# ---------------------------------------------------------------------------------------------------------------------
+# Back office (/admin/shop/, mock/admin.html). The site can't see orders made in LINE chats, so staff log orders and
+# expenses there. Visits and "order on LINE" taps are counted by the site itself (no cookies, nothing personal).
+
+
+class Order(models.Model):
+    """ออเดอร์หนึ่งรายการที่ staff บันทึก: ขายเลย หรือสั่งล่วงหน้า (สัมมนา / ของว่างช่วงพัก) ที่มีวันเวลารับ"""
+
+    KINDS = [("now", "ขายเลย"), ("pre", "สั่งล่วงหน้า")]
+    CHANNELS = [("line", "LINE"), ("store", "หน้าร้าน"), ("other", "อื่น ๆ")]
+    PAYMENTS = [("transfer", "โอน"), ("cash", "เงินสด")]
+
+    created_at = models.DateTimeField("บันทึกเมื่อ", default=timezone.now, db_index=True)
+    kind = models.CharField("แบบ", max_length=4, choices=KINDS, default="now")
+    pickup_at = models.DateTimeField("วันเวลารับ", null=True, blank=True, db_index=True)
+    who = models.CharField("ชื่องาน / ลูกค้า", max_length=120, blank=True)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="ขนม")
+    product_name = models.CharField("ชื่อขนม", max_length=120)  # kept if the product is renamed or removed
+    qty = models.PositiveIntegerField("จำนวนชิ้น", default=1)
+    unit_price = models.PositiveIntegerField("ราคาต่อชิ้น")
+    channel = models.CharField("สั่งทาง", max_length=10, choices=CHANNELS, default="line")
+    payment = models.CharField("จ่ายด้วย", max_length=10, choices=PAYMENTS, default="transfer")
+    note = models.CharField("จด", max_length=160, blank=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, editable=False)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "ออเดอร์"
+        verbose_name_plural = "ออเดอร์"
+
+    def __str__(self) -> str:
+        return f"{self.product_name} × {self.qty}"
+
+    @property
+    def total(self) -> int:
+        return self.qty * self.unit_price
+
+    def clean(self) -> None:
+        if self.kind == "pre" and not self.pickup_at:
+            raise ValidationError({"pickup_at": "สั่งล่วงหน้าต้องมีวันเวลารับ"})
+        if self.kind == "pre" and not self.who.strip():
+            raise ValidationError({"who": "ใส่ชื่องานหรือลูกค้า"})
+
+
+class Expense(models.Model):
+    """รายจ่ายหนึ่งรายการ"""
+
+    CATEGORIES = [
+        ("ingredients", "วัตถุดิบ"),
+        ("packaging", "กล่อง/ถุง"),
+        ("rent", "ค่าเช่า"),
+        ("utilities", "ค่าน้ำไฟ"),
+        ("delivery", "ค่าส่ง"),
+        ("other", "อื่น ๆ"),
+    ]
+
+    date = models.DateField("วันที่", default=timezone.localdate, db_index=True)
+    category = models.CharField("หมวด", max_length=20, choices=CATEGORIES, default="ingredients")
+    amount = models.DecimalField("จำนวนเงิน (บาท)", max_digits=10, decimal_places=2)
+    note = models.CharField("จด", max_length=160, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, editable=False)
+
+    class Meta:
+        ordering = ["-date", "-created_at"]
+        verbose_name = "รายจ่าย"
+        verbose_name_plural = "รายจ่าย"
+
+    def __str__(self) -> str:
+        return f"{self.get_category_display()} {self.amount}"
+
+
+class ClosedDay(models.Model):
+    """วันที่ร้านหยุด (ขึ้นบนหน้าเว็บด้วย)"""
+
+    date = models.DateField("วันที่", unique=True)
+    note = models.CharField("หมายเหตุ", max_length=80, blank=True)
+
+    class Meta:
+        ordering = ["date"]
+        verbose_name = "วันหยุดร้าน"
+        verbose_name_plural = "วันหยุดร้าน"
+
+    def __str__(self) -> str:
+        return str(self.date)
+
+
+class DailyStat(models.Model):
+    """นับคนเข้าเว็บ / คนกดสั่งทาง LINE ต่อวัน ต่อช่องทาง (ไม่เก็บข้อมูลส่วนตัว)"""
+
+    KINDS = [("visit", "เข้าเว็บ"), ("tap", "กดสั่งทาง LINE")]
+
+    date = models.DateField(default=timezone.localdate)
+    kind = models.CharField(max_length=10, choices=KINDS)
+    source = models.CharField(max_length=20)
+    count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["date", "kind", "source"], name="one_stat_row")]

@@ -1,0 +1,34 @@
+{% extends "backoffice/base.html" %}
+{% load humanize %}
+{% block action %}<button class="act" data-open="order"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>บันทึกออเดอร์</span></button>{% endblock %}
+{% block content %}
+<form class="filters" method="get">
+  {% for key, items in groups.items %}<div class="fgrp" data-f="{{ key }}">{% for v, label, href in items %}<a class="fpill{% if key == 'r' and v == f.r or key == 'kind' and v == f.kind or key == 'via' and v == f.via %} on{% endif %}" href="{{ href }}">{{ label }}</a>{% endfor %}</div>{% endfor %}
+  <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input name="q" value="{{ f.q }}" placeholder="ค้นชื่องาน / ลูกค้า / จด">
+    <input type="hidden" name="r" value="{{ f.r }}">{% if f.kind != 'all' %}<input type="hidden" name="kind" value="{{ f.kind }}">{% endif %}{% if f.via != 'all' %}<input type="hidden" name="via" value="{{ f.via }}">{% endif %}</label>
+  <button class="fbtn" id="fbtn" type="button"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>ตัวกรอง<span>{% if active_chips %}{{ active_chips|length }}{% endif %}</span></button>
+</form>
+<div class="achips">{% for label, href in active_chips %}<a href="{{ href }}" style="display:inline-flex;align-items:center;gap:6px;background:var(--ink);color:var(--cream);border-radius:999px;padding:5px 12px;font:500 .8rem Mitr,sans-serif;text-decoration:none">{{ label }} <span aria-hidden="true">×</span></a>{% endfor %}</div>
+<p class="osum">{% if n %}<b>{{ n }}</b> ออเดอร์ · <b>{{ pcs }}</b> ชิ้น · รวม <b>฿{{ total|intcomma }}</b>{% else %}ไม่มีออเดอร์ตามที่เลือก{% endif %}</p>
+
+{% if orders %}
+<table class="tbl only-wide"><thead><tr><th>เวลา</th><th>รายการ</th><th>ช่องทาง</th><th>จ่าย</th><th class="r">ยอด</th><th></th></tr></thead><tbody>
+{% for o in orders %}<tr><td>{% if days > 1 %}{{ o.created_at|date:"D j M" }} {% endif %}{{ o.created_at|time:"H:i" }}</td>
+<td>{{ o.product_name }} {{ o.qty }} ชิ้น{% if o.kind == 'pre' %}<span class="kb">สั่งล่วงหน้า · รับ {{ o.pickup_at|date:"D j M H:i" }}</span>{% endif %}{% if o.who or o.note %}<div class="s muted" style="font-size:.82rem">{{ o.who }}{% if o.who and o.note %} · {% endif %}{{ o.note }}</div>{% endif %}</td>
+<td>{{ o.get_channel_display }}</td><td>{{ o.get_payment_display }}</td><td class="r">฿{{ o.total|intcomma }}</td>
+<td class="r"><form method="post" action="{% url 'backoffice:order-delete' o.pk %}" class="inline" onsubmit="return confirm('ลบออเดอร์นี้?')">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="del" aria-label="ลบ">×</button></form></td></tr>{% endfor %}
+</tbody></table>
+<div class="ocards only-narrow">{% for o in orders %}<div class="ocard"><div class="t">{{ o.product_name }} {{ o.qty }} ชิ้น{% if o.kind == 'pre' %}<span class="kb">สั่งล่วงหน้า · รับ {{ o.pickup_at|date:"D j M H:i" }}</span>{% endif %}{% if o.who %}<div class="s">{{ o.who }}</div>{% endif %}</div><div class="m">฿{{ o.total|intcomma }}</div><div class="s">{{ o.created_at|date:"D j M" }} {{ o.created_at|time:"H:i" }} · {{ o.get_channel_display }} · {{ o.get_payment_display }}</div></div>{% endfor %}</div>
+{% elif not n %}<p class="empty-note">กด "บันทึกออเดอร์" มุมขวาบนเพื่อเริ่ม</p>{% endif %}
+{% endblock %}
+{% block sheets %}
+<form class="sheet" id="fsheet" method="get" aria-label="ตัวกรองออเดอร์">
+  <h3>ตัวกรอง{{ xbtn|safe }}</h3>
+  <input type="hidden" name="r" value="{{ f.r }}"><input type="hidden" name="q" value="{{ f.q }}">
+  <label>แบบ</label>
+  <div class="chips"><label><input type="radio" name="kind" value="all"{% if f.kind == 'all' %} checked{% endif %}>ทุกแบบ</label><label><input type="radio" name="kind" value="now"{% if f.kind == 'now' %} checked{% endif %}>ขายเลย</label><label><input type="radio" name="kind" value="pre"{% if f.kind == 'pre' %} checked{% endif %}>สั่งล่วงหน้า</label></div>
+  <label>ช่องทาง</label>
+  <div class="chips"><label><input type="radio" name="via" value="all"{% if f.via == 'all' %} checked{% endif %}>ทุกช่องทาง</label><label><input type="radio" name="via" value="line"{% if f.via == 'line' %} checked{% endif %}>LINE</label><label><input type="radio" name="via" value="store"{% if f.via == 'store' %} checked{% endif %}>หน้าร้าน</label><label><input type="radio" name="via" value="other"{% if f.via == 'other' %} checked{% endif %}>อื่น ๆ</label></div>
+  <div class="row2" style="margin-top:18px"><a class="save" style="background:#efe7d8;color:var(--ink);margin:0;text-align:center;text-decoration:none" href="?r={{ f.r }}">ล้างตัวกรอง</a><button class="save" style="margin:0" type="submit">ดูผล</button></div>
+</form>
+{% endblock %}

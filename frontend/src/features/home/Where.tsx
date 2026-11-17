@@ -7,13 +7,25 @@ import { Drips } from './Drips'
 /** Where the pin sits on the baked map picture (from mock/where-map-3d.html when the picture was rendered). */
 const PIN = { x: '51.14%', y: '39.05%' }
 
+const TH_DAY = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.']
+const TH_MON = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.']
+const thDay = (iso: string) => {
+  const d = new Date(`${iso}T00:00`)
+  return `${TH_DAY[d.getDay()]} ${d.getDate()} ${TH_MON[d.getMonth()]}`
+}
+
 interface Props {
   shop: MenuData['shop']
+  /** closed days in the next 30 days (back office calendar), ISO dates */
+  closedDays: string[]
   /** colour of the story section above (the drips hang from it) */
   above: string
 }
 
-export function Where({ shop, above }: Props) {
+export function Where({ shop, closedDays, above }: Props) {
+  const today = new Date().toLocaleDateString('sv')
+  const closedToday = closedDays.includes(today)
+  const next = closedDays.filter((d) => d > today).slice(0, 3)
   return (
     <section className="where" id="where" data-nav="light">
       <Drips count={24} color={above} />
@@ -27,6 +39,8 @@ export function Where({ shop, above }: Props) {
           <b>{shop.name}</b>
           <span>{shop.address}</span>
           <span>เวลาเปิด: {shop.hours}</span>
+          {closedToday && <span className="closed">วันนี้ร้านหยุด</span>}
+          {next.length > 0 && <span className="closed-next">ร้านหยุด: {next.map(thDay).join(' · ')}</span>}
         </div>
         <a className="btn go" href={shop.mapsUrl} target="_blank" rel="noopener">
           <MapPinIcon />

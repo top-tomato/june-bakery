@@ -38,6 +38,8 @@ export interface MenuData {
   reviews: { id: number; text: string; author: string }[]
   /** photos (and short silent videos, image = poster) for the gallery section (#gallery) and the photo book (/gallery) */
   gallery: GalleryItem[]
+  /** days the shop is closed in the next 30 days (ISO yyyy-mm-dd), set in the back office calendar */
+  closedDays: string[]
 }
 
 export const menuKeys = {

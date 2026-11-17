@@ -1,0 +1,13 @@
+{% extends "backoffice/base.html" %}
+{% load humanize %}
+{% block action %}<button class="act" data-open="expense"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>บันทึกรายจ่าย</span></button>{% endblock %}
+{% block content %}
+<div class="filters"><div class="fgrp"><a class="fpill{% if which != 'last' %} on{% endif %}" href="?m=this">เดือนนี้</a><a class="fpill{% if which == 'last' %} on{% endif %}" href="?m=last">เดือนก่อน</a></div></div>
+<p class="osum">{{ month_label }} · รวม <b>฿{{ total|floatformat:0|intcomma }}</b></p>
+{% if expenses %}
+<table class="tbl"><thead><tr><th>วันที่</th><th>หมวด</th><th>จด</th><th class="r">จำนวน</th><th></th></tr></thead><tbody>
+{% for e in expenses %}<tr><td>{{ e.date|date:"D j M" }}</td><td>{{ e.get_category_display }}</td><td>{{ e.note|default:"-" }}</td><td class="r">฿{{ e.amount|floatformat:2|intcomma }}</td>
+<td class="r"><form method="post" action="{% url 'backoffice:expense-delete' e.pk %}" class="inline" onsubmit="return confirm('ลบรายจ่ายนี้?')">{% csrf_token %}<input type="hidden" name="next" value="{{ request.get_full_path }}"><button class="del" aria-label="ลบ">×</button></form></td></tr>{% endfor %}
+</tbody></table>
+{% else %}<p class="empty-note">ยังไม่มีรายจ่ายในเดือนนี้</p>{% endif %}
+{% endblock %}

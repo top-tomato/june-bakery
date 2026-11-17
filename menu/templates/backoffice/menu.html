@@ -1,0 +1,14 @@
+{% extends "backoffice/base.html" %}
+{% block content %}
+<p class="osum">แก้ชื่อ ราคา คำบรรยาย แล้วกดบันทึก ขึ้นหน้าเว็บภายใน 1 นาที · เปลี่ยนรูปหรือโมเดล 3D ทำใน{% if is_owner %} <a href="{% url 'admin:menu_product_changelist' %}">ตั้งค่าเต็ม</a>{% else %}หน้าตั้งค่าเต็ม (ให้เจ้าของร้านทำ){% endif %}</p>
+{% for form in forms %}
+<form class="card-form" method="post">{% csrf_token %}<input type="hidden" name="id" value="{{ form.instance.pk }}">
+  <b style="font:600 1.05rem Mitr,sans-serif">{{ form.instance.full_name }}</b>
+  <div class="row2"><div><label for="{{ form.name_line1.id_for_label }}">ชื่อบรรทัดแรก</label>{{ form.name_line1 }}{{ form.name_line1.errors }}</div><div><label for="{{ form.name_line2.id_for_label }}">ชื่อบรรทัดสอง</label>{{ form.name_line2 }}</div></div>
+  <div class="row2"><div><label for="{{ form.price.id_for_label }}">ราคาต่อชิ้น (บาท)</label>{{ form.price }}{{ form.price.errors }}</div><div><label class="check" style="margin-top:28px">{{ form.is_active }} แสดงบนเว็บ</label></div></div>
+  <label for="{{ form.description.id_for_label }}">คำบรรยาย</label>{{ form.description }}{{ form.description.errors }}
+  <label>จุดเด่น (ไม่ใส่ก็ได้)</label>{{ form.highlight_1 }}{{ form.highlight_2 }}{{ form.highlight_3 }}
+  <button class="btn2" type="submit">บันทึก</button>
+</form>
+{% empty %}<p class="empty-note">ยังไม่มีขนม</p>{% endfor %}
+{% endblock %}

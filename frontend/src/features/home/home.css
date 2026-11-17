@@ -375,6 +375,19 @@ main .buy strong {
   font-size: clamp(2.2rem, 5vw, 4.4rem);
   margin-bottom: 22px;
 }
+/* closed days from the back office calendar */
+.shop .closed {
+  display: inline-block;
+  width: fit-content;
+  background: #a2482f;
+  color: #fff6e6;
+  border-radius: 999px;
+  padding: 2px 12px;
+  font-weight: 600;
+}
+.shop .closed-next {
+  opacity: 0.8;
+}
 .shop {
   border-top: 2px solid rgba(255, 243, 220, 0.18);
   border-bottom: 2px solid rgba(255, 243, 220, 0.18);
