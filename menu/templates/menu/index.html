@@ -1,6 +1,15 @@
 {% load static %}<!doctype html>
 <html lang="th">
 <head>
+<script>
+/* Debug switches for finding mobile jank on a real phone (no effect unless the URL asks for them):
+   ?fps      on-screen frame meter        ?no3d    skip the 3D scene (photos instead)
+   ?lowres   3D at 1x, no antialias       ?nodrips hide the cream drips between sections
+   ?nomap    hide the store map           ?noshadow drop CSS filters/shadows on moving parts
+   Combine with &, e.g. ?fps&no3d */
+window.DBG=Object.fromEntries([...new URLSearchParams(location.search).keys()].map(k=>[k,true]));
+document.documentElement.classList.add(...Object.keys(window.DBG).map(k=>'dbg-'+k));
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>June — อบใหม่ หอม นุ่มนาน (mock)</title>
@@ -217,6 +226,12 @@ section{position:relative}
 }
 .fallback{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:50%;display:none}
 .fallback.on{display:block}
+/* debug switches (see the script at the top of <head>) */
+.dbg-nodrips .drips{display:none!important}
+.dbg-nomap .plane{display:none!important}
+.dbg-noshadow .item .tilt,.dbg-noshadow .mark,.dbg-noshadow .stage .float{filter:none!important}
+.dbg-noshadow .edge{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+#dbgfps{position:fixed;left:8px;top:8px;z-index:1000;font:600 12px/1.3 ui-monospace,monospace;color:#fff;background:rgba(0,0,0,.7);padding:6px 8px;border-radius:8px;pointer-events:none;white-space:pre}
 </style>
 </head>
 <body>
@@ -610,15 +625,21 @@ function intro(){
 
 setActive(0);sync();fly(0);
 window.T0=performance.now();requestAnimationFrame(()=>{intro();frame()});
+if(window.DBG.fps){const el=document.createElement('div');el.id='dbgfps';document.body.append(el);
+  let n=0,worst=0,slow=0,last=performance.now(),t0=last;
+  (function f(t){const d=t-last;last=t;n++;worst=Math.max(worst,d);if(d>25)slow++;
+    if(t-t0>=1000){el.textContent=`${Math.round(n*1000/(t-t0))} fps\nช้าสุด ${Math.round(worst)} ms\nสะดุด ${slow} ครั้ง\n${Object.keys(window.DBG).filter(k=>k!=='fps').join(' ')||'ทุกอย่างเปิด'}`;n=0;worst=0;slow=0;t0=t}
+    requestAnimationFrame(f)})(last)}
 </script>
 <script type="module">
 import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/+esm';
 import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js/+esm';
 import {RoomEnvironment} from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/environments/RoomEnvironment.js/+esm';
 import {MeshoptDecoder} from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/libs/meshopt_decoder.module.js/+esm';
+if(window.DBG.no3d)throw new Error('3D turned off by ?no3d');   // the 4.5s fallback then shows photos
 const calm=matchMedia('(prefers-reduced-motion:reduce)').matches;
-const R=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),alpha:true,antialias:true});
-R.setPixelRatio(Math.min(devicePixelRatio,innerWidth<700?1.5:2));R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=.9;
+const R=new THREE.WebGLRenderer({canvas:document.getElementById('gl'),alpha:true,antialias:!window.DBG.lowres});
+R.setPixelRatio(window.DBG.lowres?1:Math.min(devicePixelRatio,innerWidth<700?1.5:2));R.toneMapping=THREE.ACESFilmicToneMapping;R.toneMappingExposure=.9;
 const scene=new THREE.Scene(),cam=new THREE.PerspectiveCamera(30,1,.1,50);cam.position.z=8;
 window.GLSTART=true;window.GLBAD=false;window.photo();
 scene.environment=new THREE.PMREMGenerator(R).fromScene(new RoomEnvironment(),.04).texture;
