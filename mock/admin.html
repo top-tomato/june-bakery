@@ -13,7 +13,7 @@
 :root{--ink:#2F4A45;--muted:#6b7f7a;--cream:#FFF6E6;--paper:#FFFBF3;--peach:#F3A18F;--green:#3E5D58;--line:#e6dccb;
   --bar:#3E5D58;--bar2:#E59A86;--good:#2e7d4f;--bad:#b4412b;--grid:#ece4d6}
 *{box-sizing:border-box;margin:0}
-body{font-family:Anuphan,system-ui,sans-serif;background:var(--paper);color:var(--ink);padding-bottom:110px}
+body{font-family:Anuphan,system-ui,sans-serif;background:var(--paper);color:var(--ink);padding-bottom:40px}
 /* app shell: side menu (always open on wide screens, a drawer on phones) + content */
 .side{position:fixed;left:0;top:0;bottom:0;width:248px;background:var(--green);color:var(--cream);display:flex;flex-direction:column;z-index:20;
   padding:18px 12px max(14px,env(safe-area-inset-bottom));transform:translateX(-100%);transition:transform .25s cubic-bezier(.3,.7,.2,1)}
@@ -39,6 +39,26 @@ header{background:var(--green);color:var(--cream);padding:12px 16px;position:sti
 @media (min-width:900px){header{background:var(--paper);color:var(--ink);border-bottom:1px solid var(--line)}}
 header h1{flex:1}
 .view[hidden]{display:none}
+/* order filters: compact, left-aligned, wrap on phones */
+.filters{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-bottom:10px}
+.fgrp{display:inline-flex;background:#efe7d8;border-radius:999px;padding:3px;gap:2px}
+.fgrp button{border:0;background:none;border-radius:999px;padding:7px 13px;font:500 .86rem Mitr,sans-serif;color:var(--ink);cursor:pointer;white-space:nowrap}
+.fgrp button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.search{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;flex:1;min-width:180px;max-width:280px}
+.search svg{width:16px;height:16px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round}
+.search input{border:0;outline:0;font:inherit;background:none;width:100%;color:var(--ink)}
+.osum{font-size:.92rem;color:var(--muted);margin:4px 2px 12px}
+.osum b{color:var(--ink);font-family:Mitr,sans-serif;font-weight:500}
+.kb{display:inline-block;font-size:.72rem;padding:1px 8px;border-radius:99px;background:#fde3da;color:#8b3a26;margin-left:4px;white-space:nowrap}
+.ocards{display:grid;gap:8px}
+.ocard{display:grid;grid-template-columns:1fr auto;gap:4px 10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.ocard .t{font-size:.95rem}.ocard .s{font-size:.8rem;color:var(--muted)}.ocard .m{font:500 1rem Mitr,sans-serif;text-align:right;grid-row:span 2;align-self:center}
+@media (max-width:640px){.fgrp{overflow-x:auto;max-width:100%}.search{max-width:none}}
+/* each page's own "add" button, top right next to the title */
+.act{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:9px 16px;background:var(--cream);color:var(--ink);font:500 .92rem Mitr,sans-serif;cursor:pointer;white-space:nowrap}
+.act[hidden]{display:none}
+.act svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round}
+@media (min-width:900px){.act{background:var(--ink);color:var(--cream);padding:10px 20px}}
 @media (min-width:1100px){body main{max-width:1060px}.duo{display:grid;grid-template-columns:1fr 1fr;gap:18px}}
 .tbl{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:.92rem}
 .tbl th,.tbl td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line)}
@@ -180,10 +200,10 @@ h2 small{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
   </nav>
 </aside>
 <div class="sveil" id="sveil"></div>
-<header><button class="burger" id="burger" aria-label="เปิดเมนู"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><h1 id="vtitle">สรุปร้าน</h1></header>
+<header><button class="burger" id="burger" aria-label="เปิดเมนู"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><h1 id="vtitle">สรุปร้าน</h1><button class="act" id="act" hidden><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span></span></button></header>
 <main>
 <section class="view" data-view="summary">
-  <p class="note">mock · ตัวเลขทั้งหมดเป็นตัวอย่าง · กดปุ่มล่างจอเพื่อลองบันทึกออเดอร์/รายจ่าย</p>
+  <p class="note">mock · ตัวเลขทั้งหมดเป็นตัวอย่าง · ปุ่มบันทึกอยู่มุมขวาบนของหน้าออเดอร์ / รายจ่าย / ปฏิทิน</p>
   <div class="seg" id="range"><button data-r="1" class="on">วันนี้</button><button data-r="7">7 วัน</button><button data-r="30">เดือนนี้</button></div>
 
   <div class="pick" id="pickToday"></div>
@@ -219,8 +239,14 @@ h2 small{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
 </section>
 
 <section class="view" data-view="orders" hidden>
-  <div class="seg"><button class="on">วันนี้</button><button>7 วัน</button><button>เดือนนี้</button></div>
-  <table class="tbl"><thead><tr><th>เวลา</th><th>รายการ</th><th>ช่องทาง</th><th class="r">ยอด</th></tr></thead><tbody id="otable"></tbody></table>
+  <div class="filters" id="ofilters">
+    <div class="fgrp" data-f="range"><button data-v="1" class="on">วันนี้</button><button data-v="7">7 วัน</button><button data-v="30">เดือนนี้</button></div>
+    <div class="fgrp" data-f="kind"><button data-v="all" class="on">ทุกแบบ</button><button data-v="now">ขายเลย</button><button data-v="pre">สั่งล่วงหน้า</button></div>
+    <div class="fgrp" data-f="via"><button data-v="all" class="on">ทุกช่องทาง</button><button data-v="LINE">LINE</button><button data-v="หน้าร้าน">หน้าร้าน</button><button data-v="อื่น ๆ">อื่น ๆ</button></div>
+    <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="oq" placeholder="ค้นชื่องาน / ลูกค้า"></label>
+  </div>
+  <p class="osum" id="osum"></p>
+  <div id="olist"></div>
 </section>
 <section class="view" data-view="expenses" hidden>
   <div class="seg"><button class="on">เดือนนี้</button><button>เดือนก่อน</button></div>
@@ -252,10 +278,7 @@ h2 small{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
 </section>
 </main>
 
-<div class="fab">
-  <button class="o" data-open="order"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>บันทึกออเดอร์</button>
-  <button class="e" data-open="expense"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>บันทึกรายจ่าย</button>
-</div>
+
 
 <div class="veil" id="veil"></div>
 <section class="sheet" id="order" aria-label="บันทึกออเดอร์">
@@ -389,7 +412,7 @@ function renderRecent(){document.getElementById('recent').innerHTML=recent.map(r
 /* ---------- bottom sheets ---------- */
 const veil=document.getElementById('veil');let open=null;
 const close=()=>{open?.classList.remove('on');veil.classList.remove('on');open=null};
-document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{if(b.dataset.open==='order')return openOrder(false);open=document.getElementById(b.dataset.open);open.classList.add('on');veil.classList.add('on')});
+function openSheet(id){open=document.getElementById(id);open.classList.add('on');veil.classList.add('on')}
 function openOrder(pre,date){const sh=document.getElementById('order');open=sh;sh.classList.add('on');veil.classList.add('on');
   const ks=[...document.querySelectorAll('#kind button')];ks.forEach((x,i)=>x.classList.toggle('on',i===(pre?1:0)));sh.classList.toggle('pre',!!pre);
   document.getElementById('pDate').value=date||addDays(TODAY,1)}
@@ -422,11 +445,34 @@ function route(){
   document.querySelectorAll('.view').forEach(s=>s.hidden=s.dataset.view!==v);
   document.querySelectorAll('#snav a').forEach(x=>x.classList.toggle('on',x===a));
   document.getElementById('vtitle').textContent=a.childNodes[1].textContent.trim();
-  document.querySelector('.fab').style.display=['summary','orders','expenses','calendar'].includes(v)?'':'none';
+  const ACT={orders:['บันทึกออเดอร์',()=>openOrder(false)],expenses:['บันทึกรายจ่าย',()=>openSheet('expense')],calendar:['เพิ่มนัดรับ',()=>openOrder(true,sel)]}[v];
+  const act=document.getElementById('act');act.hidden=!ACT;if(ACT){act.querySelector('span').textContent=ACT[0];act.onclick=ACT[1]}
   drawer(false);scrollTo(0,0);
 }
 addEventListener('hashchange',route);route();
-document.getElementById('otable').innerHTML=recent.filter(r=>r.k==='o').map(r=>`<tr><td>${r.ago}</td><td>ชิฟฟ่อน ${r.t}</td><td>${r.s}</td><td class="r">${baht(r.amt)}</td></tr>`).join('');
+/* sample orders for the orders page (made up) */
+const ORD=[];{let sd=11;const r=()=>(sd=(sd*16807)%2147483647)/2147483647;const VIA=['LINE','LINE','หน้าร้าน','หน้าร้าน','อื่น ๆ'],PAY=['โอน','เงินสด'];
+  for(let k=0;k<30;k++){const day=addDays(TODAY,-k),n=2+Math.floor(r()*5);for(let j=0;j<n;j++){const h=9+Math.floor(r()*8),m=Math.floor(r()*60);
+    ORD.push({date:day,time:`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`,qty:1+Math.floor(r()*6),via:VIA[Math.floor(r()*5)],pay:PAY[Math.floor(r()*2)],kind:'now'})}}
+  pickups.forEach(p=>ORD.push({date:addDays(TODAY,-2),time:'11:00',qty:p.qty,via:'LINE',pay:'โอน',kind:'pre',who:p.who,pickup:p.date+' '+p.time}));}
+const OF={range:1,kind:'all',via:'all',q:''};
+function renderOrders(){
+  const from=addDays(TODAY,-(OF.range-1)),q=OF.q.trim().toLowerCase();
+  const rows=ORD.filter(o=>o.date>=from&&o.date<=TODAY&&(OF.kind==='all'||o.kind===OF.kind)&&(OF.via==='all'||o.via===OF.via)&&(!q||(o.who||'').toLowerCase().includes(q)))
+    .sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  const pcs=rows.reduce((a,o)=>a+o.qty,0);
+  document.getElementById('osum').innerHTML=rows.length?`<b>${rows.length}</b> ออเดอร์ · <b>${pcs}</b> ชิ้น · รวม <b>${baht(pcs*PRICE)}</b>`:'ไม่มีออเดอร์ตามที่เลือก';
+  const when=o=>(OF.range>1?thDate(o.date)+' ':'')+o.time;
+  const what=o=>`ชิฟฟ่อน ${o.qty} ชิ้น${o.kind==='pre'?`<span class="kb">สั่งล่วงหน้า · รับ ${thDate(o.pickup.slice(0,10))} ${o.pickup.slice(11)}</span>`:''}${o.who?`<div class="s">${o.who}</div>`:''}`;
+  const el=document.getElementById('olist');
+  if(!rows.length){el.innerHTML='';return}
+  el.innerHTML=innerWidth<640
+    ?`<div class="ocards">${rows.map(o=>`<div class="ocard"><div class="t">${what(o)}</div><div class="m">${baht(o.qty*PRICE)}</div><div class="s">${when(o)} · ${o.via} · ${o.pay}</div></div>`).join('')}</div>`
+    :`<table class="tbl"><thead><tr><th>เวลา</th><th>รายการ</th><th>ช่องทาง</th><th>จ่าย</th><th class="r">ยอด</th></tr></thead><tbody>${rows.map(o=>`<tr><td>${when(o)}</td><td>${what(o)}</td><td>${o.via}</td><td>${o.pay}</td><td class="r">${baht(o.qty*PRICE)}</td></tr>`).join('')}</tbody></table>`;
+}
+document.getElementById('ofilters').addEventListener('click',e=>{const b=e.target.closest('.fgrp button');if(!b)return;const g=b.parentElement;g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));OF[g.dataset.f]=g.dataset.f==='range'?+b.dataset.v:b.dataset.v;renderOrders()});
+document.getElementById('oq').addEventListener('input',e=>{OF.q=e.target.value;renderOrders()});
+addEventListener('resize',renderOrders);renderOrders();
 document.getElementById('etable').innerHTML=expenses.map(e=>`<tr><td>${e.ago}</td><td>${e.t}</td><td>${e.m||'-'}</td><td class="r">${baht(e.amt)}</td></tr>`).join('');
 </script>
 </body>
