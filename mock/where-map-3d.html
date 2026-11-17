@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>June — แผนที่ 3D หน้าร้าน (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* The tilted 3D city is back, now with the real streets around the shop.
+   In this mock the tilt is live CSS so it's easy to tweak; on the real page it will be saved as ONE picture,
+   so phones only show an image while scrolling (that big live 3D layer is what stuck on fast scroll). */
+:root{--tea:#F3A18F;--cream:#FFF6E6;--indigo:#3E5D58;--ink:#243B37;--display:"Mitr","Anuphan",system-ui,sans-serif;--body:"Anuphan",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--body);background:#1c2b28;color:var(--cream);line-height:1.6}
+.note{max-width:1100px;margin:16px auto;padding:0 16px;opacity:.7;font-size:.9rem}
+.where{background:var(--indigo);padding:56px clamp(16px,5vw,80px) 80px;display:grid;grid-template-columns:minmax(260px,1fr) 1.5fr;gap:clamp(24px,4vw,64px);align-items:start}
+.where h2{font:600 clamp(2.1rem,5vw,4.2rem)/1.15 var(--display);margin-bottom:22px}
+.shop{border-top:2px solid rgba(255,243,220,.18);border-bottom:2px solid rgba(255,243,220,.18);padding:16px 0}
+.shop b{display:block;font:600 1.35rem var(--display);color:var(--tea)}
+.shop span{display:block;opacity:.8}
+.btn{font:600 1rem var(--display);padding:11px 20px;border-radius:999px;text-decoration:none;display:inline-flex;align-items:center;gap:8px;white-space:nowrap}
+.btn.main{background:var(--cream);color:var(--ink);margin-top:18px}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.contact{margin-top:26px}
+.contact h3{font:500 1rem var(--display);opacity:.8;margin-bottom:10px}
+.social{display:flex;flex-wrap:wrap;gap:10px}
+.social a{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:2px solid rgba(255,246,230,.55);color:var(--cream);text-decoration:none;font:500 .95rem var(--display)}
+.social a.todo{border-style:dashed;opacity:.75}
+
+/* ---------- the 3D map ---------- */
+.map{display:block;position:relative;border-radius:28px;overflow:hidden;background:#1F322E;aspect-ratio:4/3;perspective:900px}
+.plane{position:absolute;left:50%;top:50%;width:1200px;height:900px;margin:-450px -600px;transform:rotateX(54deg) rotateZ(-18deg) scale(var(--s,.9)) translate(var(--tx,0),var(--ty,0))}
+.plane svg{display:block;width:100%;height:100%}
+.pin{position:absolute;left:var(--px);top:var(--py);transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.pin b{background:var(--cream);color:var(--ink);font:600 .95rem var(--display);padding:6px 14px;border-radius:999px;box-shadow:0 4px 10px rgba(0,0,0,.3);white-space:nowrap}
+.pin i{width:2px;height:30px;background:var(--cream)}
+.pin s{position:relative;width:18px;height:18px;border-radius:50%;background:var(--tea);border:3px solid var(--cream);transform:translateY(50%)}
+.pin s::after{content:"";position:absolute;inset:-14px;border-radius:50%;border:3px solid var(--tea);animation:ping 1.6s ease-out infinite}
+@keyframes ping{from{transform:scale(.4);opacity:1}to{transform:scale(1.5);opacity:0}}
+.approx{margin-top:10px;font-size:.8rem;opacity:.65}
+@media (max-width:760px){.where{grid-template-columns:1fr;padding-top:40px}.plane{--s:.62}}
+</style>
+</head>
+<body>
+<p class="note">mock: แผนที่ 3D ถนนจริง + ช่องทางติดต่อ · ลองย่อหน้าต่างให้แคบเพื่อดูแบบมือถือ</p>
+
+<section class="where">
+  <div>
+    <h2>แวะหยิบได้<br>ที่หน้าร้าน</h2>
+    <div class="shop">
+      <b>หน้าร้าน June</b>
+      <span>10 พหลโยธิน · ใกล้อนุสาวรีย์ชัยสมรภูมิ</span>
+      <span>เวลาเปิด: ทักถามทาง LINE ได้เลย</span>
+    </div>
+    <a class="btn main" href="https://www.google.com/maps/search/?api=1&query=13.767586,100.539543" target="_blank" rel="noopener">
+      <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.6"/></svg>นำทางด้วย Google Maps</a>
+
+    <div class="contact">
+      <h3>ติดต่อร้าน</h3>
+      <div class="social">
+        <a href="https://line.me/R/ti/p/%40561hgrea" target="_blank" rel="noopener">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4C7 4 3 7.2 3 11.2c0 3.6 3.2 6.6 7.5 7.1l-.4 2.2c-.1.4.3.7.7.5l3.4-2.6C18.4 17.8 21 14.8 21 11.2 21 7.2 17 4 12 4Z"/></svg>LINE @561hgrea</a>
+        <a class="todo" href="#" title="รอลิงก์จริง">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".6" fill="currentColor"/></svg>Instagram</a>
+        <a class="todo" href="#" title="รอลิงก์จริง">
+          <svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><path d="M15.5 8h-1.6c-1.2 0-1.9.8-1.9 2v10M10 13h5"/></svg>Facebook</a>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <a class="map" href="https://www.google.com/maps/search/?api=1&query=13.767586,100.539543" target="_blank" rel="noopener" aria-label="แผนที่ร้าน June เปิดใน Google Maps">
+      <div class="plane" id="plane"><svg id="city" viewBox="0 0 1200 900" aria-hidden="true"></svg><span id="anchor" style="position:absolute;width:1px;height:1px"></span></div>
+      <div class="pin" id="pin"><b>June อยู่ตรงนี้</b><i></i><s></s></div>
+    </a>
+    <p class="approx">แผนที่โดยประมาณ · แตะเพื่อเปิด Google Maps</p>
+  </div>
+</section>
+
+<script>
+// Real streets (traced from the owner's map of the Victory Monument area), in plane units (1200 x 900).
+const S=4,OX=40,OY=10,P=(x,y)=>[(x-OX)*S,(y-OY)*S];
+const ROADS=[
+  {w:56,c:'#C9B79E',pts:[[10,15],[92,77],[141,108],[167,144],[206,185],[320,265]],name:'ทางด่วนศรีรัช'},
+  {w:40,c:'#D9C9AE',pts:[[154,200],[177,154],[252,0]],name:'ถ.พหลโยธิน'},
+  {w:34,c:'#D9C9AE',pts:[[0,134],[134,190]],name:'ถ.ราชวิถี'},
+  {w:34,c:'#D9C9AE',pts:[[177,211],[330,260]]},
+  {w:34,c:'#D9C9AE',pts:[[144,213],[118,265]]},
+];
+const CANAL={w:18,c:'#9CC4D6',pts:[[20,39],[98,108],[144,154],[195,180],[290,245]]};
+const MON=[154,203],SHOP=[177,113];
+const rnd=(()=>{let s=11;return(a,b)=>{s=(s*16807)%2147483647;return a+(s/2147483647)*(b-a)}})();
+const dSeg=(p,a,b)=>{const dx=b[0]-a[0],dy=b[1]-a[1],t=Math.max(0,Math.min(1,((p[0]-a[0])*dx+(p[1]-a[1])*dy)/(dx*dx+dy*dy)));return Math.hypot(p[0]-a[0]-t*dx,p[1]-a[1]-t*dy)};
+const near=(p,line,m)=>line.pts.map(q=>P(...q)).some((q,i,arr)=>i&&dSeg(p,arr[i-1],q)<line.w/2+m);
+const path=l=>'M'+l.pts.map(q=>P(...q).join(' ')).join(' L');
+let h='';
+// canal + roads
+h+=`<path d="${path(CANAL)}" fill="none" stroke="${CANAL.c}" stroke-width="${CANAL.w}" stroke-linecap="round" stroke-linejoin="round"/>`;
+ROADS.forEach(r=>h+=`<path d="${path(r)}" fill="none" stroke="${r.c}" stroke-width="${r.w}" stroke-linecap="round" stroke-linejoin="round"/>`);
+// city blocks with the same stacked-shadow "extrusion" as the old map, skipping roads, canal, monument and the shop's own lot
+const [sx,sy]=P(...SHOP),[mx,my]=P(...MON);
+for(let y=20;y<900;y+=58)for(let x=20;x<1200;x+=58){
+  const w=rnd(26,48),hgt=rnd(26,48),cx=x+w/2,cy=y+hgt/2,pt=[cx,cy];
+  if(ROADS.some(r=>near(pt,r,24))||near(pt,CANAL,18)||Math.hypot(cx-mx,cy-my)<90||Math.hypot(cx-sx,cy-sy)<44)continue;
+  if(rnd(0,1)<.18)continue;
+  const park=rnd(0,1)<.07,lift=park?0:Math.round(rnd(3,9));
+  for(let k=lift;k>=1;k--)h+=`<rect x="${x+k}" y="${y-k}" width="${w}" height="${hgt}" rx="3" fill="#4A6A64"/>`;
+  h+=`<rect x="${x}" y="${y}" width="${w}" height="${hgt}" rx="3" fill="${park?'#DCEBB5':'#6E918A'}"/>`;
+}
+// Victory Monument
+h+=`<circle cx="${mx}" cy="${my}" r="58" fill="#1F322E" stroke="#D9C9AE" stroke-width="28"/>`;
+for(let k=14;k>=1;k--)h+=`<rect x="${mx-9+k}" y="${my-10-k*2}" width="18" height="20" fill="#C9B79E"/>`;
+h+=`<rect x="${mx-9}" y="${my-38}" width="18" height="20" fill="#FFF6E6"/>`;
+// the shop's lot
+h+=`<rect x="${sx-26}" y="${sy-26}" width="52" height="52" rx="6" fill="#F3A18F" opacity=".35"/>`;
+// road names written on the ground
+const label=(t,a,b)=>{const [x1,y1]=P(...a),[x2,y2]=P(...b),ang=Math.atan2(y2-y1,x2-x1)*180/Math.PI,fx=(x1+x2)/2,fy=(y1+y2)/2,r=ang>90||ang<-90?ang+180:ang;
+  return `<text x="${fx}" y="${fy}" transform="rotate(${r} ${fx} ${fy})" text-anchor="middle" dominant-baseline="central" font-family="Mitr" font-weight="600" font-size="24" fill="#2C4540">${t}</text>`};
+h+=label('ทางด่วนศรีรัช',[92,77],[141,108])+label('ถ.พหลโยธิน',[190,126],[230,44])+label('ถ.ราชวิถี',[30,147],[110,180]);
+h+=`<text x="${mx}" y="${my+92}" text-anchor="middle" font-family="Mitr" font-weight="600" font-size="26" fill="#FFF6E6">อนุสาวรีย์ชัยฯ</text>`;
+document.getElementById('city').innerHTML=h;
+
+// centre the view on the shop, then stand the pin up at the shop's on-screen position
+const plane=document.getElementById('plane'),anchor=document.getElementById('anchor'),pin=document.getElementById('pin'),map=plane.parentElement;
+// frame the shop and the monument together
+plane.style.setProperty('--tx',(600-(sx+mx)/2)+'px');plane.style.setProperty('--ty',(450-(sy+my)/2+70)+'px');   // a bit lower so the standing pin fits above
+anchor.style.left=sx+'px';anchor.style.top=sy+'px';
+function placePin(){const a=anchor.getBoundingClientRect(),m=map.getBoundingClientRect();pin.style.setProperty('--px',(a.left-m.left)+'px');pin.style.setProperty('--py',(a.top-m.top)+'px')}
+placePin();addEventListener('resize',placePin);
+</script>
+</body>
+</html>

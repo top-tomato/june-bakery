@@ -124,25 +124,24 @@ section{position:relative}
 /* map */
 .where{background:var(--indigo);padding:clamp(240px,34vh,340px) clamp(16px,5vw,80px) 140px;--from:var(--pink);display:grid;grid-template-columns:minmax(260px,1fr) 1.5fr;gap:clamp(24px,4vw,64px);align-items:start}
 .where h2{font-size:clamp(2.2rem,5vw,4.4rem);margin-bottom:22px}
-.stores{list-style:none;padding:0}
-.stores button{width:100%;text-align:left;display:flex;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:2px solid rgba(255,243,220,.18);transition:padding .25s,color .25s}
-.stores button b{font-family:var(--display);font-size:1.2rem}
-.stores button span{opacity:.7;text-align:right;font-size:.9rem}
-.stores button[aria-pressed=true]{color:var(--tea);padding-left:16px}
-.map{position:relative;height:min(64vh,560px);border-radius:28px;overflow:hidden;background:#1F322E;perspective:900px}
-.plane{position:absolute;left:50%;top:50%;width:1200px;height:1200px;margin:-600px;transition:transform 1.5s cubic-bezier(.6,0,.2,1)}
-.plane canvas{position:absolute;left:0;top:0;width:1200px;height:1200px}
-.plane i{position:absolute;display:block;background:#6E918A;border-radius:3px;box-shadow:1px -1px 0 #4A6A64,2px -2px 0 #4A6A64,3px -3px 0 #4A6A64,4px -4px 0 #4A6A64,5px -5px 0 #4A6A64}
-.plane i.park{background:#DCEBB5;box-shadow:none}
-.plane .river{position:absolute;left:-200px;top:520px;width:1700px;height:90px;background:#9CC4D6;transform:rotate(-24deg);border-radius:60px}
-.plane .dot{position:absolute;width:22px;height:22px;margin:-11px;border-radius:50%;background:var(--cream);box-shadow:none}
-.plane .dot.on{background:var(--tea)}
-.plane .dot.on::after{content:"";position:absolute;inset:-14px;border-radius:50%;border:3px solid var(--tea);animation:ping 1.4s ease-out infinite}
-/* pause the pulsing marker while the map is off screen */
-.map.off .plane .dot.on::after{animation-play-state:paused}
-@keyframes ping{from{transform:scale(.4);opacity:1}to{transform:scale(1.6);opacity:0}}
-.tag{position:absolute;left:50%;top:50%;transform:translate(-50%,-190%);background:var(--cream);color:var(--ink);padding:6px 14px;border-radius:999px;font-weight:600;white-space:nowrap;z-index:2}
-.tag::after{content:"";position:absolute;left:50%;top:100%;width:2px;height:34px;background:var(--cream)}
+.shop{border-top:2px solid rgba(255,243,220,.18);border-bottom:2px solid rgba(255,243,220,.18);padding:16px 0}
+.shop b{display:block;font:600 1.35rem var(--display);color:var(--tea)}
+.shop span{display:block;opacity:.8}
+.where .ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.where .btn.go{display:inline-flex;align-items:center;gap:8px;margin-top:18px;text-decoration:none;background:var(--cream);color:var(--ink)}
+.contact{margin-top:26px}
+.contact h3{font:500 1rem var(--display);opacity:.8;margin-bottom:10px}
+.social{display:flex;flex-wrap:wrap;gap:10px}
+.social a{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:999px;border:2px solid rgba(255,246,230,.55);color:var(--cream);text-decoration:none;font:500 .95rem var(--display)}
+.map{display:block;position:relative;aspect-ratio:4/3;border-radius:28px;overflow:hidden;background:#1F322E}
+.map img{display:block;width:100%;height:100%;object-fit:cover}
+.map .pin{position:absolute;left:var(--px);top:var(--py);transform:translate(-50%,-100%);display:flex;flex-direction:column;align-items:center;pointer-events:none}
+.map .pin b{background:var(--cream);color:var(--ink);font:600 .95rem var(--display);padding:6px 14px;border-radius:999px;box-shadow:0 4px 10px rgba(0,0,0,.3);white-space:nowrap}
+.map .pin i{width:2px;height:30px;background:var(--cream)}
+.map .pin s{position:relative;width:18px;height:18px;border-radius:50%;background:var(--tea);border:3px solid var(--cream);transform:translateY(50%)}
+.map .pin s::after{content:"";position:absolute;inset:-14px;border-radius:50%;border:3px solid var(--tea);animation:ping 1.6s ease-out infinite}
+@keyframes ping{from{transform:scale(.4);opacity:1}to{transform:scale(1.5);opacity:0}}
+.approx{margin-top:10px;font-size:.8rem;opacity:.65}
 
 /* footer */
 .end{background:var(--tea);color:var(--ink);padding:clamp(260px,38vh,360px) 16px 0;text-align:center;--from:var(--indigo);overflow:hidden}
@@ -178,8 +177,6 @@ section{position:relative}
   .call:nth-of-type(1){bottom:-2.4em}.call:nth-of-type(2){bottom:-4.2em}.call:nth-of-type(3){bottom:-6em}
   .band{font-size:1.2rem}
   .where{grid-template-columns:1fr;padding-top:200px;padding-bottom:80px}
-  .map{height:46vh}
-  .stores button{flex-direction:column;gap:2px}.stores button span{text-align:left}
   .end{padding-top:220px}
   .qr{display:none}
   .drips{height:240px}
@@ -187,14 +184,13 @@ section{position:relative}
 @media (prefers-reduced-motion:reduce){
   html{scroll-behavior:auto}
   #curtain,#count{display:none}
-  .stage .float,.plane .dot.on::after{animation:none}
-  .plane{transition:none}
+  .stage .float,.map .pin s::after{animation:none}
 }
 .fallback{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;border-radius:50%;display:none}
 .fallback.on{display:block}
 /* debug switches (see the script at the top of <head>) */
 .dbg-nodrips .drips{display:none!important}
-.dbg-nomap .plane{display:none!important}
+.dbg-nomap .map{display:none!important}
 .dbg-noshadow .item .tilt,.dbg-noshadow .mark,.dbg-noshadow .stage .float{filter:none!important}
 .dbg-noshadow .edge{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
 #dbgfps{position:fixed;left:8px;top:8px;z-index:1000;font:600 12px/1.3 ui-monospace,monospace;color:#fff;background:rgba(0,0,0,.7);padding:6px 8px;border-radius:8px;pointer-events:none;white-space:pre}
@@ -254,10 +250,30 @@ section{position:relative}
 <section class="where" id="where" data-nav="light">
   <div class="drips" data-n="24"></div>
   <div>
-    <h2>แวะหยิบได้ที่จุดขายใกล้คุณ</h2>
-    <ul class="stores" id="stores"></ul>
+    <h2>แวะหยิบได้<br>ที่หน้าร้าน</h2>
+    <div class="shop">
+      <b>หน้าร้าน June</b>
+      <span>10 พหลโยธิน · ใกล้อนุสาวรีย์ชัยสมรภูมิ</span>
+      <span>เวลาเปิด: ทักถามทาง LINE ได้เลย</span>
+    </div>
+    <a class="btn go" href="https://www.google.com/maps/search/?api=1&amp;query=13.767586,100.539543" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.6"/></svg>นำทางด้วย Google Maps</a>
+    <div class="contact">
+      <h3>ติดต่อร้าน</h3>
+      <div class="social">
+        <a href="{{ line_add_url }}" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4C7 4 3 7.2 3 11.2c0 3.6 3.2 6.6 7.5 7.1l-.4 2.2c-.1.4.3.7.7.5l3.4-2.6C18.4 17.8 21 14.8 21 11.2 21 7.2 17 4 12 4Z"/></svg>LINE {{ line_oa_id }}</a>
+        <!-- Instagram / Facebook: add here once the shop sends its links -->
+      </div>
+    </div>
   </div>
-  <div class="map"><div class="plane" id="plane"><div class="river"></div></div><div class="tag" id="tag"></div></div>
+  <div>
+    <!-- 3D street map of the real spot, baked to one picture (mock/where-map-3d.html). It used to be a live tilted
+         3D layer, which stalled phones on fast scrolls; now only the small pin on top animates. -->
+    <a class="map" href="https://www.google.com/maps/search/?api=1&amp;query=13.767586,100.539543" target="_blank" rel="noopener" aria-label="แผนที่ร้าน June แถวอนุสาวรีย์ชัยสมรภูมิ เปิดใน Google Maps">
+      <img src="{% static 'menu/img/where-map.webp' %}" alt="" width="1750" height="1313" loading="lazy" decoding="async">
+      <span class="pin" style="--px:51.14%;--py:39.05%"><b>June อยู่ตรงนี้</b><i></i><s></s></span>
+    </a>
+    <p class="approx">แผนที่โดยประมาณ · แตะเพื่อเปิด Google Maps</p>
+  </div>
 </section>
 
 <section class="end" id="end" data-nav="dark">
@@ -266,7 +282,7 @@ section{position:relative}
   <a class="btn" href="{{ line_add_url }}" target="_blank" rel="noopener">ทักสั่งทาง LINE</a>
   <div class="qr">{{ line_qr_svg }}<p>สแกนเพื่อเพิ่มเพื่อนใน LINE<b>{{ line_oa_id }}</b></p></div>
   <div class="mark" id="mark" aria-hidden="true"><span class="logo-mask"></span></div>
-  <p class="note">หน้าตัวอย่าง: ราคา ชื่อเมนูบางรายการ และจุดขายบนแผนที่เป็นข้อมูลจำลอง ต้องแก้เป็นข้อมูลจริงก่อนใช้งาน</p>
+  <p class="note">หน้าตัวอย่าง: ราคาและชื่อเมนูบางรายการเป็นข้อมูลจำลอง ต้องแก้เป็นข้อมูลจริงก่อนใช้งาน</p>
 </section>
 </main>
 
@@ -387,37 +403,6 @@ function openStory(i){setFeatured(i);scrollTo({top:story.offsetTop+innerHeight*.
 const io=new IntersectionObserver((es,o)=>es.forEach(e=>{if(!e.isIntersecting)return;o.unobserve(e.target);const el=e.target,to=+el.dataset.to,from=+(el.dataset.from||0),t0=performance.now();(function s(t){const p=calm?1:clamp((t-t0)/1100);el.textContent=Math.round(from+(to-from)*ease(p));if(p<1)requestAnimationFrame(s)})(t0)}),{threshold:.6});
 
 
-/* map */
-const plane=$('#plane');
-/* city blocks: painted once into one canvas instead of ~200 divs with 5 stacked box-shadows each,
-   which phones had to re-rasterise as one huge tilted layer when the section scrolled into view */
-(()=>{
-  const k=Math.min(devicePixelRatio||1,1.5),cv=document.createElement('canvas');cv.width=cv.height=1200*k;cv.setAttribute('aria-hidden','true');
-  const c=cv.getContext('2d');c.scale(k,k);
-  const rr=(x,y,w,h,r)=>{c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();c.fill()};
-  // river (was a 1700x90 div rotated -24deg around its centre)
-  c.save();c.translate(-200+850,520+45);c.rotate(-24*Math.PI/180);c.fillStyle='#9CC4D6';rr(-850,-45,1700,90,45);c.restore();
-  const block=(x,y,w,h,park)=>{
-    if(!park){c.fillStyle='#4A6A64';for(let s=5;s>=1;s--)rr(x+s,y-s,w,h,3)}   // the old 1..5px stacked shadow
-    c.fillStyle=park?'#DCEBB5':'#6E918A';rr(x,y,w,h,3);
-  };
-  for(let r=0;r<12;r++)for(let col=0;col<12;col++){
-    const x=col*100+8,y=r*100+8,riverY=520+45-(x-400)*.445;if(Math.abs(y+42-riverY)<95)continue;
-    if(Math.random()<.08){block(x,y,84,84,true);continue}
-    if(Math.random()<.5)block(x,y,84,84);
-    else{block(x,y,38,84);block(x+46,y,38,rnd(40,84)|0)}
-  }
-  plane.querySelector('.river')?.remove();plane.prepend(cv);
-  new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle('off',!e.isIntersecting))).observe(plane.parentElement);
-})();
-const S=[{n:'หน้าร้าน June',a:'จุดขายตัวอย่าง · ทุกวัน',x:650,y:250,r:-18},{n:'งานรักษ์บางสะแก',a:'ออกบูธ · ตามวันงาน',x:960,y:760,r:24},{n:'ตลาดนัดวันเสาร์',a:'จุดขายตัวอย่าง · เสาร์–อาทิตย์',x:330,y:820,r:-40},{n:'จุดรับหน้าสวน',a:'จุดขายตัวอย่าง · นัดรับล่วงหน้า',x:150,y:960,r:12}];
-$('#stores').innerHTML=S.map((s,i)=>`<li><button data-s="${i}" aria-pressed="false"><b>${s.n}</b><span>${s.a}</span></button></li>`).join('');
-S.forEach(s=>plane.insertAdjacentHTML('beforeend',`<div class="dot" style="left:${s.x}px;top:${s.y}px"></div>`));
-const dots=$$('.plane .dot');
-function fly(i){const s=S[i];plane.style.transform=`rotateX(56deg) rotateZ(${s.r}deg) scale(1.25) translate(${600-s.x}px,${600-s.y}px)`;
-  $$('.stores button').forEach((b,j)=>b.setAttribute('aria-pressed',j===i));dots.forEach((d,j)=>d.classList.toggle('on',j===i));
-  const tag=$('#tag');tag.style.opacity=0;setTimeout(()=>{tag.textContent=s.n;tag.style.transition='opacity .3s';tag.style.opacity=1},calm?0:900)}
-$('#stores').addEventListener('click',e=>{const b=e.target.closest('button');if(b)fly(+b.dataset.s)});
 
 /* scroll loop */
 const dripEls=$$('.drips'),navSecs=$$('[data-nav]'),nav=$('#nav'),mark=$('#mark'),band=$('#band'),calls=$$('.call'),cut=$('#layCut'),keep=$('#layKeep'),pin=$('.story .pin');
@@ -534,7 +519,7 @@ function intro(){
   setTimeout(()=>{cur.remove();cnt.remove()},4700);
 }
 
-setActive(0);fly(0);
+setActive(0);
 window.T0=performance.now();requestAnimationFrame(()=>{intro();frame()});
 if(window.DBG.fps){const el=document.createElement('div');el.id='dbgfps';document.body.append(el);
   let n=0,worst=0,slow=0,last=performance.now(),t0=last;

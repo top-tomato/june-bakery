@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>June — แผนที่หน้าร้าน (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Replaces the tilted 3D city (a huge transformed layer that stalled phones on fast scroll)
+   with a flat, hand-styled map of the real spot. Plain inline SVG: nothing moves, nothing to re-render. */
+:root{--tea:#F3A18F;--cream:#FFF6E6;--indigo:#3E5D58;--indigo-2:#2C4540;--pink:#DCEBB5;--ink:#243B37;
+  --display:"Mitr","Anuphan",system-ui,sans-serif;--body:"Anuphan",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--body);background:#1c2b28;color:var(--cream);line-height:1.6}
+.note{max-width:1100px;margin:16px auto;padding:0 16px;opacity:.7;font-size:.9rem}
+.where{background:var(--indigo);padding:56px clamp(16px,5vw,80px) 80px;display:grid;grid-template-columns:minmax(260px,1fr) 1.5fr;gap:clamp(24px,4vw,64px);align-items:start}
+.where h2{font:600 clamp(2.1rem,5vw,4.2rem)/1.15 var(--display);margin-bottom:22px}
+.shop{border-top:2px solid rgba(255,243,220,.18);border-bottom:2px solid rgba(255,243,220,.18);padding:16px 0}
+.shop b{display:block;font:600 1.35rem var(--display);color:var(--tea)}
+.shop span{display:block;opacity:.8}
+.acts{display:flex;flex-wrap:wrap;gap:10px;margin-top:18px}
+.btn{font:600 1rem var(--display);padding:11px 20px;border-radius:999px;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+.btn.main{background:var(--cream);color:var(--ink)}
+.btn.line{border:2px solid var(--cream);color:var(--cream)}
+.btn .ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.map{display:block;position:relative;border-radius:28px;overflow:hidden;background:#24403B;aspect-ratio:4/3}
+.map svg{display:block;width:100%;height:100%}
+.road{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.lbl{font:600 11px var(--display);fill:var(--cream);opacity:.75;letter-spacing:.02em}
+.lbl.big{font-size:12px;opacity:.9}
+.tag{position:absolute;left:var(--x);top:var(--y);transform:translate(-50%,calc(-100% - 30px));background:var(--cream);color:var(--ink);font:600 .95rem var(--display);padding:6px 14px;border-radius:999px;white-space:nowrap;box-shadow:0 4px 10px rgba(0,0,0,.25)}
+.tag::after{content:"";position:absolute;left:50%;top:100%;width:2px;height:22px;margin-left:-1px;background:var(--cream)}
+.approx{font-size:.8rem;opacity:.65}
+.maprow{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px}
+.btn.swap{background:none;border:2px solid rgba(255,246,230,.5);color:var(--cream);padding:8px 16px;font-size:.9rem;cursor:pointer;white-space:nowrap;flex:none}
+.gmap{border-radius:28px;overflow:hidden;aspect-ratio:4/3;background:#24403B}
+.gmap iframe{display:block;width:100%;height:100%;border:0}
+[hidden]{display:none!important}
+@media (max-width:760px){.where{grid-template-columns:1fr;padding-top:40px}}
+</style>
+</head>
+<body>
+<p class="note">mock: ส่วน "แวะหยิบ" ของหน้าแรก · ลองย่อหน้าต่างให้แคบเพื่อดูแบบมือถือ</p>
+
+<section class="where">
+  <div>
+    <h2>แวะหยิบได้<br>ที่หน้าร้าน</h2>
+    <div class="shop">
+      <b>หน้าร้าน June</b>
+      <span>10 พหลโยธิน · ใกล้อนุสาวรีย์ชัยสมรภูมิ</span>
+      <span>เวลาเปิด: ทักถามทาง LINE ได้เลย</span>
+    </div>
+    <div class="acts">
+      <a class="btn main" href="https://www.google.com/maps/search/?api=1&query=13.767586,100.539543" target="_blank" rel="noopener"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12Z"/><circle cx="12" cy="10" r="2.6"/></svg>เปิดใน Google Maps</a>
+      <a class="btn line" href="https://line.me/R/oaMessage/%40561hgrea/?%E0%B8%82%E0%B8%AD%E0%B8%97%E0%B8%B2%E0%B8%87%E0%B9%84%E0%B8%9B%E0%B8%A3%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%AB%E0%B8%99%E0%B9%88%E0%B8%AD%E0%B8%A2"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4Z"/><path d="M8 10h8M8 13h5"/></svg>ถามทางทาง LINE</a>
+    </div>
+  </div>
+
+  <div>
+  <a class="map" href="https://www.google.com/maps/search/?api=1&query=13.767586,100.539543" target="_blank" rel="noopener" aria-label="แผนที่ร้าน June เปิดใน Google Maps">
+    <!-- traced by hand from the map the owner shared (Victory Monument area); approximate, not to scale -->
+    <svg viewBox="40 10 300 225" aria-hidden="true">
+      <!-- small streets, just for texture -->
+      <g class="road" stroke="#33524C" stroke-width="2">
+        <path d="M120 10 L150 60 M135 0 L170 55 M200 30 L235 10 M210 60 L250 40 M215 95 L260 70 M60 60 L100 30 M70 100 L110 70 M230 120 L290 90 M240 150 L300 120 M250 175 L320 150 M260 200 L330 175 M90 150 L120 175 M60 180 L95 205 M175 70 L200 85 M160 95 L182 110 M300 30 L330 10 M290 60 L340 40"/>
+      </g>
+      <!-- Khlong Sam Sen canal -->
+      <path class="road" stroke="#6FA6B8" stroke-width="4" d="M20 39 L98 108 L144 154 L195 180 L290 245"/>
+      <!-- Sri Rat expressway -->
+      <path class="road" stroke="#E9B9A6" stroke-width="12" d="M10 15 L92 77 L141 108 L167 144 L206 185 L320 265"/>
+      <!-- Ratchawithi -->
+      <path class="road" stroke="#E9B9A6" stroke-width="8" d="M0 134 L134 190 M177 211 L330 260"/>
+      <!-- Phaya Thai -->
+      <path class="road" stroke="#E9B9A6" stroke-width="8" d="M144 213 L118 265"/>
+      <!-- Phahonyothin -->
+      <path class="road" stroke="#F3A18F" stroke-width="10" d="M154 200 L177 154 L252 0"/>
+      <!-- Victory Monument roundabout -->
+      <circle cx="154" cy="203" r="15" fill="#24403B" stroke="#E9B9A6" stroke-width="7"/>
+      <path d="M154 188 l3 12 h-6 Z M147 206 h14" stroke="var(--cream)" stroke-width="2" fill="var(--cream)"/>
+      <!-- labels -->
+      <text class="lbl big" x="226" y="78" transform="rotate(-64 226 78)">ถ.พหลโยธิน</text>
+      <text class="lbl" x="58" y="58" transform="rotate(37 58 58)">ทางด่วนศรีรัช</text>
+      <text class="lbl" x="22" y="155" transform="rotate(23 22 155)">ถ.ราชวิถี</text>
+      <text class="lbl big" x="172" y="222">อนุสาวรีย์ชัยฯ</text>
+      <!-- the shop -->
+      <circle cx="177" cy="113" r="22" fill="var(--tea)" opacity=".18"/>
+      <circle cx="177" cy="113" r="9" fill="var(--tea)" stroke="var(--cream)" stroke-width="3"/>
+    </svg>
+    <span class="tag" style="--x:45.7%;--y:45.8%">June อยู่ตรงนี้</span>
+  </a>
+  <!-- the real Google map is only loaded when asked for, so the page stays light for everyone else -->
+  <div class="gmap" id="gmap" hidden></div>
+  <div class="maprow">
+    <p class="approx" id="approx">แผนที่โดยประมาณ</p>
+    <button class="btn swap" id="swap" type="button"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6l6-2 6 2 6-2v14l-6 2-6-2-6 2Z"/><path d="M9 4v14M15 6v14"/></svg><span>ดูแผนที่จริง</span></button>
+  </div>
+  </div>
+</section>
+<script>
+const SRC='https://www.google.com/maps?q=13.767586,100.539543&z=17&hl=th&output=embed';
+const drawn=document.querySelector('.map'),gmap=document.getElementById('gmap'),swap=document.getElementById('swap'),approx=document.getElementById('approx');
+swap.onclick=()=>{
+  const real=gmap.hidden;
+  if(real&&!gmap.firstChild)gmap.innerHTML=`<iframe src="${SRC}" title="แผนที่ร้าน June บน Google Maps" loading="lazy" referrerpolicy="no-referrer-when-downgrade" allowfullscreen></iframe>`;
+  gmap.hidden=!real;drawn.hidden=real;
+  swap.querySelector('span').textContent=real?'กลับไปแผนที่วาด':'ดูแผนที่จริง';
+  approx.textContent=real?'แผนที่จาก Google Maps · ใช้สองนิ้วเลื่อนแผนที่':'แผนที่โดยประมาณ';
+};
+</script>
+</body>
+</html>
