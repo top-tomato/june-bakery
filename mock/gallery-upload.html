@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>June — อัปโหลดรูปเข้า Gallery (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Shop-side upload page (would live at /admin/gallery/ behind the admin login). Phone first: the shop will most
+   likely upload straight from the phone's photo library. Pick or drop many photos/videos at once; each one uploads
+   on its own with a progress bar; captions are optional and editable later. Below: what's on the site now, in order,
+   with move up/down, show/hide and delete. Mock: nothing is sent anywhere. */
+:root{--ink:#2F4A45;--cream:#FFF6E6;--paper:#FFFBF3;--peach:#F3A18F;--green:#3E5D58;--line:#e6dccb}
+*{box-sizing:border-box;margin:0}
+body{font-family:Anuphan,system-ui,sans-serif;background:var(--paper);color:var(--ink);padding:0 0 60px}
+header{background:var(--green);color:var(--cream);padding:16px;position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between}
+header h1{font:600 1.15rem Mitr,sans-serif}
+header a{color:var(--cream);opacity:.85;font-size:.9rem;text-decoration:none}
+main{max-width:720px;margin:0 auto;padding:16px}
+.note{background:#1c2b28;color:var(--cream);padding:10px 14px;border-radius:10px;font-size:.85rem;margin-bottom:16px}
+.drop{display:grid;place-items:center;gap:10px;text-align:center;border:2.5px dashed #c9bfae;border-radius:18px;padding:34px 16px;background:#fff;cursor:pointer;transition:.2s}
+.drop.over{border-color:var(--peach);background:#fff4ef}
+.drop svg{width:44px;height:44px;fill:none;stroke:var(--ink);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.drop b{font:600 1.1rem Mitr,sans-serif}
+.drop small{opacity:.65}
+.btn{display:inline-flex;align-items:center;gap:8px;border:0;border-radius:999px;padding:12px 22px;background:var(--ink);color:var(--cream);font:500 1rem Mitr,sans-serif;cursor:pointer}
+h2{font:600 1.05rem Mitr,sans-serif;margin:26px 0 10px}
+.list{display:grid;gap:10px}
+.item{display:grid;grid-template-columns:72px 1fr auto;gap:12px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:8px}
+.item .th{width:72px;height:72px;border-radius:10px;object-fit:cover;background:#eee;position:relative;overflow:hidden}
+.item .th img,.item .th video{width:100%;height:100%;object-fit:cover;display:block}
+.item .th i{position:absolute;left:4px;bottom:4px;font:600 .62rem Mitr;background:rgba(36,59,55,.85);color:var(--cream);padding:1px 6px;border-radius:99px;font-style:normal}
+.item input{width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font:inherit;background:var(--paper)}
+.bar{height:6px;border-radius:9px;background:#eee;margin-top:6px;overflow:hidden}
+.bar span{display:block;height:100%;width:0;background:var(--peach);transition:width .2s}
+.st{font-size:.8rem;opacity:.7;margin-top:4px}
+.st.ok{color:#3d7a3a;opacity:1}
+.tools{display:flex;gap:4px}
+.ic{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;display:grid;place-items:center;cursor:pointer}
+.ic svg{width:18px;height:18px;fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ic.on{background:#eaf3dd;border-color:#bcd79a}
+.item.off{opacity:.5}
+.empty{opacity:.6;text-align:center;padding:20px}
+@media (max-width:480px){.item{grid-template-columns:60px 1fr}.item .th{width:60px;height:60px}.tools{grid-column:1/-1;justify-content:flex-end}}
+</style>
+</head>
+<body>
+<header><h1>อัปโหลดรูป · Gallery</h1><a href="#">กลับหน้า admin</a></header>
+<main>
+  <p class="note">mock: ลองเลือกรูปจากเครื่องได้ แต่ยังไม่ส่งไปไหน · หน้านี้จริงจะอยู่ใน admin ต้องล็อกอินก่อน</p>
+  <label class="drop" id="drop">
+    <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg>
+    <b>เลือกรูปหรือวิดีโอ</b>
+    <small>เลือกได้ทีละหลายไฟล์ · ลากไฟล์มาวางตรงนี้ก็ได้<br>วิดีโอ .mp4 ไม่เกิน 20 MB</small>
+    <span class="btn">เลือกจากเครื่อง</span>
+    <input type="file" id="file" accept="image/*,video/mp4" multiple hidden>
+  </label>
+
+  <h2 id="upH" hidden>กำลังอัปโหลด</h2>
+  <div class="list" id="up"></div>
+
+  <h2>บนเว็บตอนนี้ <small style="font:400 .85rem Anuphan;opacity:.6">(เรียงตามที่ลูกค้าเห็น)</small></h2>
+  <div class="list" id="now"></div>
+</main>
+<script>
+const ICON={
+  up:'<path d="M12 19V5M5 12l7-7 7 7"/>',down:'<path d="M12 5v14M5 12l7 7 7-7"/>',
+  eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+  trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>',
+};
+const ic=(k,t,on)=>`<button class="ic${on?' on':''}" title="${t}" data-a="${k}"><svg viewBox="0 0 24 24">${ICON[k]}</svg></button>`;
+let items=[
+  {src:'img/snackbox-poster.jpg',video:true,cap:'Snack box',on:true},
+  {src:'img/shop-12.jpg',cap:'ชิฟฟ่อนมะพร้าวใบเตย',on:true},
+  {src:'img/shop-05.jpg',cap:'',on:true},
+];
+function renderNow(){
+  const el=document.getElementById('now');
+  el.innerHTML=items.length?items.map((g,i)=>`<div class="item${g.on?'':' off'}" data-i="${i}">
+    <div class="th">${g.video?`<img src="${g.src}"><i>วิดีโอ</i>`:`<img src="${g.src}">`}</div>
+    <div><input value="${g.cap}" placeholder="คำบรรยาย (ไม่ใส่ก็ได้)"><div class="st">${g.on?'แสดงบนเว็บ':'ซ่อนอยู่'}</div></div>
+    <div class="tools">${ic('up','เลื่อนขึ้น')}${ic('down','เลื่อนลง')}${ic('eye',g.on?'ซ่อน':'แสดง',g.on)}${ic('trash','ลบ')}</div></div>`).join(''):'<p class="empty">ยังไม่มีรูป</p>';
+}
+document.getElementById('now').addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;const i=+b.closest('.item').dataset.i,a=b.dataset.a;
+  if(a==='up'&&i>0)[items[i-1],items[i]]=[items[i],items[i-1]];
+  if(a==='down'&&i<items.length-1)[items[i+1],items[i]]=[items[i],items[i+1]];
+  if(a==='eye')items[i].on=!items[i].on;
+  if(a==='trash'&&confirm('ลบรูปนี้ออกจากเว็บ?'))items.splice(i,1);
+  renderNow();
+});
+function add(files){
+  document.getElementById('upH').hidden=false;
+  [...files].forEach(f=>{
+    const video=f.type.startsWith('video'),url=URL.createObjectURL(f);
+    const row=document.createElement('div');row.className='item';
+    row.innerHTML=`<div class="th">${video?`<video src="${url}#t=0.1" muted></video><i>วิดีโอ</i>`:`<img src="${url}">`}</div>
+      <div><input placeholder="คำบรรยาย (ไม่ใส่ก็ได้)"><div class="bar"><span></span></div><div class="st">กำลังอัปโหลด…</div></div><div></div>`;
+    document.getElementById('up').prepend(row);
+    if(video&&f.size>20*1024*1024){row.querySelector('.st').textContent='ไฟล์ใหญ่เกิน 20 MB';return}
+    let p=0;const t=setInterval(()=>{p+=8+Math.random()*14;row.querySelector('.bar span').style.width=Math.min(p,100)+'%';
+      if(p>=100){clearInterval(t);const st=row.querySelector('.st');st.textContent='ขึ้นเว็บแล้ว';st.className='st ok';
+        items.push({src:video?'img/snackbox-poster.jpg':url,video,cap:row.querySelector('input').value,on:true});renderNow()}},180);
+  });
+}
+const drop=document.getElementById('drop'),file=document.getElementById('file');
+file.addEventListener('change',()=>add(file.files));
+['dragenter','dragover'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.add('over')}));
+['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('over')}));
+drop.addEventListener('drop',e=>add(e.dataTransfer.files));
+renderNow();
+</script>
+</body>
+</html>
