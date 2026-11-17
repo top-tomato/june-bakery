@@ -200,15 +200,15 @@ P.push(`<div class="pg cover" data-density="hard"><div class="in"><div class="pa
 if(P.length%2)P.splice(P.length-1,0,`<div class="pg left"><div class="in"><div class="pad"></div></div></div>`);   // page-flip needs an even page count
 const stageEl=document.querySelector('.stage');
 const book=document.getElementById('book');book.innerHTML=P.join('');
-// Phones: one page at a time, sized exactly to the screen. page-flip ties its single-page switch to minWidth,
-// which also acts as a minimum page size, so instead we use a fixed page size that fits and let it go single.
-const RATIO=360/680,SINGLE=innerWidth<700;
-const pageW=Math.floor(Math.min(innerWidth-24,(innerHeight-(innerHeight<560?60:104))*RATIO));
-if(SINGLE)stageEl.style.width=pageW+'px';
-const size=SINGLE?{width:pageW,height:Math.round(pageW/RATIO),size:'fixed'}
-                 :{width:360,height:680,size:'stretch',minWidth:innerHeight<560?140:330,maxWidth:520,minHeight:innerHeight<560?260:400,maxHeight:980};   // short landscape phones: smaller spread
-// crossing the phone/desktop breakpoint (e.g. rotating) rebuilds the book
-addEventListener('resize',()=>{if((innerWidth<700)!==SINGLE)location.reload()});
+// Same rule as frontend/src/features/book/layout.ts: work out whether a spread fits this screen, then give page-flip a
+// fixed page size (a 1280x720 laptop at 100% used to get a ~1200px-tall page that ran off the screen).
+const RATIO=360/680;
+function layout(w,h){const aw=w-24,ah=h-(h<560?70:130),sw=Math.floor(Math.min(aw/2,ah*RATIO)),one=Math.floor(Math.min(aw,ah*RATIO)),single=sw<Math.min(300,one),pw=single?one:sw;return{single,pageW:pw,pageH:Math.round(pw/RATIO)}}
+const L=layout(innerWidth,innerHeight),SINGLE=L.single;
+stageEl.style.width=(SINGLE?L.pageW:L.pageW*2)+'px';
+const size={width:L.pageW,height:L.pageH,size:'fixed'};
+// a different layout (rotation, window resize) rebuilds the book
+let rt=0;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{const n=layout(innerWidth,innerHeight);if(n.single!==L.single||n.pageW!==L.pageW)location.reload()},200)});
 const pf=new St.PageFlip(book,{
   ...size,
   usePortrait:true,showCover:true,startZIndex:10,drawShadow:true,maxShadowOpacity:.4,flippingTime:900,

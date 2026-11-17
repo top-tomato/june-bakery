@@ -4,22 +4,38 @@ import { PageFlip, type FlipState } from 'page-flip'
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore, type CSSProperties } from 'react'
 import type { MenuData } from '@/api/menu'
 import { viewportHeight } from '@/lib/env'
+import { bookLayout, PAGE_RATIO } from './layout'
 import { buildPages } from './pages'
 
-const PHONE = '(max-width: 699px)'
-const phoneQuery = matchMedia(PHONE)
-const subscribePhone = (cb: () => void) => {
-  phoneQuery.addEventListener('change', cb)
-  return () => phoneQuery.removeEventListener('change', cb)
+// Rebuild the book only when the layout really changes: width changes (rotation, desktop window resize) or the frozen
+// viewport height changes (rotation). Phone toolbars sliding in and out don't count.
+const layoutKey = () => {
+  const l = bookLayout(innerWidth, viewportHeight())
+  return `${l.single ? 's' : 'd'}:${l.pageW}`
+}
+const subscribeLayout = (cb: () => void) => {
+  let t = 0
+  const onChange = () => {
+    clearTimeout(t)
+    t = window.setTimeout(cb, 150)
+  }
+  addEventListener('resize', onChange)
+  addEventListener('vhchange', onChange)
+  return () => {
+    clearTimeout(t)
+    removeEventListener('resize', onChange)
+    removeEventListener('vhchange', onChange)
+  }
 }
 
 export function BookPage({ data }: { data: MenuData }) {
-  // phones get one full-height page, wider screens the two-page spread; switching rebuilds the book (key)
-  const single = useSyncExternalStore(subscribePhone, () => phoneQuery.matches)
-  return <Book key={single ? 'single' : 'spread'} data={data} single={single} />
+  const key = useSyncExternalStore(subscribeLayout, layoutKey)
+  const [mode, w] = key.split(':')
+  const pageW = Number(w)
+  return <Book key={key} data={data} single={mode === 's'} pageW={pageW} />
 }
 
-function Book({ data, single }: { data: MenuData; single: boolean }) {
+function Book({ data, single, pageW }: { data: MenuData; single: boolean; pageW: number }) {
   const stageRef = useRef<HTMLDivElement>(null)
   const bookRef = useRef<HTMLDivElement>(null)
   const ringsRef = useRef<HTMLDivElement>(null)
@@ -36,15 +52,9 @@ function Book({ data, single }: { data: MenuData; single: boolean }) {
     // page-flip owns these nodes from here on (React renders #book empty and never touches its children)
     book.innerHTML = pages.join('')
 
-    // Phones: page-flip's single-page switch is tied to minWidth, which is also a minimum page size, so pick a fixed
-    // size that fits the screen instead. Wide screens: stretch the spread.
-    const RATIO = 360 / 680
-    const vh = viewportHeight()
-    const pageW = Math.floor(Math.min(innerWidth - 24, (vh - (vh < 560 ? 60 : 104)) * RATIO))
-    stage.style.width = single ? `${pageW}px` : ''
-    const size = single
-      ? { width: pageW, height: Math.round(pageW / RATIO), size: 'fixed' as const }
-      : { width: 360, height: 680, size: 'stretch' as const, minWidth: vh < 560 ? 140 : 330, maxWidth: 520, minHeight: vh < 560 ? 260 : 400, maxHeight: 980 }
+    // fixed page size worked out for this screen (layout.ts); a stage exactly 2 pages wide makes page-flip show a spread
+    stage.style.width = `${single ? pageW : pageW * 2}px`
+    const size = { width: pageW, height: Math.round(pageW / PAGE_RATIO), size: 'fixed' as const }
 
     const pf = new PageFlip(book, {
       ...size,
@@ -89,7 +99,7 @@ function Book({ data, single }: { data: MenuData; single: boolean }) {
       pf.destroy()
       flipRef.current = null
     }
-  }, [pages, single])
+  }, [pages, single, pageW])
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
