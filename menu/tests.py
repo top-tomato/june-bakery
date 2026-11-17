@@ -73,7 +73,13 @@ class MenuApiTests(MediaTestCase):
         info = ShopInfo.load()
         info.instagram_url = "https://www.instagram.com/june"
         info.save()
-        self.assertEqual(self.client.get(reverse("menu:api-menu")).json()["social"], {"instagram": "https://www.instagram.com/june"})
+        self.assertEqual(self.client.get(reverse("menu:api-menu")).json()["social"], {"instagram": "https://www.instagram.com/june/"})
+
+    def test_social_links_lose_tracking_bits(self) -> None:
+        info = ShopInfo.load()
+        info.instagram_url = "https://www.instagram.com/june.bakery.dessert?rpxt=enQ2enNsMHIzeXk0"
+        info.save()
+        self.assertEqual(ShopInfo.load().instagram_url, "https://www.instagram.com/june.bakery.dessert/")
 
     def test_social_links_must_point_at_a_page(self) -> None:
         info = ShopInfo.load()
@@ -230,6 +236,38 @@ class GalleryUploadTests(MediaTestCase):
         self.assertTrue(g.image.name.endswith(".jpg"))
         self.assertEqual(max(g.image.width, g.image.height), 1600)
         self.assertEqual(self.client.get(reverse("menu:api-menu")).json()["gallery"][0]["caption"], "ชิ้นแรก")
+
+    def test_upload_is_watermarked_and_keeps_the_original(self) -> None:
+        from PIL import Image
+
+        self.client.force_login(self.staff)
+        self.client.post(reverse("gallery-upload-file"), {"file": SimpleUploadedFile("big.png", png_bytes((800, 600)), "image/png")})
+        g = GalleryPhoto.objects.get()
+        self.assertTrue(g.original and g.image and g.original.name != g.image.name)
+        with Image.open(g.original.path) as o, Image.open(g.image.path) as w:
+            self.assertEqual(o.size, w.size)
+            # top-left corner: the original is the flat test colour, the shown photo has the white logo / shade on it
+            self.assertNotEqual(o.convert("RGB").getpixel((40, 30)), w.convert("RGB").getpixel((40, 30)))
+
+    def test_ig_link_change_rewatermarks_from_the_original(self) -> None:
+        from menu.watermark import handle_from_url
+
+        self.assertEqual(handle_from_url("https://www.instagram.com/june.bakery.dessert/"), "@june.bakery.dessert")
+        self.assertEqual(handle_from_url(""), "")
+        self.client.force_login(self.staff)
+        self.client.post(reverse("gallery-upload-file"), {"file": SimpleUploadedFile("p.png", png_bytes((600, 600)), "image/png")})
+        g = GalleryPhoto.objects.get()
+        before, original = g.image.name, g.original.name
+        info = ShopInfo.load()
+        info.instagram_url = "https://www.instagram.com/june.bakery.dessert/"
+        info.save()
+        g.refresh_from_db()
+        self.assertNotEqual(g.image.name, before)
+        self.assertEqual(g.original.name, original)
+        self.assertFalse(Path(settings.MEDIA_ROOT, before).exists())
+        orig_path = Path(g.original.path)
+        self.client.post(reverse("gallery-upload-delete", args=[g.pk]))
+        self.assertFalse(orig_path.exists())
 
     def test_photo_gets_a_tiny_blur_preview(self) -> None:
         self.client.force_login(self.staff)

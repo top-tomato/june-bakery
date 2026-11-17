@@ -44,6 +44,14 @@ class GalleryPhotoAdmin(admin.ModelAdmin):
     list_display = ("__str__", "has_video", "sort_order", "is_active")
     fields = ("image", "video", "caption", "sort_order", "is_active")
 
+    def save_model(self, request, obj, form, change) -> None:  # type: ignore[no-untyped-def]
+        # a photo replaced here becomes the new original and gets the watermark like an upload
+        if "image" in form.changed_data and obj.image:
+            if obj.original:
+                obj.original.delete(save=False)
+            obj.apply_watermark()
+        super().save_model(request, obj, form, change)
+
     @admin.display(boolean=True, description="วิดีโอ")
     def has_video(self, obj: GalleryPhoto) -> bool:
         return bool(obj.video)

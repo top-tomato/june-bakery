@@ -70,7 +70,8 @@ def upload(request: HttpRequest) -> JsonResponse:
                 raise ValidationError("วิดีโอต้องเป็น .mp4")
             g.video.save(f"{Path(f.name or 'video').stem[:40] or 'video'}{ext}", f, save=False)
         else:
-            g.image.save("photo.jpg", _shrink(f), save=False)
+            g.original.save("photo.jpg", _shrink(f), save=False)
+            g.apply_watermark()
         g.full_clean()
     except ValidationError as e:
         g.delete_files()

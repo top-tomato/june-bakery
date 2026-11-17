@@ -2,6 +2,7 @@ from urllib.parse import urlsplit
 
 from django.conf import settings
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils import timezone
@@ -121,6 +122,24 @@ class ShopInfo(models.Model):
             if parts.path.strip("/") == "" and not parts.query:
                 raise ValidationError({field: "ใส่ลิงก์หน้าร้าน ไม่ใช่หน้าแรกของเว็บ"})
 
+    def save(self, *args: object, **kwargs: object) -> None:
+        # drop tracking bits apps add when sharing a profile ("?igsh=…", "?rpxt=…"): a clean link on the site
+        for field in ("instagram_url", "facebook_url"):
+            url = getattr(self, field)
+            if url:
+                parts = urlsplit(url)
+                keep = parts.query if field == "facebook_url" and "profile.php" in parts.path else ""
+                setattr(self, field, f"{parts.scheme}://{parts.netloc}{parts.path.rstrip('/')}/" + (f"?{keep}" if keep else ""))
+        before = ShopInfo.objects.filter(pk=self.pk).values_list("instagram_url", flat=True).first() if self.pk else None
+        super().save(*args, **kwargs)  # type: ignore[arg-type]
+        if before is not None and before != self.instagram_url:
+            from menu.watermark import handle_from_url
+
+            handle = handle_from_url(self.instagram_url)
+            for g in GalleryPhoto.objects.exclude(original="", image=""):
+                g.apply_watermark(handle)
+                g.save()
+
     @property
     def social(self) -> dict[str, str]:
         return {k: v for k, v in {"instagram": self.instagram_url, "facebook": self.facebook_url}.items() if v}
@@ -172,6 +191,8 @@ class GalleryPhoto(models.Model):
     """รูปหรือวิดีโอในส่วนรูปขนมบนหน้าแรก และในสมุดรูป /gallery/"""
 
     image = models.ImageField("รูป", upload_to=UniqueName("gallery/"), blank=True, help_text="ถ้าใส่วิดีโอด้วย รูปนี้ใช้เป็นภาพปกของวิดีโอ (ไม่ใส่ก็ได้)")
+    # the photo as uploaded (shrunk, no watermark); `image` is made from it with the watermark (menu/watermark.py)
+    original = models.ImageField(upload_to=UniqueName("gallery/original/"), blank=True, editable=False)
     video = models.FileField(
         "วิดีโอ (ไม่ใส่ก็ได้)",
         upload_to=UniqueName("gallery/video/"),
@@ -195,7 +216,7 @@ class GalleryPhoto(models.Model):
 
     def delete_files(self) -> None:
         """ลบไฟล์รูปและวิดีโอออกจากดิสก์ด้วย (Django ไม่ลบให้เอง)"""
-        for f in (self.image, self.video):
+        for f in (self.image, self.original, self.video):
             if f:
                 f.delete(save=False)
 
@@ -207,6 +228,24 @@ class GalleryPhoto(models.Model):
             "video": self.video.url if self.video else "",
             "preview": self.preview,
         }
+
+    def apply_watermark(self, handle: str | None = None) -> None:
+        """(Re)make `image` from `original` with the current watermark. A photo uploaded before watermarks keeps its
+        file as the original. Videos and video-only items are left alone."""
+        from menu.watermark import handle_from_url, render
+
+        if self.video or not (self.original or self.image):
+            return
+        if not self.original:
+            with self.image.open("rb") as f:
+                self.original.save("photo.jpg", ContentFile(f.read()), save=False)
+        if handle is None:
+            handle = handle_from_url(ShopInfo.load().instagram_url)
+        old = self.image.name if self.image else ""
+        with self.original.open("rb") as f:
+            self.image.save("photo.jpg", render(f, handle), save=False)  # new unique name: caches never show the old one
+        if old and old != self.original.name:
+            self.image.storage.delete(old)
 
     def save(self, *args: object, **kwargs: object) -> None:
         # only when the photo may have changed (a caption/visibility edit passes update_fields and skips this)
