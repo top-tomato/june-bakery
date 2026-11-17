@@ -3,6 +3,26 @@ from django.core.validators import FileExtensionValidator
 from django.db import models
 
 
+def make_preview(field: object, side: int = 32) -> str:
+    """A 32px JPEG of the photo as a data: URI. Upscaled by the browser it looks like a soft blur of the photo,
+    shown instantly (it's in the page data) until the real photo has loaded."""
+    import base64
+    import io
+
+    from PIL import Image, ImageOps
+
+    try:
+        f = field.open("rb") if hasattr(field, "open") else field  # type: ignore[union-attr]
+        with Image.open(f) as im:
+            im = ImageOps.exif_transpose(im).convert("RGB")
+            im.thumbnail((side, side))
+            out = io.BytesIO()
+            im.save(out, "JPEG", quality=45)
+    except Exception:  # a broken or missing file just gets no preview
+        return ""
+    return "data:image/jpeg;base64," + base64.b64encode(out.getvalue()).decode()
+
+
 class Product(models.Model):
     """ขนมหนึ่งเมนูที่โชว์บนหน้าเว็บ"""
 
@@ -123,6 +143,8 @@ class GalleryPhoto(models.Model):
     caption = models.CharField("คำบรรยาย", max_length=80, blank=True)
     sort_order = models.PositiveIntegerField("ลำดับ", default=0)
     is_active = models.BooleanField("แสดงบนเว็บ", default=True)
+    # tiny JPEG (data: URI, ~1 KB) shown blurred while the real photo loads; made from `image` on save
+    preview = models.TextField(blank=True, editable=False)
 
     class Meta:
         ordering = ["sort_order", "id"]
@@ -144,7 +166,14 @@ class GalleryPhoto(models.Model):
             "image": self.image.url if self.image else "",
             "caption": self.caption,
             "video": self.video.url if self.video else "",
+            "preview": self.preview,
         }
+
+    def save(self, *args: object, **kwargs: object) -> None:
+        # only when the photo may have changed (a caption/visibility edit passes update_fields and skips this)
+        if kwargs.get("update_fields") is None:
+            self.preview = make_preview(self.image) if self.image else ""
+        super().save(*args, **kwargs)  # type: ignore[arg-type]
 
     def clean(self) -> None:
         if not self.image and not self.video:

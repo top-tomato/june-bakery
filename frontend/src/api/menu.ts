@@ -21,6 +21,8 @@ export interface GalleryItem {
   caption: string
   /** URL of a short .mp4, or "" for a plain photo */
   video: string
+  /** tiny blurred JPEG (data: URI) to show while `image` loads; "" if none */
+  preview: string
 }
 
 export interface MenuData {
