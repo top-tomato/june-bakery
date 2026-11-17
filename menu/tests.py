@@ -75,6 +75,13 @@ class MenuApiTests(MediaTestCase):
         info.save()
         self.assertEqual(self.client.get(reverse("menu:api-menu")).json()["social"], {"instagram": "https://www.instagram.com/june/"})
 
+    def test_django_admin_shows_social_fields(self) -> None:
+        from django.contrib.admin.sites import site
+
+        fields = [f for _, opts in site._registry[ShopInfo].fieldsets for f in opts["fields"]]
+        self.assertIn("instagram_url", fields)
+        self.assertIn("facebook_url", fields)
+
     def test_social_links_lose_tracking_bits(self) -> None:
         info = ShopInfo.load()
         info.instagram_url = "https://www.instagram.com/june.bakery.dessert?rpxt=enQ2enNsMHIzeXk0"
