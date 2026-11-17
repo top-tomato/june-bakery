@@ -35,7 +35,7 @@ body{font-family:var(--display);color:var(--ink);background:#3E5D58;overflow:hid
 .shift.closed-back{transform:translateX(25%)}
 /* page edges stacked under each half; the side you have read grows, the side to come shrinks */
 .edges{position:absolute;inset:0;pointer-events:none}
-.edges i{transition:opacity .35s;position:absolute;top:0;bottom:0;width:50%;border-radius:6px;background:
+.edges i{position:absolute;top:0;bottom:0;width:50%;border-radius:6px;background:
   repeating-linear-gradient(180deg,#eadcc6 0 1px,#fffaf1 1px 3px) 0 100%/100% var(--t) no-repeat,#fffaf1;
   box-shadow:0 16px 28px -10px rgba(0,0,0,.45);transition:transform .6s,opacity .3s}
 .edges .l{left:0;transform:translate(calc(var(--l)*-6px),calc(var(--l)*6px));--t:calc(var(--l)*6px)}
@@ -266,8 +266,9 @@ const N=P.length,shift=document.getElementById('shift'),edges=document.getElemen
 function upd(i){
   shift.classList.toggle('closed-front',i===0);shift.classList.toggle('closed-back',i===N-1);
   const read=i/(N-1);edges.style.setProperty('--l',read.toFixed(2));edges.style.setProperty('--r',(1-read).toFixed(2));
-  // closed (either cover showing): the cover hides the pages, so no stack peeks out from under it
-  const closed=i===0||i===N-1;edges.querySelector('.l').style.opacity=closed?0:1;edges.querySelector('.r').style.opacity=closed?0:1;
+  // A side's stack is the pages under it. One spread from a cover there is nothing under that side but the cover board,
+  // and while flipping onto the cover it would show as a blank sheet — so hide it from there, instantly (no fade).
+  edges.querySelector('.l').style.opacity=i<=1?0:1;edges.querySelector('.r').style.opacity=i>=N-2?0:1;
   const single=stageEl.classList.contains('single');
   count.textContent=i===0?'ปกหน้า':i===N-1?'ปกหลัง':single?`หน้า ${i} / ${N-2}`:`หน้า ${i}–${Math.min(i+1,N-2)}`;
   prev.disabled=i===0;next.disabled=i===N-1;
