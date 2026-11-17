@@ -863,8 +863,9 @@ main .board {
   text-align: center;
   padding: 8px 0 10px;
 }
+/* a polaroid keeps its thick bottom edge even without a caption (a thin one looked cut off) */
 .gsnap:not(:has(figcaption)) {
-  padding-bottom: 10px;
+  padding-bottom: 44px;
 }
 .gtape {
   position: absolute;
