@@ -268,7 +268,8 @@ function upd(i){
   const read=i/(N-1);edges.style.setProperty('--l',read.toFixed(2));edges.style.setProperty('--r',(1-read).toFixed(2));
   // A side's stack is the pages under it. One spread from a cover there is nothing under that side but the cover board,
   // and while flipping onto the cover it would show as a blank sheet — so hide it from there, instantly (no fade).
-  edges.querySelector('.l').style.opacity=i<=1?0:1;edges.querySelector('.r').style.opacity=i>=N-2?0:1;
+  // and a closed book (either cover) hides every page under the cover board
+  edges.querySelector('.l').style.opacity=i<=1||i===N-1?0:1;edges.querySelector('.r').style.opacity=i===0||i>=N-2?0:1;
   const single=stageEl.classList.contains('single');
   count.textContent=i===0?'ปกหน้า':i===N-1?'ปกหลัง':single?`หน้า ${i} / ${N-2}`:`หน้า ${i}–${Math.min(i+1,N-2)}`;
   prev.disabled=i===0;next.disabled=i===N-1;
