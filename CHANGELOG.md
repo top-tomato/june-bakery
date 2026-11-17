@@ -5,6 +5,7 @@
 
 ## [Unreleased]
 
+<<<<<<< HEAD
 ### Removed
 - ส่วน "หกชิ้น เลือกเองทุกช่อง" (จัดกล่อง 6 ชิ้น), ส่วน "อบมาใหม่ทุกวัน หมดทุกวัน" และปุ่ม "กล่อง (0)" บนแถบด้านบน ตามที่เจ้าของร้านขอ
 
@@ -16,6 +17,10 @@
 
 ### Added
 - สวิตช์สำหรับหาสาเหตุที่กระตุกบนมือถือจริง ใส่ต่อท้าย URL: `?fps` ตัววัดเฟรม (`&log` ส่งตัวเลขเข้า log ของเซิร์ฟเวอร์ตอนทดสอบในเครื่อง), `?no3d`, `?lowres`, `?nodrips`, `?nomap`, `?noshadow` ไม่มีผลกับหน้าปกติ
+=======
+### Added
+- Agent skills สำหรับงานหน้าบ้าน React + TanStack ใน `.claude/skills/` คือ react-best-practices (Vercel), tanstack-router, tanstack-query และ tanstack-integration (deckardger) และ three-best-practices (emalorenzo) สำหรับงาน three.js/WebGL มีที่มา commit และ license อยู่ใน `.claude/skills/README.md`
+>>>>>>> chore/agent-skills
 
 ### Changed
 - ขนม 3D ตอนเปิดหน้าเว็บลอยขึ้นจากด้านล่างนิดเดียวพร้อมขยายตัว แทนการตกจากสูงหนึ่งจอแล้วเด้ง 3 ครั้ง และรอให้ม่านครีมเปิดเกือบหมดก่อนค่อยขึ้น (ดู `mock/intro-drop.html`)
