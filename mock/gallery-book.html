@@ -59,9 +59,12 @@ body{font-family:var(--display);color:var(--ink);background:#3E5D58;overflow:hid
 .pg.right .pad{left:13cqw}.pg.left .pad{right:13cqw}
 
 /* covers: thick board */
-.cover .in{background:var(--grain),radial-gradient(rgba(255,255,255,.18) 1px,transparent 1.3px) 0 0/8px 8px,var(--board)}
+.cover .in,.pg.inside .in{background:var(--grain),radial-gradient(rgba(255,255,255,.18) 1px,transparent 1.3px) 0 0/8px 8px,var(--board)}
+/* inside of a cover: bare board, a touch darker than the outside */
+.pg.inside .in{filter:brightness(.96)}
 .cover .pad{align-items:center;justify-content:center;text-align:center}
 .plate{background:var(--paper);border-radius:10px;padding:8cqh 8cqw 7cqh;width:100%;box-shadow:0 3px 0 rgba(0,0,0,.08)}
+.logo{width:62cqw;aspect-ratio:1000/660;margin:0 auto;background:var(--ink);-webkit-mask:url(img/logo.png) center/contain no-repeat;mask:url(img/logo.png) center/contain no-repeat}  /* the real logo (white PNG) inked in the book's colour */
 .brand{font:500 18cqw/1 var(--display);letter-spacing:.02em}
 .brand em{font:400 1em/1 var(--hand);color:var(--peach);font-style:normal}
 .kicker{font:400 6.5cqw var(--hand);opacity:.8;margin-top:3cqh}
@@ -182,7 +185,7 @@ const snap=([img,cap],j,k)=>`<div class="snap" style="--r:${(j+k)%2?2.5:-2.5}deg
 const P=[];
 P.push(`<div class="pg cover" data-density="hard"><div class="in"><div class="pad">
   ${svg('leaf','left:10%;top:8%;width:22cqw;transform:rotate(-10deg)')}${svg('whisk','right:8%;bottom:4%;width:14cqw;transform:rotate(16deg)')}
-  <div class="plate"><div class="brand">June <em>photos</em></div><div class="rule"></div><div class="kicker">สมุดรูปจากครัว</div></div>
+  <div class="plate"><div class="logo" role="img" aria-label="June"></div><div class="rule"></div><div class="kicker">สมุดรูปจากครัว</div></div>
   <div class="cap" style="margin-top:7cqh;opacity:.8">ลากมุมขวาล่างเพื่อเปิด →</div></div></div></div>`);
 // inside cover: the snack-box reel, full page
 P.push(`<div class="pg left"><div class="in"><div class="pad">
@@ -201,9 +204,7 @@ P.push(`<div class="pg ${(SHOTS.length/2)%2?'left':'right'}"><div class="in"><di
   <div class="h-name" style="font-size:9cqw">ติดตามรูปใหม่</div><div class="h-desc">Instagram ของร้าน</div></div></div></div>`);
 P.push(`<div class="pg cover back" data-density="hard"><div class="in"><div class="pad">
   <div class="plate"><div class="brand" style="font-size:13cqw">ขอบคุณนะ</div><div class="rule"></div><div class="kicker">June · อบใหม่ทุกวัน</div></div></div></div></div>`);
-if(P.length%2)P.splice(P.length-1,0,`<div class="pg left"><div class="in"><div class="pad"></div></div></div>`);   // page-flip needs an even page count
 const stageEl=document.querySelector('.stage');
-const book=document.getElementById('book');book.innerHTML=P.join('');
 // Same rule as frontend/src/features/book/layout.ts: work out whether a spread fits this screen, then give page-flip a
 // fixed page size (a 1280x720 laptop at 100% used to get a ~1200px-tall page that ran off the screen).
 const RATIO=360/680;
@@ -211,6 +212,17 @@ function layout(w,h){const aw=w-24,ah=h-(h<560?70:130),sw=Math.floor(Math.min(aw
 const L=layout(innerWidth,innerHeight),SINGLE=L.single;
 stageEl.style.width=(SINGLE?L.pageW:L.pageW*2)+'px';
 const size={width:L.pageW,height:L.pageH,size:'fixed'};
+// Like a real notebook: the inside of each cover is bare board and the paper starts on the right-hand page.
+// Phones show one page at a time, so they skip the bare insides. page-flip needs an even page count: an odd count gets an "order on LINE" page rather than a blank sheet.
+const INSIDE=`<div class="pg inside" data-density="hard"><div class="in"></div></div>`,SHEET=`<div class="pg"><div class="in"><div class="pad" style="justify-content:center;align-items:center;text-align:center">
+  ${svg('whisk','position:relative;width:16cqw;margin-bottom:4cqh')}
+  <div class="h-name" style="font-size:9cqw">อยากชิมแล้ว?</div><div class="h-desc" style="margin:2cqh 0 5cqh">ทักมาสั่งทาง LINE ได้เลย</div>
+  <a class="order" href="${lineURL('สนใจสั่งชิฟฟ่อนมะพร้าวใบเตย')}">สั่งทาง LINE</a></div></div></div>`;   // fills the odd slot instead of a blank sheet
+const body=P.slice(1,-1);
+const pages=SINGLE?[P[0],...body,...(body.length%2?[SHEET]:[]),P.at(-1)]:[P[0],INSIDE,...body,...(body.length%2?[SHEET]:[]),INSIDE,P.at(-1)];
+const book=document.getElementById('book');book.innerHTML=pages.join('');
+// left/right from the position (with showCover, odd index = left page), so holes and the gutter shadow sit on the spine side
+book.querySelectorAll('.pg').forEach((el,i)=>{if(el.classList.contains('cover'))return;el.classList.remove('left','right');el.classList.add(i%2?'left':'right')});
 // a different layout (rotation, window resize) rebuilds the book
 let rt=0;addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>{const n=layout(innerWidth,innerHeight);if(n.single!==L.single||n.pageW!==L.pageW)location.reload()},200)});
 const pf=new St.PageFlip(book,{
@@ -220,7 +232,7 @@ const pf=new St.PageFlip(book,{
 });
 pf.loadFromHTML(book.querySelectorAll('.pg'));
 book.querySelector('.stf__block').prepend(document.getElementById('rings'));
-const N=P.length,shift=document.getElementById('shift'),edges=document.getElementById('edges');
+const N=pages.length,shift=document.getElementById('shift'),edges=document.getElementById('edges');
 function upd(i){
   shift.classList.toggle('closed-front',i===0);shift.classList.toggle('closed-back',i===N-1);
   const read=i/(N-1);edges.style.setProperty('--l',read.toFixed(2));edges.style.setProperty('--r',(1-read).toFixed(2));
@@ -228,7 +240,8 @@ function upd(i){
   // and while flipping onto the cover it would show as a blank sheet — so hide it from there, instantly (no fade).
   edges.querySelector('.l').style.opacity=i<=1?0:1;edges.querySelector('.r').style.opacity=i>=N-2?0:1;
   const single=stageEl.classList.contains('single');
-  count.textContent=i===0?'ปกหน้า':i===N-1?'ปกหลัง':single?`หน้า ${i} / ${N-2}`:`หน้า ${i}–${Math.min(i+1,N-2)}`;
+  const off=SINGLE?0:1,tot=N-2-2*off,a=Math.max(1,i-off),z=Math.min(i+1-off,tot);
+  count.textContent=i===0?'ปกหน้า':i===N-1?'ปกหลัง':single?`หน้า ${a} / ${tot}`:a===z?`หน้า ${a}`:`หน้า ${a}–${z}`;
   prev.disabled=i===0;next.disabled=i===N-1;
 }
 pf.on('flip',e=>upd(e.data));upd(0);
