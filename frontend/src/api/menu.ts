@@ -20,6 +20,13 @@ export interface MenuData {
   /** links the shop has set (missing = no button) */
   social: { instagram?: string; facebook?: string }
   shop: { name: string; address: string; hours: string; lat: number; lng: number; mapsUrl: string }
+  /** facts shown under "how to order" — null/"" = not filled in yet (hidden) */
+  order: { preorderDays: number | null; shelfLife: string; payment: string }
+  /** the shop's story; null until the shop writes it (section hidden) */
+  about: { title: string; text: string; photo: string } | null
+  reviews: { id: number; text: string; author: string }[]
+  /** photos for the gallery section (#gallery) */
+  gallery: { id: number; image: string; caption: string }[]
 }
 
 export const menuKeys = {

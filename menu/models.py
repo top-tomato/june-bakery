@@ -43,3 +43,85 @@ class Product(models.Model):
             "accent": self.accent_color,
             "highlights": [h for h in (self.highlight_1, self.highlight_2, self.highlight_3) if h],
         }
+
+
+class ShopInfo(models.Model):
+    """ข้อมูลร้านที่แก้ได้ใน admin (มีแถวเดียว) ช่องไหนว่าง หน้าเว็บจะซ่อนส่วนนั้นไว้"""
+
+    hours = models.CharField("เวลาเปิด", max_length=120, blank=True, help_text="เช่น ทุกวัน 9:00–17:00 (ว่าง = บอกให้ทักถามทาง LINE)")
+    preorder_days = models.PositiveSmallIntegerField("ต้องสั่งล่วงหน้ากี่วัน", null=True, blank=True)
+    shelf_life = models.CharField("เก็บได้นานแค่ไหน", max_length=120, blank=True, help_text="เช่น 2 วันในตู้เย็น")
+    payment = models.CharField("วิธีจ่ายเงิน", max_length=120, blank=True, help_text="เช่น โอนพร้อมเพย์ / จ่ายตอนรับ")
+    about_title = models.CharField("หัวข้อเรื่องของร้าน", max_length=80, blank=True)
+    about_text = models.TextField("เรื่องของร้าน (2–3 ประโยค)", blank=True)
+    about_photo = models.ImageField("รูปประกอบเรื่องของร้าน", upload_to="shop/", blank=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "ข้อมูลร้าน"
+        verbose_name_plural = "ข้อมูลร้าน"
+
+    def __str__(self) -> str:
+        return "ข้อมูลร้าน"
+
+    @classmethod
+    def load(cls) -> "ShopInfo":
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def as_payload(self) -> dict[str, object]:
+        return {
+            "hours": self.hours,
+            "preorderDays": self.preorder_days,
+            "shelfLife": self.shelf_life,
+            "payment": self.payment,
+            "about": (
+                {
+                    "title": self.about_title,
+                    "text": self.about_text,
+                    "photo": self.about_photo.url if self.about_photo else "",
+                }
+                if self.about_text
+                else None
+            ),
+        }
+
+
+class Review(models.Model):
+    """รีวิวจากลูกค้า (ขออนุญาตลูกค้าก่อนใส่)"""
+
+    text = models.TextField("ข้อความรีวิว")
+    author = models.CharField("ชื่อลูกค้า", max_length=60, help_text="ใส่ชื่อเล่นหรือย่อได้")
+    sort_order = models.PositiveIntegerField("ลำดับ", default=0)
+    is_active = models.BooleanField("แสดงบนเว็บ", default=True)
+
+    class Meta:
+        ordering = ["sort_order", "id"]
+        verbose_name = "รีวิว"
+        verbose_name_plural = "รีวิว"
+
+    def __str__(self) -> str:
+        return f"{self.author}: {self.text[:30]}"
+
+    def as_payload(self) -> dict[str, object]:
+        return {"id": self.pk, "text": self.text, "author": self.author}
+
+
+class GalleryPhoto(models.Model):
+    """รูปในส่วนรูปขนม (ลิงก์ตรงได้ที่ /#gallery)"""
+
+    image = models.ImageField("รูป", upload_to="gallery/")
+    caption = models.CharField("คำบรรยาย", max_length=80, blank=True)
+    sort_order = models.PositiveIntegerField("ลำดับ", default=0)
+    is_active = models.BooleanField("แสดงบนเว็บ", default=True)
+
+    class Meta:
+        ordering = ["sort_order", "id"]
+        verbose_name = "รูปขนม"
+        verbose_name_plural = "รูปขนม"
+
+    def __str__(self) -> str:
+        return self.caption or self.image.name
+
+    def as_payload(self) -> dict[str, object]:
+        return {"id": self.pk, "image": self.image.url, "caption": self.caption}

@@ -8,11 +8,15 @@ import { CakeLayer } from './CakeLayer'
 import { Curtain } from './Curtain'
 import { GooFilter } from './Drips'
 import { End } from './End'
+import { About, Gallery, Reviews } from './Extras'
+import { HowToOrder } from './HowToOrder'
 import { Hero } from './Hero'
 import { createMotion, type HomeMotion } from './motion'
 import { Nav } from './Nav'
 import { Story } from './Story'
 import { Where } from './Where'
+
+const BG = { indigo: '#3E5D58', pink: '#DCEBB5', cream: '#FFF6E6' }
 
 export function HomePage({ data }: { data: MenuData }) {
   const { products, line, shop } = data
@@ -57,6 +61,15 @@ export function HomePage({ data }: { data: MenuData }) {
   }
   const photo = !product.model || noGl === 'all' || noGl.has(active) ? product.image : null
 
+  // Section backgrounds, top to bottom. Optional sections only appear once filled in (admin), and each section's
+  // drips take the colour of whatever is visible right above it.
+  const sections: { key: string; bg: string }[] = [{ key: 'story', bg: product.accent }, { key: 'how', bg: BG.pink }]
+  if (data.reviews.length) sections.push({ key: 'reviews', bg: BG.indigo })
+  if (data.about) sections.push({ key: 'about', bg: BG.cream })
+  if (data.gallery.length) sections.push({ key: 'gallery', bg: BG.cream })
+  const above = (key: string) => sections[sections.findIndex((s) => s.key === key) - 1]?.bg ?? BG.indigo
+  const lastBg = sections[sections.length - 1]?.bg ?? BG.indigo
+
   return (
     <>
       <GooFilter />
@@ -64,9 +77,13 @@ export function HomePage({ data }: { data: MenuData }) {
       <Curtain />
       <Nav />
       <main>
-        <Hero products={products} active={active} onPick={pick} onOpen={openStory} spotRef={heroSpot} photo={photo} motion={motion} />
+        <Hero products={products} active={active} onPick={pick} onOpen={openStory} spotRef={heroSpot} photo={photo} motion={motion} lineOaId={line.oaId} />
         <Story product={product} lineOaId={line.oaId} stageRef={stage} photo={photo} motion={motion} />
-        <Where shop={shop} above={product.accent} />
+        <HowToOrder order={data.order} shopName={shop.name} above={above('how')} />
+        {data.reviews.length > 0 && <Reviews reviews={data.reviews} above={above('reviews')} />}
+        {data.about && <About about={data.about} above={above('about')} />}
+        {data.gallery.length > 0 && <Gallery photos={data.gallery} above={above('gallery')} />}
+        <Where shop={shop} above={lastBg} />
         <End line={line} social={data.social} />
       </main>
     </>
