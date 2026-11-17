@@ -7,15 +7,19 @@ import { createRoot } from 'react-dom/client'
 import { menuQueries, readBootstrap } from './api/menu'
 import { routeTree } from './routeTree.gen'
 
-// Opened straight onto an inner page (the rich menu's Gallery button opens /gallery/ in LINE's browser): there is no
-// page behind it, so "back" closed the browser. Put the homepage underneath, so back goes home instead.
-// (Not gated on document.referrer: LINE's browser may report one. Someone arriving from elsewhere gets home first on
-// "back", then where they came from.)
-const cameFromHere = document.referrer.startsWith(location.origin)
-if (/^\/(gallery|book)\/?$/.test(location.pathname) && history.length <= 2 && !cameFromHere) {
-  const here = location.pathname + location.search + location.hash
-  history.replaceState(null, '', '/')
-  history.pushState(null, '', here)
+// The rich menu opens its pages with ?from=richmenu (e.g. /gallery/?from=richmenu). LINE's browser has no page of ours
+// behind it, so "back" would close the browser: put the homepage underneath so back goes home, and drop the marker
+// from the address bar so a shared link stays clean.
+const params = new URLSearchParams(location.search)
+if (params.get('from') === 'richmenu') {
+  params.delete('from')
+  const rest = params.toString()
+  const here = location.pathname + (rest ? `?${rest}` : '') + location.hash
+  if (location.pathname === '/') history.replaceState(null, '', here)
+  else {
+    history.replaceState(null, '', '/')
+    history.pushState(null, '', here)
+  }
 }
 
 const queryClient = new QueryClient({
