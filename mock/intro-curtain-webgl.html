@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>June — ม่านครีม WebGL (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--tea:#F3A18F;--cream:#FFF6E6;--indigo:#3E5D58;--indigo-2:#2C4540;--ink:#243B37;--display:"Mitr","Anuphan",system-ui,sans-serif;--body:"Anuphan",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--body);background:var(--indigo-2);color:var(--cream);padding:24px 16px 48px;line-height:1.6}
+header{max-width:900px;margin:0 auto 20px}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,3vw,1.9rem)}
+.note{opacity:.8;font-size:.95rem;margin-top:4px}
+button{font:600 .95rem var(--body);padding:9px 18px;border-radius:999px;border:0;background:var(--cream);color:var(--ink);cursor:pointer}
+button.ghost{background:transparent;color:var(--cream);border:2px solid var(--cream)}
+.row{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.col{display:flex;flex-direction:column;align-items:center;gap:10px}
+.col b{font-family:var(--display);font-weight:600;font-size:1.1rem}
+.col small{opacity:.75;text-align:center}
+.col.rec .phone{outline:3px solid var(--tea)}
+.phone{position:relative;width:min(100%,300px);aspect-ratio:390/844;border-radius:32px;overflow:hidden;background:var(--indigo);container-type:size}
+.fps{font-size:.85rem;opacity:.85;min-height:1.4em;text-align:center}
+.btns{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.all{max-width:900px;margin:0 auto 16px;display:flex;justify-content:center}
+
+/* fake page */
+.page{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:9cqh;color:var(--cream);background:var(--indigo);container-type:size}
+.page .logo{font:600 7cqh/1 var(--display)}
+.page h2{font:600 4.2cqh/1.25 var(--display);margin-top:3cqh;text-align:center;padding:0 6cqw}
+.page .cake{width:30cqh;height:30cqh;border-radius:50%;margin-top:8cqh;background:#B9D58A;box-shadow:0 2cqh 3cqh rgba(0,0,0,.3)}
+
+.host{position:absolute;inset:0;pointer-events:none;z-index:5;overflow:hidden}
+.host.full{position:fixed;z-index:100}
+.count{position:absolute;inset:0;display:grid;place-items:center;font:600 1.15rem var(--display);color:var(--ink);z-index:2}
+
+/* OLD: SVG goo filter (copied from the live page) */
+.goo{position:absolute;inset:-40px;filter:url(#goo12);color:var(--cream)}
+.goo i{position:absolute;background:currentColor;display:block}
+.goo .t{top:0;border-radius:0 0 999px 999px}
+.goo .b{bottom:0;border-radius:999px 999px 0 0}
+
+/* NEW: one WebGL canvas */
+.host canvas{position:absolute;inset:0;width:100%;height:100%}
+
+@media (max-width:640px){.row{gap:10px}.btns button{padding:7px 12px;font-size:.8rem}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="goo12"><feGaussianBlur in="SourceGraphic" stdDeviation="14"/><feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 26 -11"/></filter>
+</svg>
+
+<header>
+  <h1>ม่านครีม: แบบเดิม vs WebGL</h1>
+  <p class="note">ทั้งสองแบบใช้หยดครีมชุดเดียวกัน ท่าเดียวกัน ต่างกันแค่ใครวาด · <b>บนมือถือกด "เต็มจอ"</b> ทีละแบบ · fps ยิ่งใกล้ 60 ยิ่งลื่น</p>
+</header>
+<div class="all"><button class="ghost" id="reroll">สุ่มหยดครีมใหม่</button></div>
+
+<div class="row">
+  <div class="col">
+    <b>แบบเดิม</b><small>ฟิลเตอร์ SVG (CPU)</small>
+    <div class="phone" id="pOld"></div>
+    <div class="fps" id="fOld">–</div>
+    <div class="btns"><button data-k="old">เล่นใหม่</button><button class="ghost" data-k="old" data-full>เต็มจอ</button></div>
+  </div>
+  <div class="col">
+    <b>WebGL เรียบ</b><small>การ์ดจอวาด หน้าตาเรียบแบบเดิม</small>
+    <div class="phone" id="pNew"></div>
+    <div class="fps" id="fNew">–</div>
+    <div class="btns"><button data-k="new">เล่นใหม่</button><button class="ghost" data-k="new" data-full>เต็มจอ</button></div>
+  </div>
+  <div class="col rec">
+    <b>WebGL ครีม</b><small>มีเงา แสงวาว และหยดปลายกลม</small>
+    <div class="phone" id="pCream"></div>
+    <div class="fps" id="fCream">–</div>
+    <div class="btns"><button data-k="cream">เล่นใหม่</button><button class="ghost" data-k="cream" data-full>เต็มจอ</button></div>
+  </div>
+</div>
+
+<script>
+const rnd=(a,b)=>a+Math.random()*(b-a),clamp=v=>Math.min(1,Math.max(0,v)),lerp=(a,b,t)=>a+(b-a)*t;
+const PAGE='<div class="page"><div class="logo">June</div><h2>อบใหม่ หอม นุ่มนาน</h2><div class="cake"></div></div>';
+const TOTAL=4700;
+const FIXT=+new URLSearchParams(location.search).get('t')||null; // ?t=2000 freezes the WebGL curtain at 2s (for screenshots)
+
+/* CSS cubic-bezier(x1,y1,x2,y2) as a JS easing, so WebGL follows the exact same curves as the CSS version */
+function bez(x1,y1,x2,y2){
+  const cx=3*x1,bx=3*(x2-x1)-cx,ax=1-cx-bx,cy=3*y1,by=3*(y2-y1)-cy,ay=1-cy-by;
+  const X=t=>((ax*t+bx)*t+cx)*t,Y=t=>((ay*t+by)*t+cy)*t,dX=t=>(3*ax*t+2*bx)*t+cx;
+  return x=>{if(x<=0)return 0;if(x>=1)return 1;let t=x;for(let i=0;i<8;i++){const d=dX(t);if(Math.abs(d)<1e-6)break;t-=(X(t)-x)/d}return Y(clamp(t))};
+}
+const E1=bez(.7,0,.2,1),E2=bez(.6,0,.8,.4),EIN=bez(.42,0,1,1);
+
+/* timings copied from the live page's intro() */
+const makePlan=n=>Array.from({length:n},()=>({bh:rnd(50,68),bDur:rnd(800,1100),bDel:1550+rnd(0,250),len:rnd(7,24),t1Dur:rnd(1000,1500),t1Del:900+rnd(0,380),t2Del:3500+rnd(0,300)}));
+let plans={6:makePlan(6),12:makePlan(12)};
+reroll.onclick=()=>{plans={6:makePlan(6),12:makePlan(12)}};
+
+/* ---------- OLD ---------- */
+function old(host,P){
+  const g=document.createElement('div');g.className='goo';host.append(g);const N=P.length;
+  P.forEach((p,i)=>{const w=100/N*1.35,l=i*100/N-w*.13;
+    const t=document.createElement('i');t.className='t';t.style.cssText=`left:${l}%;width:${w}%;height:125%`;g.append(t);
+    const b=document.createElement('i');b.className='b';b.style.cssText=`left:${l}%;width:${w}%;height:${p.bh}%`;g.append(b);
+    b.animate([{height:p.bh+'%'},{height:'0%'}],{duration:p.bDur,delay:p.bDel,easing:'cubic-bezier(.6,0,.8,.4)',fill:'forwards'});
+    t.animate([{height:'125%'},{height:p.len+'%'}],{duration:p.t1Dur,delay:p.t1Del,easing:'cubic-bezier(.7,0,.2,1)',fill:'forwards'});
+    t.animate([{height:p.len+'%'},{height:'0%'}],{duration:800,delay:p.t2Del,easing:'ease-in',fill:'forwards'});});
+}
+
+/* ---------- NEW: WebGL smooth-union of capsules ---------- */
+const MAXB=24;
+const FS=`precision mediump float;
+uniform vec2 res;uniform float dpr;uniform float k;uniform vec4 bars[${MAXB}];uniform int n;uniform float look;
+// bars[i] = (centre x, half width, top y, bottom y) in CSS px, y down. even i = top drip, odd i = bottom bump
+float cap(vec2 p,vec4 b){
+  float h=b.w-b.z; if(h<=0.)return 1e5;
+  float r=min(b.y,h*.5);
+  float y=clamp(p.y,b.z+r,b.w-r);
+  return length(p-vec2(b.x,y))-r;
+}
+float smin(float a,float b,float k){float h=max(k-abs(a-b),0.)/k;return min(a,b)-h*h*k*.25;}
+float field(vec2 p){
+  float d=1e5;
+  for(int i=0;i<${MAXB};i++){
+    if(i>=n)break;
+    vec4 b=bars[i];
+    d=smin(d,cap(p,b),k);
+    // cream look: heavy round bead at the tip of each drip, like real cream about to fall
+    if(look>.5&&mod(float(i),2.)<.5&&b.w-b.z>b.y*3.){
+      d=smin(d,length(p-vec2(b.x,b.w-b.y*.95))-b.y*1.12,k*.6);
+    }
+  }
+  return d;
+}
+void main(){
+  vec2 p=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y)/dpr;
+  float d=field(p);
+  float a=1.-smoothstep(-.75,.75,d);
+  vec3 cream=vec3(1.,.965,.902);
+  if(look<.5){gl_FragColor=vec4(cream*a,a);return;}
+  // fake 3D: treat distance-inside as height, light it from the top-left
+  float e=1.5;
+  vec2 g=vec2(field(p+vec2(e,0.))-d,field(p+vec2(0.,e))-d);
+  g=g/max(length(g),1e-4);
+  float h=clamp(-d/18.,0.,1.);
+  vec3 nrm=normalize(vec3(g*(1.-h)*1.8,1.));
+  vec3 L=normalize(vec3(-.35,-.75,.6));
+  float diff=max(dot(nrm,L),0.);
+  float spec=pow(max(dot(reflect(-L,nrm),vec3(0.,0.,1.)),0.),26.);
+  vec3 shade=vec3(.91,.84,.72);
+  vec3 col=mix(shade,cream,smoothstep(.25,.95,diff+.2*h))+spec*.5;
+  // soft shadow the cream casts on the page below it
+  float ds=field(p-vec2(0.,7.));
+  float sa=.3*(1.-smoothstep(-2.,16.,ds));
+  float A=a+sa*(1.-a);
+  gl_FragColor=vec4(min(col,1.)*a,A);
+}`;
+const VS='attribute vec2 v;void main(){gl_Position=vec4(v,0.,1.);}';
+
+function neu(host,P,look=0){
+  const cv=document.createElement('canvas');host.append(cv);
+  const gl=cv.getContext('webgl',{premultipliedAlpha:true,antialias:false,alpha:true});
+  const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(o));return o};
+  const pr=gl.createProgram();gl.attachShader(pr,sh(gl.VERTEX_SHADER,VS));gl.attachShader(pr,sh(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);gl.useProgram(pr);
+  gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(pr,'v');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  const U=n=>gl.getUniformLocation(pr,n),uRes=U('res'),uDpr=U('dpr'),uK=U('k'),uBars=U('bars'),uN=U('n'),uLook=U('look');
+  const dpr=Math.min(devicePixelRatio||1,1.5),W=host.clientWidth,H=host.clientHeight;
+  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);gl.viewport(0,0,cv.width,cv.height);
+  gl.uniform2f(uRes,cv.width,cv.height);gl.uniform1f(uDpr,dpr);gl.uniform1f(uK,30);
+  const N=P.length,CW=W+80,CH=H+80,buf=new Float32Array(MAXB*4),t0=performance.now();
+  gl.uniform1i(uN,N*2);gl.uniform1f(uLook,look);
+  (function f(t){
+    const ms=FIXT??(t-t0);
+    P.forEach((p,i)=>{
+      const w=100/N*1.35,l=i*100/N-w*.13,cx=-40+(l+w/2)/100*CW,hw=w/200*CW;
+      // top drip height (% of curtain), same keyframes as the CSS version
+      let th=125;
+      if(ms>=p.t2Del)th=lerp(p.len,0,EIN(clamp((ms-p.t2Del)/800)));
+      else if(ms>=p.t1Del)th=lerp(125,p.len,E1(clamp((ms-p.t1Del)/p.t1Dur)));
+      const bh=lerp(p.bh,0,E2(clamp((ms-p.bDel)/p.bDur)));
+      // hidden ends extend off-screen so their rounding never shows
+      buf.set([cx,hw,-40-2*hw,-40+th/100*CH],i*8);
+      buf.set([cx,hw,-40+CH-bh/100*CH,-40+CH+2*hw],i*8+4);
+    });
+    gl.uniform4fv(uBars,buf);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLES,0,3);
+    if(ms<TOTAL)requestAnimationFrame(f);else gl.getExtension('WEBGL_lose_context')?.loseContext();
+  })(t0);
+}
+
+/* ---------- shared ---------- */
+function counter(host){
+  const c=document.createElement('div');c.className='count';c.textContent='0%';host.append(c);
+  const t0=performance.now();(function s(t){const p=Math.min(1,(t-t0)/850);c.textContent=Math.round(p*100)+'%';
+    if(p<1)requestAnimationFrame(s);else c.animate([{opacity:1},{opacity:0}],{duration:300,fill:'forwards'})})(t0);
+}
+function measure(out){
+  let n=0,worst=0,last=performance.now();const t0=last;out.textContent='กำลังวัด…';
+  (function f(t){n++;worst=Math.max(worst,t-last);last=t;
+    if(t-t0<TOTAL)requestAnimationFrame(f);
+    else out.textContent=`เฉลี่ย ${Math.round(n/((t-t0)/1000))} fps · สะดุดสุด ${Math.round(worst)} ms`})(t0);
+}
+const S={old:{fn:old,phone:pOld,out:fOld},new:{fn:(h,P)=>neu(h,P,0),phone:pNew,out:fNew},cream:{fn:(h,P)=>neu(h,P,1),phone:pCream,out:fCream}};
+function play(k,full){
+  const s=S[k];s.phone.innerHTML=PAGE;
+  const host=document.createElement('div');host.className='host'+(full?' full':'');
+  if(full){document.body.append(host);host.insertAdjacentHTML('afterbegin',PAGE)}else s.phone.append(host);
+  const N=(full?innerWidth:390)<700?6:12; // phone frames act like a 390px-wide phone
+  s.fn(host,plans[N]);counter(host);measure(s.out);
+  setTimeout(()=>host.remove(),TOTAL+200);
+}
+document.querySelectorAll('button[data-k]').forEach(b=>b.onclick=()=>play(b.dataset.k,b.hasAttribute('data-full')));
+pOld.innerHTML=pNew.innerHTML=pCream.innerHTML=PAGE;
+play('old');play('new');play('cream');
+</script>
+</body>
+</html>

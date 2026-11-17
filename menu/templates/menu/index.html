@@ -36,10 +36,9 @@ section{position:relative}
 .drip::after{content:"";position:absolute;bottom:-5px;left:-14%;width:128%;aspect-ratio:1;border-radius:50%;background:currentColor}
 
 /* intro curtain */
-#curtain{position:fixed;inset:-40px;z-index:100;filter:url(#goo12);color:var(--cream);pointer-events:none}
-#curtain i{position:absolute;background:currentColor;display:block}
-#curtain .t{top:0;border-radius:0 0 999px 999px}
-#curtain .b{bottom:0;border-radius:999px 999px 0 0}
+/* drawn by WebGL in intro() (mock/intro-curtain-webgl.html, "WebGL ครีม"); the cream background covers the page until the first frame */
+#curtain{position:fixed;inset:0;width:100%;height:100%;z-index:100;background:var(--cream);pointer-events:none}
+#curtain.gl{background:none}
 #count{position:fixed;inset:0;z-index:101;display:grid;place-items:center;align-content:center;gap:10px;font-family:var(--display);font-weight:600;font-size:1.25rem;color:var(--ink);pointer-events:none;transition:opacity .3s}
 /* loading logo: faint June that fills with ink from the bottom as the count goes up (mock/intro-logo.html, option 1) */
 #count .load{position:relative;width:min(46vw,260px)}
@@ -216,11 +215,10 @@ section{position:relative}
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="8"/><feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 24 -10"/></filter>
-  <filter id="goo12"><feGaussianBlur in="SourceGraphic" stdDeviation="14"/><feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 26 -11"/></filter>
 </svg>
 
 <canvas id="gl" aria-hidden="true"></canvas>
-<div id="curtain"></div>
+<canvas id="curtain" aria-hidden="true"></canvas>
 <div id="count"><div class="load" aria-hidden="true"><span class="logo-mask ghost"></span><span class="logo-mask fill"></span></div><span class="pct">0%</span></div>
 
 <header class="nav top" id="nav">
@@ -432,19 +430,75 @@ function frame(){
   requestAnimationFrame(frame);
 }
 
+/* intro curtain: cream drips drawn on the GPU.
+   The old version used an SVG blur+threshold filter, which phones (Safari especially) redraw on the CPU every frame.
+   Here every drip is a capsule; the shader merges them with a smooth minimum (same gooey look),
+   fakes depth from the distance field for shading/gloss, and casts a soft shadow on the page. */
+function curtainGL(cv){
+  const gl=cv.getContext('webgl',{premultipliedAlpha:true,antialias:false,alpha:true});
+  if(!gl)return false;
+  const N=innerWidth<700?6:12,MAXB=24;
+  const FS=`precision mediump float;
+uniform vec2 res;uniform float dpr;uniform vec4 bars[${MAXB}];uniform int n;
+float cap(vec2 p,vec4 b){float h=b.w-b.z;if(h<=0.)return 1e5;float r=min(b.y,h*.5);return length(p-vec2(b.x,clamp(p.y,b.z+r,b.w-r)))-r;}
+float smin(float a,float b,float k){float h=max(k-abs(a-b),0.)/k;return min(a,b)-h*h*k*.25;}
+float field(vec2 p){float d=1e5;
+  for(int i=0;i<${MAXB};i++){if(i>=n)break;vec4 b=bars[i];d=smin(d,cap(p,b),30.);
+    if(mod(float(i),2.)<.5&&b.w-b.z>b.y*3.)d=smin(d,length(p-vec2(b.x,b.w-b.y*.95))-b.y*1.12,18.);}
+  return d;}
+void main(){
+  vec2 p=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y)/dpr;
+  float d=field(p),a=1.-smoothstep(-.75,.75,d);
+  vec2 g=vec2(field(p+vec2(1.5,0.))-d,field(p+vec2(0.,1.5))-d);g/=max(length(g),1e-4);
+  float h=clamp(-d/18.,0.,1.);
+  vec3 nrm=normalize(vec3(g*(1.-h)*1.8,1.)),L=normalize(vec3(-.35,-.75,.6));
+  float diff=max(dot(nrm,L),0.),spec=pow(max(dot(reflect(-L,nrm),vec3(0.,0.,1.)),0.),26.);
+  vec3 col=mix(vec3(.91,.84,.72),vec3(1.,.965,.902),smoothstep(.25,.95,diff+.2*h))+spec*.5;
+  float sa=.3*(1.-smoothstep(-2.,16.,field(p-vec2(0.,7.))));
+  gl_FragColor=vec4(min(col,1.)*a,a+sa*(1.-a));
+}`;
+  const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return gl.getShaderParameter(o,gl.COMPILE_STATUS)?o:null};
+  const vs=sh(gl.VERTEX_SHADER,'attribute vec2 v;void main(){gl_Position=vec4(v,0.,1.);}'),fs=sh(gl.FRAGMENT_SHADER,FS);
+  if(!vs||!fs)return false;
+  const pr=gl.createProgram();gl.attachShader(pr,vs);gl.attachShader(pr,fs);gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS))return false;
+  gl.useProgram(pr);
+  gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(pr,'v');gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  const U=k=>gl.getUniformLocation(pr,k),uBars=U('bars');
+  const dpr=Math.min(devicePixelRatio||1,1.5),W=innerWidth,H=innerHeight,CW=W+80,CH=H+80;
+  cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);gl.viewport(0,0,cv.width,cv.height);
+  gl.uniform2f(U('res'),cv.width,cv.height);gl.uniform1f(U('dpr'),dpr);gl.uniform1i(U('n'),N*2);
+  // CSS cubic-bezier as JS, so the motion matches the old keyframes exactly
+  const bez=(x1,y1,x2,y2)=>{const cx=3*x1,bx=3*(x2-x1)-cx,ax=1-cx-bx,cy=3*y1,by=3*(y2-y1)-cy,ay=1-cy-by;
+    return x=>{if(x<=0)return 0;if(x>=1)return 1;let t=x;for(let i=0;i<8;i++){const dx=(3*ax*t+2*bx)*t+cx;if(Math.abs(dx)<1e-6)break;t-=(((ax*t+bx)*t+cx)*t-x)/dx}t=clamp(t);return((ay*t+by)*t+cy)*t}};
+  const E1=bez(.7,0,.2,1),E2=bez(.6,0,.8,.4),EIN=bez(.42,0,1,1),mix=(a,b,t)=>a+(b-a)*t;
+  // same timings as the old CSS curtain
+  const P=Array.from({length:N},()=>({bh:rnd(50,68),bDur:rnd(800,1100),bDel:1550+rnd(0,250),len:rnd(7,24),t1Dur:rnd(1000,1500),t1Del:900+rnd(0,380),t2Del:3500+rnd(0,300)}));
+  const buf=new Float32Array(MAXB*4),t0=performance.now();
+  cv.classList.add('gl');
+  (function f(t){
+    const ms=t-t0;
+    P.forEach((p,i)=>{
+      const w=100/N*1.35,l=i*100/N-w*.13,cx=-40+(l+w/2)/100*CW,hw=w/200*CW;
+      let th=125;
+      if(ms>=p.t2Del)th=mix(p.len,0,EIN(clamp((ms-p.t2Del)/800)));
+      else if(ms>=p.t1Del)th=mix(125,p.len,E1(clamp((ms-p.t1Del)/p.t1Dur)));
+      const bh=mix(p.bh,0,E2(clamp((ms-p.bDel)/p.bDur)));
+      buf.set([cx,hw,-40-2*hw,-40+th/100*CH],i*8);              // top drip; hidden end kept off-screen
+      buf.set([cx,hw,-40+CH-bh/100*CH,-40+CH+2*hw],i*8+4);      // bottom bump
+    });
+    gl.uniform4fv(uBars,buf);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLES,0,3);
+    if(ms<4700&&cv.isConnected)requestAnimationFrame(f);else gl.getExtension('WEBGL_lose_context')?.loseContext();
+  })(t0);
+  return true;
+}
+
 /* intro */
 function intro(){
-  const cur=$('#curtain'),cnt=$('#count'),N=innerWidth<700?6:12,tops=[];
+  const cur=$('#curtain'),cnt=$('#count');
   if(calm){cur.remove();cnt.remove();return}
-  for(let i=0;i<N;i++){
-    const w=100/N*1.35,l=i*100/N-w*.13;
-    const t=document.createElement('i');t.className='t';t.style.cssText=`left:${l}%;width:${w}%;height:125%`;cur.append(t);tops.push(t);
-    const b=document.createElement('i');b.className='b';b.style.cssText=`left:${l}%;width:${w}%;height:${rnd(50,68)}%`;cur.append(b);
-    b.animate([{height:b.style.height},{height:'0%'}],{duration:rnd(800,1100),delay:1550+rnd(0,250),easing:'cubic-bezier(.6,0,.8,.4)',fill:'forwards'});
-    const len=rnd(7,24);
-    t.animate([{height:'125%'},{height:len+'%'}],{duration:rnd(1000,1500),delay:900+rnd(0,380),easing:'cubic-bezier(.7,0,.2,1)',fill:'forwards'});
-    t.animate([{height:len+'%'},{height:'0%'}],{duration:800,delay:3500+rnd(0,300),easing:'ease-in',fill:'forwards'});
-  }
+  if(!curtainGL(cur))cur.animate([{opacity:1},{opacity:0}],{duration:600,delay:1800,fill:'forwards'}); // no WebGL: plain cream fade
   const pct=cnt.querySelector('.pct'),fill=cnt.querySelector('.fill'),load=cnt.querySelector('.load');
   const t0=performance.now();(function c(t){const p=clamp((t-t0)/850);pct.textContent=Math.round(p*100)+'%';fill.style.clipPath=`inset(${(1-p)*100}% 0 0 0)`;load.style.transform=`translateY(${Math.sin((t-t0)/180)*2}px)`;p<1?requestAnimationFrame(c):cnt.style.opacity=0})(t0);
   setTimeout(()=>{cur.remove();cnt.remove()},4700);
