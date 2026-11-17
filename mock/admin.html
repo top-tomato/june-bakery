@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>June — สรุปร้าน (mock)</title>
+<title>June — หลังร้าน (mock)</title>
 <link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
 <style>
 /* Staff "shop summary" page (would live at /admin/summary/). Phone first.
@@ -14,7 +14,43 @@
   --bar:#3E5D58;--bar2:#E59A86;--good:#2e7d4f;--bad:#b4412b;--grid:#ece4d6}
 *{box-sizing:border-box;margin:0}
 body{font-family:Anuphan,system-ui,sans-serif;background:var(--paper);color:var(--ink);padding-bottom:110px}
-header{background:var(--green);color:var(--cream);padding:14px 16px;position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px}
+/* app shell: side menu (always open on wide screens, a drawer on phones) + content */
+.side{position:fixed;left:0;top:0;bottom:0;width:248px;background:var(--green);color:var(--cream);display:flex;flex-direction:column;z-index:20;
+  padding:18px 12px max(14px,env(safe-area-inset-bottom));transform:translateX(-100%);transition:transform .25s cubic-bezier(.3,.7,.2,1)}
+.side.on{transform:none}
+.brandbox{display:flex;align-items:center;gap:10px;padding:4px 10px 18px;border-bottom:1px solid rgba(255,246,230,.14);margin-bottom:10px}
+.brandbox .lg{width:64px;aspect-ratio:1000/660;background:var(--cream);-webkit-mask:url(img/logo.png) center/contain no-repeat;mask:url(img/logo.png) center/contain no-repeat}
+.brandbox small{display:block;opacity:.7;font-size:.8rem}
+.brandbox b{font:600 .95rem Mitr,sans-serif}
+.side nav{display:grid;gap:2px;overflow:auto}
+.side .grp{font-size:.72rem;letter-spacing:.06em;opacity:.55;padding:14px 12px 4px}
+.side a{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;color:var(--cream);text-decoration:none;font-size:.97rem;opacity:.86}
+.side a:hover{background:rgba(255,246,230,.08);opacity:1}
+.side a.on{background:var(--cream);color:var(--ink);opacity:1;font-weight:600}
+.side a svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.side a .badge{margin-left:auto;font-size:.72rem;background:var(--peach);color:var(--ink);border-radius:99px;padding:1px 8px}
+.side .me{margin-top:auto;border-top:1px solid rgba(255,246,230,.14);padding-top:10px}
+.sveil{position:fixed;inset:0;background:rgba(20,30,28,.45);z-index:19;opacity:0;pointer-events:none;transition:opacity .2s}
+.sveil.on{opacity:1;pointer-events:auto}
+.burger{width:40px;height:40px;border:0;border-radius:10px;background:rgba(255,246,230,.12);display:grid;place-items:center;cursor:pointer}
+.burger svg{width:22px;height:22px;stroke:var(--cream);stroke-width:2.2;stroke-linecap:round;fill:none}
+@media (min-width:900px){.side{transform:none}.sveil{display:none}.burger{display:none}body{padding-left:248px}.fab{left:248px}}
+header{background:var(--green);color:var(--cream);padding:12px 16px;position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px}
+@media (min-width:900px){header{background:var(--paper);color:var(--ink);border-bottom:1px solid var(--line)}}
+header h1{flex:1}
+.view[hidden]{display:none}
+@media (min-width:1100px){body main{max-width:1060px}.duo{display:grid;grid-template-columns:1fr 1fr;gap:18px}}
+.tbl{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:.92rem}
+.tbl th,.tbl td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line)}
+.tbl th{font:500 .82rem Mitr,sans-serif;color:var(--muted);background:#faf6ee}
+.tbl td.r,.tbl th.r{text-align:right}
+.tbl tr:last-child td{border-bottom:0}
+.empty-view{background:#fff;border:1px dashed var(--line);border-radius:16px;padding:28px 18px;text-align:center;color:var(--muted)}
+.empty-view b{display:block;font:600 1.05rem Mitr,sans-serif;color:var(--ink);margin-bottom:6px}
+.form{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:12px}
+.form label{font:500 .88rem Mitr,sans-serif}
+.form input,.form textarea{width:100%;font:1rem Anuphan,sans-serif;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}
+.btn2{border:0;border-radius:999px;padding:12px 20px;background:var(--ink);color:var(--cream);font:500 1rem Mitr,sans-serif;justify-self:start;cursor:pointer}
 header h1{font:600 1.15rem Mitr,sans-serif}
 header nav{display:flex;gap:14px;font-size:.9rem}
 header a{color:var(--cream);opacity:.85;text-decoration:none}
@@ -85,8 +121,30 @@ h2 small{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
 </style>
 </head>
 <body>
-<header><h1>สรุปร้าน</h1><nav><a href="gallery-upload.html">อัปโหลดรูป</a><a href="#">admin</a></nav></header>
+<aside class="side" id="side" aria-label="เมนูหลังร้าน">
+  <div class="brandbox"><div class="lg" role="img" aria-label="June"></div><div><b>หลังร้าน</b><small>June Bakery</small></div></div>
+  <nav id="snav">
+    <a href="#summary" class="on"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>สรุปร้าน</a>
+    <div class="grp">ขาย</div>
+    <a href="#orders"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>ออเดอร์<span class="badge">3 วันนี้</span></a>
+    <a href="#expenses"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg>รายจ่าย</a>
+    <div class="grp">หน้าเว็บ</div>
+    <a href="#gallery"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg>Gallery</a>
+    <a href="#menu"><svg viewBox="0 0 24 24"><path d="M4 20h16M5 20v-7h14v7M5 13c2 0 2-2 3.5-2S10 13 12 13s2-2 3.5-2 1.5 2 3.5 2M12 7v4"/></svg>เมนูขนม</a>
+    <a href="#reviews"><svg viewBox="0 0 24 24"><path d="M12 4C7 4 3 7.2 3 11.2c0 3.6 3.2 6.6 7.5 7.1l-.4 2.2 3.8-2.4C18.4 17.8 21 14.8 21 11.2 21 7.2 17 4 12 4Z"/></svg>รีวิว</a>
+    <a href="#shop"><svg viewBox="0 0 24 24"><path d="M4 10 6 4h12l2 6M4 10h16v10H4ZM9 20v-5h6v5"/></svg>ข้อมูลร้าน</a>
+    <div class="grp">ตั้งค่า</div>
+    <a href="#staff"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.8-3.6 3.2-5.4 6-5.4s5.2 1.8 6 5.4M16 4.6a3.2 3.2 0 0 1 0 6.3M18 14.8c1.6.6 2.6 2.4 3 5.2"/></svg>บัญชี staff</a>
+  </nav>
+  <nav class="me">
+    <a href="../" target="_blank"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>ดูหน้าเว็บ</a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 16l-4-4 4-4M6 12h10"/></svg>ออกจากระบบ <span style="margin-left:auto;font-size:.8rem;opacity:.6">staff</span></a>
+  </nav>
+</aside>
+<div class="sveil" id="sveil"></div>
+<header><button class="burger" id="burger" aria-label="เปิดเมนู"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><h1 id="vtitle">สรุปร้าน</h1></header>
 <main>
+<section class="view" data-view="summary">
   <p class="note">mock · ตัวเลขทั้งหมดเป็นตัวอย่าง · กดปุ่มล่างจอเพื่อลองบันทึกออเดอร์/รายจ่าย</p>
   <div class="seg" id="range"><button data-r="1" class="on">วันนี้</button><button data-r="7">7 วัน</button><button data-r="30">เดือนนี้</button></div>
 
@@ -99,20 +157,52 @@ h2 small{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
     <div class="tile profit"><div class="k">กำไร</div><div class="v" id="mProfit"></div></div>
   </div>
 
+  <div class="duo"><div>
   <h2>ยอดขายรายวัน <small>30 วันล่าสุด · แตะแท่งดูตัวเลข</small></h2>
   <div class="card"><svg class="chart" id="cSales" viewBox="0 0 360 170"></svg><div class="tip" id="tSales"></div></div>
+  </div><div>
 
   <h2>คนเข้าเว็บรายวัน <small>30 วันล่าสุด</small></h2>
   <div class="card"><svg class="chart" id="cVisits" viewBox="0 0 360 150"></svg><div class="tip" id="tVisits"></div></div>
+  </div></div>
+  <div class="duo"><div>
 
   <h2>จากเข้าเว็บ ถึงซื้อ <small id="fRange">วันนี้</small></h2>
   <div class="card"><div class="funnel" id="funnel"></div></div>
+  </div><div>
 
   <h2>คนมาจากไหน <small id="sRange">วันนี้</small></h2>
   <div class="card"><div class="funnel" id="sources"></div></div>
+  </div></div>
 
   <h2>ล่าสุด <small>ออเดอร์และรายจ่าย</small></h2>
   <div class="list" id="recent"></div>
+</section>
+
+<section class="view" data-view="orders" hidden>
+  <div class="seg"><button class="on">วันนี้</button><button>7 วัน</button><button>เดือนนี้</button></div>
+  <table class="tbl"><thead><tr><th>เวลา</th><th>รายการ</th><th>ช่องทาง</th><th class="r">ยอด</th></tr></thead><tbody id="otable"></tbody></table>
+</section>
+<section class="view" data-view="expenses" hidden>
+  <div class="seg"><button class="on">เดือนนี้</button><button>เดือนก่อน</button></div>
+  <table class="tbl"><thead><tr><th>วันที่</th><th>หมวด</th><th>จด</th><th class="r">จำนวน</th></tr></thead><tbody id="etable"></tbody></table>
+</section>
+<section class="view" data-view="gallery" hidden>
+  <div class="empty-view"><b>รูปและวิดีโอใน Gallery</b>หน้าอัปโหลดรูป (ทำแล้วบนเว็บจริง) จะย้ายมาอยู่ในเมนูนี้<br><br><a class="btn2" href="gallery-upload.html" style="display:inline-block;text-decoration:none">เปิดหน้าอัปโหลด</a></div>
+</section>
+<section class="view" data-view="menu" hidden>
+  <div class="form"><label>ชื่อขนม</label><input value="ชิฟฟ่อนมะพร้าวใบเตย"><label>ราคาต่อชิ้น (บาท)</label><input value="45" inputmode="numeric"><label>คำบรรยาย</label><textarea rows="3">ชิฟฟ่อนใบเตยเนื้อนุ่ม หน้ามะพร้าวอ่อนอบสีทอง</textarea><button class="btn2">บันทึก</button></div>
+</section>
+<section class="view" data-view="reviews" hidden>
+  <div class="empty-view"><b>ยังไม่มีรีวิว</b>ใส่ข้อความรีวิวจากลูกค้า (ขออนุญาตก่อน) แล้วจะขึ้นหน้าเว็บส่วน "เสียงจากลูกค้า"<br><br><button class="btn2">+ เพิ่มรีวิว</button></div>
+</section>
+<section class="view" data-view="shop" hidden>
+  <div class="form"><label>สั่งล่วงหน้ากี่วัน</label><input inputmode="numeric" placeholder="เช่น 1"><label>เก็บได้นานแค่ไหน</label><input placeholder="เช่น 2 วันในตู้เย็น"><label>วิธีจ่ายเงิน</label><input placeholder="เช่น โอนพร้อมเพย์"><label>เวลาเปิด</label><input placeholder="เช่น ทุกวัน 9:00–17:00"><button class="btn2">บันทึก</button></div>
+</section>
+<section class="view" data-view="staff" hidden>
+  <table class="tbl"><thead><tr><th>ชื่อผู้ใช้</th><th>สิทธิ์</th><th>เข้าล่าสุด</th></tr></thead><tbody><tr><td>staff</td><td>staff</td><td>วันนี้</td></tr></tbody></table>
+  <p style="margin-top:12px"><button class="btn2">+ เพิ่ม staff</button></p>
+</section>
 </main>
 
 <div class="fab">
@@ -220,6 +310,22 @@ document.querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>{
     recent.unshift({k:'e',t:document.querySelector('[data-g=cat] .on').textContent,m:document.getElementById('memo').value,amt,ago:'เมื่อกี้'});toast('บันทึกรายจ่ายแล้ว');document.getElementById('amt').value='';document.getElementById('memo').value=''}
   close();render();renderRecent();bars('cSales','tSales','sales',baht,'var(--bar)',170)});
 render();renderRecent();
+
+/* side menu: switch views by #hash; on phones it is a drawer */
+const side=document.getElementById('side'),sveil=document.getElementById('sveil');
+const drawer=on=>{side.classList.toggle('on',on);sveil.classList.toggle('on',on)};
+document.getElementById('burger').onclick=()=>drawer(true);sveil.onclick=()=>drawer(false);
+function route(){
+  const v=(location.hash||'#summary').slice(1),a=document.querySelector(`#snav a[href="#${v}"]`);if(!a)return;
+  document.querySelectorAll('.view').forEach(s=>s.hidden=s.dataset.view!==v);
+  document.querySelectorAll('#snav a').forEach(x=>x.classList.toggle('on',x===a));
+  document.getElementById('vtitle').textContent=a.childNodes[1].textContent.trim();
+  document.querySelector('.fab').style.display=['summary','orders','expenses'].includes(v)?'':'none';
+  drawer(false);scrollTo(0,0);
+}
+addEventListener('hashchange',route);route();
+document.getElementById('otable').innerHTML=recent.filter(r=>r.k==='o').map(r=>`<tr><td>${r.ago}</td><td>ชิฟฟ่อน ${r.t}</td><td>${r.s}</td><td class="r">${baht(r.amt)}</td></tr>`).join('');
+document.getElementById('etable').innerHTML=expenses.map(e=>`<tr><td>${e.ago}</td><td>${e.t}</td><td>${e.m||'-'}</td><td class="r">${baht(e.amt)}</td></tr>`).join('');
 </script>
 </body>
 </html>
