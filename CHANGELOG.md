@@ -5,6 +5,9 @@
 
 ## [Unreleased]
 
+### Added
+- Agent skills สำหรับงานหน้าบ้าน React + TanStack ใน `.claude/skills/` คือ react-best-practices (Vercel), tanstack-router, tanstack-query และ tanstack-integration (deckardger) มีที่มา commit และ license อยู่ใน `.claude/skills/README.md`
+
 ### Changed
 - ขนม 3D ตอนเปิดหน้าเว็บลอยขึ้นจากด้านล่างนิดเดียวพร้อมขยายตัว แทนการตกจากสูงหนึ่งจอแล้วเด้ง 3 ครั้ง และรอให้ม่านครีมเปิดเกือบหมดก่อนค่อยขึ้น (ดู `mock/intro-drop.html`)
 - ม่านครีมตอนเปิดหน้าเว็บวาดด้วย WebGL แทนฟิลเตอร์ SVG ท่าเดิม แต่ไม่กระตุกบนมือถือ และเพิ่มเงา แสงวาว และหยดปลายกลมให้ดูเป็นครีม ถ้าเครื่องไม่รองรับ WebGL จะเป็นม่านครีมเรียบที่ค่อย ๆ จางหาย (ดู `mock/intro-curtain-webgl.html`)
