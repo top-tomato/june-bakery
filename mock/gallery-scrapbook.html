@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>June — ส่วนรูปบนหน้าแรก แบบสมุดสแครปบุ๊ก (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&family=Itim&display=swap" rel="stylesheet">
+<style>
+/* Option A: the landing page's gallery as one scrapbook page — taped polaroids on dot-grid paper.
+   Nothing to flip, so a thumb scrolling the page never fights a page-turn. The full flip book is a separate page. */
+:root{--tea:#F3A18F;--cream:#FFF6E6;--paper:#FFFBF3;--indigo:#3E5D58;--ink:#2F4A45;--peach:#F3A18F;
+  --display:"Mitr","Anuphan",system-ui,sans-serif;--body:"Anuphan",system-ui,sans-serif;--hand:"Itim","Mitr",cursive;
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .35 0 0 0 0 .25 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--body);background:var(--indigo);color:var(--ink)}
+.note{background:#1c2b28;color:var(--cream);padding:12px 16px;font-size:.9rem;text-align:center}
+.gallery{position:relative;padding:72px clamp(14px,5vw,80px) 88px;background:var(--grain),radial-gradient(circle,rgba(47,74,69,.2) .9px,transparent 1.3px) 0 0/18px 18px,var(--paper)}
+.wrap{max-width:1040px;margin:0 auto}
+.kicker{font:400 1.1rem var(--hand);color:var(--peach)}
+h2{font:600 clamp(2rem,6vw,3.4rem)/1.15 var(--display);margin:4px 0 6px}
+.sub{font:1.05rem var(--hand);opacity:.8;margin-bottom:34px}
+/* collage */
+.board{display:grid;grid-template-columns:repeat(3,1fr);gap:28px 22px;align-items:start}
+.snap{position:relative;background:#fff;padding:10px 10px 0;box-shadow:0 6px 14px rgba(0,0,0,.14);transform:rotate(var(--r,0deg))}
+.snap img,.snap video{display:block;width:100%;aspect-ratio:var(--ar,1);object-fit:cover;background:#eee}
+.snap p{font:1.05rem var(--hand);text-align:center;padding:8px 0 10px}
+.tape{position:absolute;top:-12px;left:50%;width:84px;height:24px;margin-left:-42px;background:rgba(243,161,143,.55);transform:rotate(-5deg)}
+.tape.g{background:rgba(201,222,152,.75);transform:rotate(4deg)}
+.snap.tall{grid-row:span 2}
+.snap.video .badge{position:absolute;top:18px;left:18px;font:600 .75rem var(--display);background:rgba(36,59,55,.8);color:var(--cream);padding:2px 10px;border-radius:999px}
+.doodle{position:absolute;width:64px;opacity:.9}
+.dd{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.dd.peach{stroke:var(--peach)}
+.more{display:flex;justify-content:center;margin-top:40px}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:12px 24px;border-radius:999px;background:var(--ink);color:var(--cream);font:600 1rem var(--display);text-decoration:none}
+.ic{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+@media (max-width:720px){.board{grid-template-columns:repeat(2,1fr);gap:22px 14px}.snap p{font-size:.95rem}.doodle{display:none}}
+</style>
+</head>
+<body>
+<p class="note">mock แบบ A: ส่วนรูปบนหน้าแรก เป็นหน้าสมุดสแครปบุ๊กนิ่ง ๆ · วิดีโอเล่นเองแบบไม่มีเสียง · ปุ่มล่างสุดพาไปสมุดรูปแบบพลิก (mock แบบ B)</p>
+<section class="gallery" id="gallery">
+  <div class="wrap" style="position:relative">
+    <svg class="doodle" viewBox="0 0 100 100" style="right:0;top:-10px"><path class="dd peach" d="M50 10l5 35 35 5-35 5-5 35-5-35-35-5 35-5Z"/></svg>
+    <div class="kicker">สมุดรูป</div>
+    <h2>จากครัว June</h2>
+    <p class="sub">อบเสร็จ ถ่ายเก็บไว้ทุกวัน</p>
+    <div class="board">
+      <figure class="snap tall" style="--r:-2deg;--ar:4/5"><span class="tape"></span><img src="img/shop-12.jpg" alt=""><p>ชิฟฟ่อนมะพร้าวใบเตย</p></figure>
+      <figure class="snap video tall" style="--r:2deg;--ar:9/16"><span class="tape g"></span>
+        <video src="img/snackbox.mp4" poster="img/snackbox-poster.jpg" autoplay muted loop playsinline preload="metadata"></video>
+        <span class="badge">วิดีโอ</span><p>Snack box</p></figure>
+      <figure class="snap" style="--r:3deg"><span class="tape"></span><img src="img/shop-05.jpg" alt=""><p>ออกจากเตา</p></figure>
+      <figure class="snap" style="--r:-3deg"><span class="tape g"></span><img src="img/shop-14.jpg" alt=""><p>วันที่ครัวยุ่ง</p></figure>
+      <figure class="snap" style="--r:1.5deg"><span class="tape"></span><img src="img/shop-13.jpg" alt=""><p>จัดโต๊ะ</p></figure>
+      <figure class="snap" style="--r:-1.5deg"><span class="tape g"></span><img src="img/shop-10.jpg" alt=""><p>หลายหน้าตา</p></figure>
+    </div>
+    <div class="more"><a class="btn" href="gallery-book.html"><svg class="ic" viewBox="0 0 24 24"><path d="M4 5h7a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4Z"/><path d="M20 5h-7a2 2 0 0 0-2 2v12a2 2 0 0 1 2-2h7Z"/></svg>เปิดสมุดรูปทั้งเล่ม</a></div>
+  </div>
+</section>
+</body>
+</html>

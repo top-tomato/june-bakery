@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>June — สมุดรูป (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=Itim&display=swap" rel="stylesheet">
+<style>
+/* Research-based rules for this version:
+   - restrained base + 1–2 cute accents  -> cream paper, ink line drawings, one peach accent
+   - 3 colours from the shop, 2 fonts    -> cream / deep green / peach; Mitr + Itim (handwriting)
+   - hand-drawn line art, no emoji       -> inline SVG doodles in one stroke style
+   - whitespace + clear hierarchy        -> one cake per spread: photo page left, details page right
+   - subtle tactile paper                -> static grain + dot grid, gutter shadow at the rings */
+:root{
+  --cream:#FFF6E6;--paper:#FFFBF3;--ink:#2F4A45;--peach:#F3A18F;--peach-soft:#F9D3C8;--board:#E7B3A0;
+  --display:"Mitr",system-ui,sans-serif;--hand:"Itim","Mitr",cursive;
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .35 0 0 0 0 .25 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{font-family:var(--display);color:var(--ink);background:#3E5D58;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  padding:max(12px,env(safe-area-inset-top)) max(10px,env(safe-area-inset-right)) max(12px,env(safe-area-inset-bottom)) max(10px,env(safe-area-inset-left));touch-action:manipulation;-webkit-tap-highlight-color:transparent;
+  background-image:var(--grain)}
+.hint{color:var(--cream);opacity:.75;font:1rem var(--hand)}
+
+/* stage holds the two-page spread; while closed it slides so the closed cover sits in the middle */
+/* page is 360 x 680. Wide screens show the two-page spread; narrow screens (phones) get one page
+   sized in JS to fill the height (see SINGLE below). */
+.stage{position:relative;width:min(100%,1000px,calc((100svh - 120px) * 1.06))}
+@media (max-width:700px){.hint{font-size:.9rem}}
+@media (max-height:520px){.hint{display:none}.stage{width:min(100%,1000px,calc((100svh - 70px) * 1.06))}}
+.shift{position:relative;transition:transform .7s cubic-bezier(.5,0,.2,1)}
+.shift.closed-front{transform:translateX(-25%)}
+.shift.closed-back{transform:translateX(25%)}
+/* page edges stacked under each half; the side you have read grows, the side to come shrinks */
+.edges{position:absolute;inset:0;pointer-events:none}
+.edges i{position:absolute;top:0;bottom:0;width:50%;border-radius:6px;background:
+  repeating-linear-gradient(180deg,#eadcc6 0 1px,#fffaf1 1px 3px) 0 100%/100% var(--t) no-repeat,#fffaf1;
+  box-shadow:0 16px 28px -10px rgba(0,0,0,.45);transition:transform .6s,opacity .3s}
+.edges .l{left:0;transform:translate(calc(var(--l)*-6px),calc(var(--l)*6px));--t:calc(var(--l)*6px)}
+.edges .r{right:0;transform:translate(calc(var(--r)*6px),calc(var(--r)*6px));--t:calc(var(--r)*6px)}
+#book{position:relative}
+
+/* ---------- paper ---------- */
+.pg{background:var(--paper)}
+.in{position:absolute;inset:0;container-type:size;overflow:hidden;background:
+   var(--grain),
+   radial-gradient(circle,rgba(47,74,69,.22) .9px,transparent 1.3px) 0 0/16px 16px,
+   var(--paper)}
+/* the bend into the rings + punched holes on the inner edge */
+.pg.left .in{box-shadow:inset -22px 0 22px -18px rgba(0,0,0,.28)}
+.pg.right .in{box-shadow:inset 22px 0 22px -18px rgba(0,0,0,.28)}
+.pg.left .in::after,.pg.right .in::after{content:"";position:absolute;top:0;bottom:0;width:16px;
+  background:radial-gradient(circle,#3E5D58 4.2px,transparent 4.8px) 50% 14px/16px 28px repeat-y}
+.pg.left .in::after{right:4px}.pg.right .in::after{left:4px}
+.pad{position:absolute;inset:7cqh 9cqw 6cqh 9cqw;display:flex;flex-direction:column}
+.pg.right .pad{left:13cqw}.pg.left .pad{right:13cqw}
+
+/* covers: thick board */
+.cover .in{background:var(--grain),radial-gradient(rgba(255,255,255,.18) 1px,transparent 1.3px) 0 0/8px 8px,var(--board)}
+.cover .pad{align-items:center;justify-content:center;text-align:center}
+.plate{background:var(--paper);border-radius:10px;padding:8cqh 8cqw 7cqh;width:100%;box-shadow:0 3px 0 rgba(0,0,0,.08)}
+.brand{font:500 18cqw/1 var(--display);letter-spacing:.02em}
+.brand em{font:400 1em/1 var(--hand);color:var(--peach);font-style:normal}
+.kicker{font:400 6.5cqw var(--hand);opacity:.8;margin-top:3cqh}
+.rule{width:30%;height:2px;background:var(--ink);opacity:.25;margin:4cqh auto}
+.cap{font:400 6cqw var(--hand)}
+
+/* doodles share one stroke style */
+.dd{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.dd.peach{stroke:var(--peach)}
+svg.d{position:absolute;overflow:visible}
+
+/* text */
+.h-hand{font:400 7.5cqw/1.3 var(--hand)}
+.h-num{font:400 6cqw var(--hand);color:var(--peach)}
+.h-name{font:600 11cqw/1.1 var(--display);margin-top:2cqh}
+.h-desc{font:400 6.2cqw/1.45 var(--hand);margin-top:3cqh;opacity:.85}
+.notes{list-style:none;padding:0;margin-top:4cqh;display:grid;gap:1.6cqh}
+.notes li{font:400 5.8cqw/1.3 var(--hand);display:flex;gap:2.5cqw;align-items:flex-start}
+.notes li::before{content:"";flex:none;width:3.4cqw;height:3.4cqw;margin-top:1.2cqw;border:2px solid var(--peach);border-radius:50%}
+.buy{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:3cqw}
+.price{position:relative;font:600 11cqw/1 var(--display);padding:2cqw 4cqw}
+.price svg{position:absolute;inset:-12% -14%;width:128%;height:124%}
+.order{font:500 5.2cqw var(--display);color:var(--cream);background:var(--ink);text-decoration:none;padding:2.6cqw 4.5cqw;border-radius:999px;white-space:nowrap}
+
+/* photo page: one big photo, a paper-corner mount, a handwritten caption */
+.photo{position:relative;width:100%;aspect-ratio:4/5;margin-top:4cqh;border-radius:4px;background:#e9e2d4 center/cover;box-shadow:0 2px 6px rgba(0,0,0,.12)}
+.photo i{position:absolute;width:12cqw;height:12cqw;background:var(--ink);opacity:.85;clip-path:polygon(0 0,100% 0,0 100%)}
+.photo i:nth-child(1){left:-2cqw;top:-2cqw}
+.photo i:nth-child(2){right:-2cqw;top:-2cqw;transform:scaleX(-1)}
+.photo i:nth-child(3){left:-2cqw;bottom:-2cqw;transform:scaleY(-1)}
+.photo i:nth-child(4){right:-2cqw;bottom:-2cqw;transform:scale(-1)}
+.caption{font:400 6.5cqw var(--hand);margin-top:3.5cqh;text-align:center}
+
+/* scrapbook pages: two snapshots per page with handwritten captions */
+.snaps{display:grid;gap:4cqh;margin-top:3cqh;flex:1;grid-template-rows:1fr 1fr}
+.snap{position:relative;display:flex;flex-direction:column;min-height:0;transform:rotate(var(--r))}
+.snap .ph{flex:1;min-height:0;background:#e9e2d4 center/cover;border:2.2cqw solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+.snap .tape{position:absolute;top:-2.2cqh;left:50%;width:22cqw;height:3.6cqh;margin-left:-11cqw;background:rgba(243,161,143,.55);transform:rotate(-4deg)}
+.snap p{font:400 5.6cqw/1.2 var(--hand);text-align:center;margin-top:1.2cqh}
+/* video snapshot fills its slot like a photo */
+.snap video.ph{width:100%;object-fit:cover;display:block}
+/* contents */
+.toc{list-style:none;padding:0;margin-top:5cqh;display:grid;gap:3cqh}
+.toc button{all:unset;cursor:pointer;display:flex;align-items:baseline;gap:2cqw;width:100%;font:500 7cqw var(--display)}
+.toc button span{flex:1;border-bottom:2px dotted rgba(47,74,69,.35);transform:translateY(-1cqw)}
+.toc button b{font:400 6.5cqw var(--hand);color:var(--peach)}
+.steps{list-style:none;padding:0;margin-top:4cqh;display:grid;gap:3cqh;counter-reset:s}
+.steps li{counter-increment:s;font:400 6.2cqw/1.35 var(--hand);display:flex;gap:3cqw}
+.steps li::before{content:counter(s);flex:none;width:8cqw;height:8cqw;border-radius:50%;background:var(--peach-soft);display:grid;place-items:center;font:600 4.6cqw var(--display)}
+
+/* spiral rings down the spine, lined up with the holes (14px offset, 28px step) */
+/* page-flip puts the whole book in its own layer (.stf__parent has transform, .stf__block has perspective),
+   so the rings are moved inside .stf__block next to the pages. Pages rest at startZIndex+3/+4 and the turning
+   page is +5; with startZIndex 10 the rings (15, placed before the pages) sit above resting pages and under the turning one. */
+.rings{position:absolute;left:50%;top:0;bottom:0;width:30px;margin-left:-15px;z-index:15;pointer-events:none;
+  background:linear-gradient(180deg,transparent 0 11px,#7f8d8a 11px,#f1f4f3 14px,#9aa8a5 16px,#6f7c79 17px,transparent 17px) 0 0/30px 28px repeat-y;
+  border-radius:8px;filter:drop-shadow(0 2px 1px rgba(0,0,0,.35))}
+
+/* tap a page to read it full size (the spread is small on phones) */
+.zoom{position:fixed;inset:0;z-index:100;background:rgba(30,46,43,.86);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+  padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom));opacity:0;pointer-events:none;transition:opacity .25s}
+.zoom.on{opacity:1;pointer-events:auto}
+.zoom .sheet{position:relative;width:min(94vw,calc((100svh - 110px) * .516),480px);aspect-ratio:330/640;border-radius:6px;overflow:hidden;
+  box-shadow:0 20px 40px rgba(0,0,0,.45);transform:scale(.92);transition:transform .25s}
+.zoom.on .sheet{transform:none}
+.zoom .sheet .pg{position:absolute;inset:0;display:block}
+.zoom .close{font:500 1rem var(--display);color:var(--cream);background:none;border:2px solid var(--cream);border-radius:999px;padding:8px 22px}
+.stage.single .pg .in{box-shadow:inset 22px 0 22px -18px rgba(0,0,0,.28)}
+.stage.single .pg .in::after{left:4px;right:auto}
+.stage.single .pg.left .pad{left:13cqw;right:9cqw}
+.stage.single .rings{left:0}
+.stage.single .edges .l{display:none}
+.stage.single .edges .r{width:100%}
+.stage.single .shift{transform:none}
+.nav{display:flex;align-items:center;gap:14px;color:var(--cream)}
+.nav button{width:44px;height:44px;border-radius:50%;border:2px solid var(--cream);background:none;color:var(--cream);font-size:1.15rem}
+.nav button:disabled{opacity:.3}
+.count{font:1rem var(--hand);min-width:76px;text-align:center}
+</style>
+</head>
+<body>
+<div class="hint">สมุดรูปจากครัว June · ปัดหรือลากมุมเพื่อพลิก</div>
+<div class="stage">
+  <div class="shift closed-front" id="shift">
+    <div class="edges" id="edges"><i class="l"></i><i class="r"></i></div>
+    <div id="book"></div>
+    <div class="rings" id="rings" aria-hidden="true"></div>
+  </div>
+</div>
+<div class="zoom" id="zoom" aria-hidden="true"><div class="sheet" id="sheet"></div><button class="close" id="zclose">ปิด</button></div>
+<div class="nav"><button id="prev" aria-label="หน้าก่อน">←</button><span class="count" id="count"></span><button id="next" aria-label="หน้าถัดไป">→</button></div>
+
+<script src="https://cdn.jsdelivr.net/npm/page-flip@2.0.7/dist/js/page-flip.browser.js"></script>
+<script>
+const LINE_ID='@561hgrea';
+const lineURL=t=>`https://line.me/R/oaMessage/${encodeURIComponent(LINE_ID)}/${t?'?'+encodeURIComponent(t):''}`;
+// Option B: the whole album as a flip notebook (same engine as the menu book). Two snapshots per page;
+// the snack-box reel plays silently on its own page. Photos from the shop's LINE album (Downloads/collections).
+const SHOTS=[
+  ['img/shop-12.jpg','ชิฟฟ่อนมะพร้าวใบเตย'],['img/shop-05.jpg','ออกจากเตา'],
+  ['img/shop-07.jpg','อุ่น ๆ'],['img/shop-14.jpg','วันที่ครัวยุ่ง'],
+  ['img/shop-13.jpg','จัดโต๊ะ'],['img/shop-10.jpg','หลายหน้าตา'],
+  ['img/shop-11.jpg',''],['img/shop-02.jpg',''],
+  ['img/shop-08.jpg',''],['img/shop-15.jpg',''],
+  ['img/shop-03.jpg',''],['img/shop-09.jpg',''],
+  ['img/shop-04.jpg',''],['img/shop-01.jpg',''],
+];
+const D={
+  sparkle:'<path class="dd peach" d="M50 10l5 35 35 5-35 5-5 35-5-35-35-5 35-5Z"/>',
+  whisk:'<path class="dd" d="M50 96V58"/><path class="dd" d="M50 58C26 40 30 6 50 6s24 34 0 52Z"/><path class="dd" d="M50 58C40 40 42 10 50 6M50 58c10-18 8-48 0-52"/>',
+  leaf:'<path class="dd" d="M8 92C28 66 58 34 94 8C74 42 46 72 8 92Z"/><path class="dd" d="M8 92C40 64 64 40 94 8"/><path class="dd" d="M30 92C44 70 60 52 78 36"/>',
+};
+const svg=(k,css)=>`<svg class="d" viewBox="0 0 100 100" style="${css}" aria-hidden="true">${D[k]}</svg>`;
+const snap=([img,cap],j,k)=>`<div class="snap" style="--r:${(j+k)%2?2.5:-2.5}deg"><span class="tape"></span><div class="ph" style="background-image:url('${img}')"></div><p>${cap||'&nbsp;'}</p></div>`;
+const P=[];
+P.push(`<div class="pg cover" data-density="hard"><div class="in"><div class="pad">
+  ${svg('leaf','left:10%;top:8%;width:22cqw;transform:rotate(-10deg)')}${svg('whisk','right:8%;bottom:4%;width:14cqw;transform:rotate(16deg)')}
+  <div class="plate"><div class="brand">June <em>photos</em></div><div class="rule"></div><div class="kicker">สมุดรูปจากครัว</div></div>
+  <div class="cap" style="margin-top:7cqh;opacity:.8">ลากมุมขวาล่างเพื่อเปิด →</div></div></div></div>`);
+// inside cover: the snack-box reel, full page
+P.push(`<div class="pg left"><div class="in"><div class="pad">
+  <div class="h-num">วิดีโอ</div><div class="h-name" style="font-size:9cqw;margin-top:0">Snack box</div>
+  <div class="snaps" style="grid-template-rows:1fr"><div class="snap" style="--r:-1.5deg"><span class="tape"></span>
+    <video class="ph" src="img/snackbox.mp4" poster="img/snackbox-poster.jpg" autoplay muted loop playsinline preload="metadata"></video><p>ทำเสร็จ แพ็กใส่กล่อง</p></div></div>
+</div></div></div>`);
+for(let k=0;k<SHOTS.length/2;k++){
+  P.push(`<div class="pg ${k%2?'left':'right'}"><div class="in"><div class="pad">
+    <div class="h-num">หน้า ${k+1}</div>
+    <div class="snaps" style="margin-top:2cqh">${SHOTS.slice(k*2,k*2+2).map((s,j)=>snap(s,j,k)).join('')}</div>
+  </div></div></div>`);
+}
+P.push(`<div class="pg ${(SHOTS.length/2)%2?'left':'right'}"><div class="in"><div class="pad" style="justify-content:center;text-align:center;align-items:center">
+  ${svg('sparkle','position:relative;width:20cqw;margin-bottom:4cqh')}
+  <div class="h-name" style="font-size:9cqw">ติดตามรูปใหม่</div><div class="h-desc">Instagram ของร้าน</div></div></div></div>`);
+P.push(`<div class="pg cover" data-density="hard"><div class="in"><div class="pad">
+  <div class="plate"><div class="brand" style="font-size:13cqw">ขอบคุณนะ</div><div class="rule"></div><div class="kicker">June · อบใหม่ทุกวัน</div></div></div></div></div>`);
+if(P.length%2)P.splice(P.length-1,0,`<div class="pg left"><div class="in"><div class="pad"></div></div></div>`);   // page-flip needs an even page count
+const stageEl=document.querySelector('.stage');
+const book=document.getElementById('book');book.innerHTML=P.join('');
+// Phones: one page at a time, sized exactly to the screen. page-flip ties its single-page switch to minWidth,
+// which also acts as a minimum page size, so instead we use a fixed page size that fits and let it go single.
+const RATIO=360/680,SINGLE=innerWidth<700;
+const pageW=Math.floor(Math.min(innerWidth-24,(innerHeight-(innerHeight<560?60:104))*RATIO));
+if(SINGLE)stageEl.style.width=pageW+'px';
+const size=SINGLE?{width:pageW,height:Math.round(pageW/RATIO),size:'fixed'}
+                 :{width:360,height:680,size:'stretch',minWidth:innerHeight<560?140:330,maxWidth:520,minHeight:innerHeight<560?260:400,maxHeight:980};   // short landscape phones: smaller spread
+// crossing the phone/desktop breakpoint (e.g. rotating) rebuilds the book
+addEventListener('resize',()=>{if((innerWidth<700)!==SINGLE)location.reload()});
+const pf=new St.PageFlip(book,{
+  ...size,
+  usePortrait:true,showCover:true,startZIndex:10,drawShadow:true,maxShadowOpacity:.4,flippingTime:900,
+  mobileScrollSupport:false,swipeDistance:20,showPageCorners:true,disableFlipByClick:true,
+});
+pf.loadFromHTML(book.querySelectorAll('.pg'));
+book.querySelector('.stf__block').prepend(document.getElementById('rings'));
+const N=P.length,shift=document.getElementById('shift'),edges=document.getElementById('edges');
+function upd(i){
+  shift.classList.toggle('closed-front',i===0);shift.classList.toggle('closed-back',i===N-1);
+  const read=i/(N-1);edges.style.setProperty('--l',read.toFixed(2));edges.style.setProperty('--r',(1-read).toFixed(2));
+  edges.querySelector('.l').style.opacity=i===0?0:1;edges.querySelector('.r').style.opacity=i===N-1?0:1;
+  const single=stageEl.classList.contains('single');
+  count.textContent=i===0?'ปกหน้า':i===N-1?'ปกหลัง':single?`หน้า ${i} / ${N-2}`:`หน้า ${i}–${Math.min(i+1,N-2)}`;
+  prev.disabled=i===0;next.disabled=i===N-1;
+}
+pf.on('flip',e=>upd(e.data));upd(0);
+let bookState='read';pf.on('changeState',e=>bookState=e.data);
+const setOrient=o=>{stageEl.classList.toggle('single',o==='portrait');upd(pf.getCurrentPageIndex())};
+pf.on('changeOrientation',e=>setOrient(e.data));setOrient(pf.getOrientation());
+next.onclick=()=>pf.flipNext();prev.onclick=()=>pf.flipPrev();
+const zoom=document.getElementById('zoom'),sheet=document.getElementById('sheet');
+function openZoom(pg){const c=pg.cloneNode(true);c.removeAttribute('style');
+  c.className=[...c.classList].filter(k=>!k.startsWith('stf__')&&!k.startsWith('--')).join(' ');   // drop page-flip's own classes (they hide/position the page)
+ c.querySelectorAll('[style*="display: none"]').forEach(x=>x.style.display='');
+  sheet.replaceChildren(c);zoom.classList.add('on');zoom.setAttribute('aria-hidden','false')}
+function closeZoom(){zoom.classList.remove('on');zoom.setAttribute('aria-hidden','true')}
+zclose.onclick=closeZoom;zoom.addEventListener('click',e=>{if(e.target===zoom)closeZoom()});
+sheet.addEventListener('click',e=>{const b=e.target.closest('[data-go]');if(b){closeZoom();pf.flip(+b.dataset.go)}});
+book.addEventListener('click',e=>{
+  const b=e.target.closest('[data-go]');if(b){pf.flip(+b.dataset.go);return}
+  if(e.target.closest('a,button'))return;
+  const pg=e.target.closest('.pg');if(pg&&!pg.classList.contains('cover')&&bookState==='read'&&!stageEl.classList.contains('single'))openZoom(pg);
+});
+addEventListener('keydown',e=>{if(e.key==='Escape')closeZoom();if(e.key==='ArrowRight')pf.flipNext();if(e.key==='ArrowLeft')pf.flipPrev()});
+</script>
+</body>
+</html>
