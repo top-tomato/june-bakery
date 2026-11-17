@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>June — สรุปร้าน (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Staff "shop summary" page (would live at /admin/summary/). Phone first.
+   - visitors / "order on LINE" taps: counted by the site itself (no cookies, no personal data)
+   - orders, sales, expenses: the site can't see LINE chats, so staff log them with the two big buttons
+   Every number here is SAMPLE data. One chart per measure (no dual axes); single series -> no legend. */
+:root{--ink:#2F4A45;--muted:#6b7f7a;--cream:#FFF6E6;--paper:#FFFBF3;--peach:#F3A18F;--green:#3E5D58;--line:#e6dccb;
+  --bar:#3E5D58;--bar2:#E59A86;--good:#2e7d4f;--bad:#b4412b;--grid:#ece4d6}
+*{box-sizing:border-box;margin:0}
+body{font-family:Anuphan,system-ui,sans-serif;background:var(--paper);color:var(--ink);padding-bottom:110px}
+header{background:var(--green);color:var(--cream);padding:14px 16px;position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px}
+header h1{font:600 1.15rem Mitr,sans-serif}
+header nav{display:flex;gap:14px;font-size:.9rem}
+header a{color:var(--cream);opacity:.85;text-decoration:none}
+main{max-width:760px;margin:0 auto;padding:14px 16px}
+.note{background:#1c2b28;color:var(--cream);padding:10px 14px;border-radius:10px;font-size:.85rem;margin-bottom:14px}
+.seg{display:flex;background:#efe7d8;border-radius:999px;padding:4px;gap:4px;margin-bottom:14px}
+.seg button{flex:1;border:0;background:none;border-radius:999px;padding:9px 0;font:500 .95rem Mitr,sans-serif;color:var(--ink);cursor:pointer}
+.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+h2{font:600 1rem Mitr,sans-serif;margin:22px 0 10px;display:flex;justify-content:space-between;align-items:baseline}
+h2 small{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px}
+.tile .k{font-size:.85rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.tile .k svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tile .v{font:600 1.45rem/1.15 Mitr,sans-serif;margin-top:6px}
+.tiles .tile:not(.hero){padding:12px 10px}
+.tile .d{font-size:.8rem;margin-top:2px;color:var(--muted)}
+.tile .d b.up{color:var(--good)}.tile .d b.down{color:var(--bad)}
+.tile.hero{grid-column:1/-1;background:var(--green);color:var(--cream);border:0}
+.tile.hero .k,.tile.hero .d{color:rgba(255,246,230,.75)}
+.tile.hero .v{font-size:2.2rem}
+.money{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.money .tile{padding:12px}
+.money .v{font-size:1.25rem}
+.profit .v{color:var(--good)}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 12px 10px;position:relative}
+.chart{width:100%;height:auto;display:block;touch-action:pan-y}
+.chart text{font:11px Anuphan,sans-serif;fill:var(--muted)}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--cream);font-size:.82rem;padding:6px 10px;border-radius:8px;white-space:nowrap;opacity:0;transform:translate(-50%,-110%);transition:opacity .1s}
+.tip b{font-family:Mitr,sans-serif;font-weight:500}
+.funnel{display:grid;gap:8px}
+.frow{display:grid;grid-template-columns:120px 1fr 54px;gap:10px;align-items:center;font-size:.9rem}
+.frow .track{height:14px;background:#f1ebe0;border-radius:4px;overflow:hidden}
+.frow .track span{display:block;height:100%;background:var(--bar);border-radius:0 4px 4px 0}
+.frow b{font-family:Mitr,sans-serif;font-weight:500;text-align:right}
+.list{display:grid;gap:8px}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.row .t{font-size:.95rem}
+.row .s{font-size:.8rem;color:var(--muted)}
+.row .m{font:500 1rem Mitr,sans-serif;text-align:right}
+.row .m.out{color:var(--bad)}
+.tag{display:inline-block;font-size:.72rem;padding:1px 8px;border-radius:99px;background:#eef3e6;margin-left:4px}
+.fab{position:fixed;left:0;right:0;bottom:0;padding:12px 16px max(12px,env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--paper) 30%);display:flex;gap:10px;justify-content:center;z-index:6}
+.fab button{flex:1;max-width:260px;border:0;border-radius:999px;padding:15px;font:500 1.02rem Mitr,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.fab .o{background:var(--ink);color:var(--cream)}
+.fab .e{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
+.fab svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+/* bottom sheets */
+.veil{position:fixed;inset:0;background:rgba(20,30,28,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}
+.veil.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-radius:22px 22px 0 0;padding:18px 18px max(18px,env(safe-area-inset-bottom));transform:translateY(105%);transition:transform .25s cubic-bezier(.3,.7,.2,1);z-index:10;max-width:560px;margin:0 auto}
+.sheet.on{transform:none}
+.sheet h3{font:600 1.15rem Mitr,sans-serif;margin-bottom:14px}
+.sheet label{display:block;font:500 .9rem Mitr,sans-serif;margin:14px 0 8px}
+.step{display:flex;align-items:center;gap:14px}
+.step button{width:48px;height:48px;border-radius:14px;border:1.5px solid var(--line);background:#fff;font:600 1.4rem Mitr;color:var(--ink);cursor:pointer}
+.step output{font:600 2rem Mitr,sans-serif;min-width:52px;text-align:center}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;font:inherit;color:var(--ink);cursor:pointer}
+.chips button.on{border-color:var(--ink);background:var(--ink);color:var(--cream)}
+.sheet input{width:100%;font:1.05rem Anuphan,sans-serif;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px;padding-top:12px;border-top:1px dashed var(--line)}
+.total b{font:600 1.6rem Mitr,sans-serif}
+.save{width:100%;margin-top:16px;border:0;border-radius:999px;padding:15px;background:var(--ink);color:var(--cream);font:500 1.05rem Mitr,sans-serif;cursor:pointer}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--cream);padding:10px 18px;border-radius:999px;font-size:.9rem;opacity:0;transition:opacity .25s;pointer-events:none;z-index:11}
+.toast.on{opacity:1}
+@media (min-width:700px){.tiles{grid-template-columns:repeat(5,1fr)}.tile.hero{grid-column:span 2}}
+</style>
+</head>
+<body>
+<header><h1>สรุปร้าน</h1><nav><a href="gallery-upload.html">อัปโหลดรูป</a><a href="#">admin</a></nav></header>
+<main>
+  <p class="note">mock · ตัวเลขทั้งหมดเป็นตัวอย่าง · กดปุ่มล่างจอเพื่อลองบันทึกออเดอร์/รายจ่าย</p>
+  <div class="seg" id="range"><button data-r="1" class="on">วันนี้</button><button data-r="7">7 วัน</button><button data-r="30">เดือนนี้</button></div>
+
+  <div class="tiles" id="tiles"></div>
+
+  <h2>เงินเข้า-ออก <small id="moneyRange">เดือนนี้</small></h2>
+  <div class="money">
+    <div class="tile"><div class="k">รายรับ</div><div class="v" id="mIn"></div></div>
+    <div class="tile"><div class="k">รายจ่าย</div><div class="v" id="mOut"></div></div>
+    <div class="tile profit"><div class="k">กำไร</div><div class="v" id="mProfit"></div></div>
+  </div>
+
+  <h2>ยอดขายรายวัน <small>30 วันล่าสุด · แตะแท่งดูตัวเลข</small></h2>
+  <div class="card"><svg class="chart" id="cSales" viewBox="0 0 360 170"></svg><div class="tip" id="tSales"></div></div>
+
+  <h2>คนเข้าเว็บรายวัน <small>30 วันล่าสุด</small></h2>
+  <div class="card"><svg class="chart" id="cVisits" viewBox="0 0 360 150"></svg><div class="tip" id="tVisits"></div></div>
+
+  <h2>จากเข้าเว็บ ถึงซื้อ <small id="fRange">วันนี้</small></h2>
+  <div class="card"><div class="funnel" id="funnel"></div></div>
+
+  <h2>คนมาจากไหน <small id="sRange">วันนี้</small></h2>
+  <div class="card"><div class="funnel" id="sources"></div></div>
+
+  <h2>ล่าสุด <small>ออเดอร์และรายจ่าย</small></h2>
+  <div class="list" id="recent"></div>
+</main>
+
+<div class="fab">
+  <button class="o" data-open="order"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>บันทึกออเดอร์</button>
+  <button class="e" data-open="expense"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>บันทึกรายจ่าย</button>
+</div>
+
+<div class="veil" id="veil"></div>
+<section class="sheet" id="order" aria-label="บันทึกออเดอร์">
+  <h3>บันทึกออเดอร์</h3>
+  <label>จำนวนชิ้น · ชิฟฟ่อนมะพร้าวใบเตย ฿45</label>
+  <div class="step"><button data-q="-1">−</button><output id="qty">1</output><button data-q="1">+</button></div>
+  <label>สั่งทาง</label>
+  <div class="chips" data-g="via"><button class="on">LINE</button><button>หน้าร้าน</button><button>อื่น ๆ</button></div>
+  <label>จ่ายด้วย</label>
+  <div class="chips" data-g="pay"><button class="on">โอน</button><button>เงินสด</button></div>
+  <div class="total"><span>รวม</span><b id="oTotal">฿45</b></div>
+  <button class="save" data-save="order">บันทึก</button>
+</section>
+<section class="sheet" id="expense" aria-label="บันทึกรายจ่าย">
+  <h3>บันทึกรายจ่าย</h3>
+  <label>หมวด</label>
+  <div class="chips" data-g="cat"><button class="on">วัตถุดิบ</button><button>กล่อง/ถุง</button><button>ค่าเช่า</button><button>ค่าน้ำไฟ</button><button>ค่าส่ง</button><button>อื่น ๆ</button></div>
+  <label for="amt">จำนวนเงิน (บาท)</label>
+  <input id="amt" inputmode="decimal" placeholder="เช่น 350">
+  <label for="memo">จดสั้น ๆ (ไม่ใส่ก็ได้)</label>
+  <input id="memo" placeholder="เช่น แป้ง ไข่ กะทิ">
+  <button class="save" data-save="expense">บันทึก</button>
+</section>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- sample data (deterministic) ---------- */
+const PRICE=45;let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+const days=[...Array(30)].map((_,i)=>{const d=new Date(2026,10,18-29+i),wk=d.getDay()===0||d.getDay()===6;
+  const visits=Math.round((wk?95:60)+rnd()*40),taps=Math.round(visits*(.16+rnd()*.08)),orders=Math.round(taps*(.55+rnd()*.2)),pcs=orders+Math.round(orders*rnd()*1.4);
+  return{d,visits,taps,orders,pcs,sales:pcs*PRICE,src:{'Rich menu':.46,'Instagram':.24,'Facebook':.12,'เข้าตรง / อื่น ๆ':.18}}});
+const expenses=[{t:'วัตถุดิบ',m:'แป้ง ไข่ กะทิ ใบเตย',amt:1280,ago:'วันนี้ 09:10'},{t:'กล่อง/ถุง',m:'กล่อง 200 ใบ',amt:640,ago:'เมื่อวาน'},{t:'ค่าเช่า',m:'',amt:6000,ago:'1 พ.ย.'}];
+const monthOut=6000+640+1280+[...Array(12)].reduce(a=>a+600+Math.round(rnd()*700),0);
+const recent=[{k:'o',t:'3 ชิ้น',s:'LINE · โอน',amt:135,ago:'10:42'},{k:'o',t:'1 ชิ้น',s:'หน้าร้าน · เงินสด',amt:45,ago:'10:15'},{k:'e',...expenses[0]},{k:'o',t:'6 ชิ้น',s:'LINE · โอน',amt:270,ago:'09:02'}];
+
+const baht=n=>'฿'+n.toLocaleString('th-TH');
+const sum=(arr,k)=>arr.reduce((a,x)=>a+x[k],0);
+const ICON={eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+  chat:'<path d="M12 4C7 4 3 7.2 3 11.2c0 3.6 3.2 6.6 7.5 7.1l-.4 2.2 3.8-2.4C18.4 17.8 21 14.8 21 11.2 21 7.2 17 4 12 4Z"/>',
+  bag:'<path d="M6 7h12l-1 13H7Z"/><path d="M9 7a3 3 0 0 1 6 0"/>',cake:'<path d="M4 20h16M5 20v-7h14v7M5 13c2 0 2-2 3.5-2S10 13 12 13s2-2 3.5-2 1.5 2 3.5 2M12 7v4M12 4v.5"/>'};
+const tile=(k,ic,v,d,hero)=>`<div class="tile${hero?' hero':''}"><div class="k"><svg viewBox="0 0 24 24">${ICON[ic]}</svg>${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+const change=(a,b)=>{if(!b)return'';const p=Math.round((a-b)/b*100);return `<b class="${p>=0?'up':'down'}">${p>=0?'▲':'▼'} ${Math.abs(p)}%</b> จากช่วงก่อน`};
+
+let range=1;
+function render(){
+  const cur=days.slice(-range),prev=range<30?days.slice(-range*2,-range):[];
+  const label={1:'วันนี้',7:'7 วัน',30:'เดือนนี้'}[range];
+  document.getElementById('tiles').innerHTML=
+    tile('ยอดขาย','bag',baht(sum(cur,'sales')),change(sum(cur,'sales'),sum(prev,'sales'))||`${sum(cur,'orders')} ออเดอร์`,true)+
+    tile('ขายได้','cake',sum(cur,'pcs')+' ชิ้น',sum(cur,'orders')+' ออเดอร์')+
+    tile('คนเข้าเว็บ','eye',sum(cur,'visits').toLocaleString(),change(sum(cur,'visits'),sum(prev,'visits'))||'คน')+
+    tile('กดสั่งทาง LINE','chat',sum(cur,'taps').toLocaleString(),Math.round(sum(cur,'taps')/sum(cur,'visits')*100)+'% ของคนเข้าเว็บ');
+  const inc=sum(days,'sales');
+  document.getElementById('mIn').textContent=baht(inc);document.getElementById('mOut').textContent=baht(monthOut);document.getElementById('mProfit').textContent=baht(inc-monthOut);
+  for(const id of ['fRange','sRange'])document.getElementById(id).textContent=label;
+  // visit -> tap -> order: bars share one scale (the visits)
+  const V=sum(cur,'visits'),f=[['เข้าเว็บ',V],['กดสั่งทาง LINE',sum(cur,'taps')],['สั่งจริง (บันทึก)',sum(cur,'orders')]];
+  document.getElementById('funnel').innerHTML=f.map(([k,n])=>`<div class="frow"><span>${k}</span><div class="track"><span style="width:${n/V*100}%"></span></div><b>${n.toLocaleString()}</b></div>`).join('');
+  const S=Object.entries(cur[0].src).map(([k,p])=>[k,Math.round(V*p)]).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('sources').innerHTML=S.map(([k,n])=>`<div class="frow"><span>${k}</span><div class="track"><span style="width:${n/S[0][1]*100}%"></span></div><b>${n}</b></div>`).join('');
+  document.querySelectorAll('#range button').forEach(b=>b.classList.toggle('on',+b.dataset.r===range));
+}
+document.getElementById('range').addEventListener('click',e=>{const b=e.target.closest('button');if(b){range=+b.dataset.r;render()}});
+
+/* ---------- charts: one measure each, thin bars rounded at the data end, recessive grid, hover/tap tooltip ---------- */
+function bars(svgId,tipId,key,fmt,color,H){
+  const svg=document.getElementById(svgId),tip=document.getElementById(tipId),W=360,L=40,B=H-22,T=10,max=Math.max(...days.map(d=>d[key]));
+  const nice=Math.ceil(max/(key==='sales'?1000:50))*(key==='sales'?1000:50),bw=(W-L-6)/days.length;
+  let g='';for(let k=0;k<=2;k++){const v=nice*k/2,y=B-(B-T)*k/2;g+=`<line x1="${L}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--grid)"/><text x="${L-6}" y="${y+4}" text-anchor="end">${key==='sales'?(v/1000)+'k':v}</text>`}
+  days.forEach((d,i)=>{const h=(B-T)*d[key]/nice,x=L+i*bw+1,w=bw-2,y=B-h,r=Math.min(4,w/2);
+    g+=`<path d="M${x},${B}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${B}Z" fill="${color}" opacity="${i===days.length-1?1:.8}"/>`;
+    g+=`<rect x="${L+i*bw}" y="${T}" width="${bw}" height="${B-T}" fill="transparent" data-i="${i}"/>`});
+  [0,14,29].forEach(i=>g+=`<text x="${i===29?W:L+i*bw+bw/2}" y="${H-6}" text-anchor="${i===29?'end':'middle'}">${days[i].d.getDate()}/${days[i].d.getMonth()+1}</text>`);
+  svg.innerHTML=g;
+  const show=e=>{const r=e.target.closest('[data-i]');if(!r){tip.style.opacity=0;return}const d=days[+r.dataset.i],box=svg.getBoundingClientRect(),cb=svg.parentElement.getBoundingClientRect();
+    const rb=r.getBoundingClientRect();tip.innerHTML=`${d.d.getDate()}/${d.d.getMonth()+1} · <b>${fmt(d[key])}</b>`;tip.style.left=(rb.left-cb.left+rb.width/2)+'px';tip.style.top=(box.top-cb.top+10)+'px';tip.style.opacity=1};
+  svg.addEventListener('pointermove',show);svg.addEventListener('pointerdown',show);svg.addEventListener('pointerleave',()=>tip.style.opacity=0);
+}
+bars('cSales','tSales','sales',baht,'var(--bar)',170);
+bars('cVisits','tVisits','visits',n=>n+' คน','var(--bar2)',150);
+
+function renderRecent(){document.getElementById('recent').innerHTML=recent.map(r=>r.k==='o'
+  ?`<div class="row"><div><div class="t">ออเดอร์ ${r.t}<span class="tag">${r.s}</span></div><div class="s">${r.ago}</div></div><div class="m">+${baht(r.amt)}</div></div>`
+  :`<div class="row"><div><div class="t">${r.t}${r.m?` · ${r.m}`:''}</div><div class="s">${r.ago}</div></div><div class="m out">−${baht(r.amt)}</div></div>`).join('')}
+
+/* ---------- bottom sheets ---------- */
+const veil=document.getElementById('veil');let open=null;
+const close=()=>{open?.classList.remove('on');veil.classList.remove('on');open=null};
+document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{open=document.getElementById(b.dataset.open);open.classList.add('on');veil.classList.add('on')});
+veil.onclick=close;
+document.querySelectorAll('.chips').forEach(c=>c.onclick=e=>{const b=e.target.closest('button');if(!b)return;c.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
+let qty=1;const q=document.getElementById('qty'),ot=document.getElementById('oTotal');
+document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{qty=Math.max(1,qty+ +b.dataset.q);q.textContent=qty;ot.textContent=baht(qty*PRICE)});
+const toast=t=>{const el=document.getElementById('toast');el.textContent=t;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),1800)};
+document.querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>{
+  if(b.dataset.save==='order'){const via=document.querySelector('[data-g=via] .on').textContent,pay=document.querySelector('[data-g=pay] .on').textContent;
+    recent.unshift({k:'o',t:qty+' ชิ้น',s:`${via} · ${pay}`,amt:qty*PRICE,ago:'เมื่อกี้'});days[29].orders++;days[29].pcs+=qty;days[29].sales+=qty*PRICE;toast('บันทึกออเดอร์แล้ว');qty=1;q.textContent=1;ot.textContent=baht(PRICE)}
+  else{const amt=+document.getElementById('amt').value||0;if(!amt){toast('ใส่จำนวนเงินก่อน');return}
+    recent.unshift({k:'e',t:document.querySelector('[data-g=cat] .on').textContent,m:document.getElementById('memo').value,amt,ago:'เมื่อกี้'});toast('บันทึกรายจ่ายแล้ว');document.getElementById('amt').value='';document.getElementById('memo').value=''}
+  close();render();renderRecent();bars('cSales','tSales','sales',baht,'var(--bar)',170)});
+render();renderRecent();
+</script>
+</body>
+</html>
