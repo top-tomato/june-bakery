@@ -50,6 +50,43 @@ header h1{flex:1}
 .form{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:12px}
 .form label{font:500 .88rem Mitr,sans-serif}
 .form input,.form textarea{width:100%;font:1rem Anuphan,sans-serif;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}
+/* pickups (pre-orders for seminars / breaks) and the calendar */
+.pick{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:12px}
+.pick h3{font:600 .95rem Mitr,sans-serif;display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.pick h3 a{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
+.pk{display:grid;grid-template-columns:62px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-top:1px dashed var(--line)}
+.pk:first-of-type{border-top:0}
+.pk time{font:600 1rem Mitr,sans-serif}
+.pk small{display:block;color:var(--muted);font-size:.8rem}
+.pk b{font:500 .95rem Mitr,sans-serif}
+.pk .day{font:400 .75rem Anuphan;color:var(--muted)}
+.cal{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px}
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-h b{font:600 1.05rem Mitr,sans-serif}
+.cal-h button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:1.1rem;cursor:pointer;color:var(--ink)}
+.grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.grid7 .dw{font-size:.75rem;color:var(--muted);text-align:center;padding:4px 0}
+.dc{position:relative;aspect-ratio:1/1.05;border-radius:10px;border:1px solid transparent;background:#faf6ee;padding:4px 5px;font-size:.85rem;text-align:left;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;justify-content:space-between;font-family:inherit}
+.dc.out{opacity:.35}
+.dc.today{border-color:var(--ink)}
+.dc.sel{background:var(--ink);color:var(--cream)}
+.dc.closed{background:repeating-linear-gradient(135deg,#f3e1da 0 6px,#fbefea 6px 12px)}
+.dc.closed.sel{background:var(--ink)}
+.dc .cnt{align-self:flex-start;font:600 .7rem Mitr,sans-serif;background:var(--peach);color:var(--ink);border-radius:99px;padding:0 6px}
+.dc .off{font-size:.66rem;color:#a2482f}
+.dc.sel .off{color:var(--cream)}
+.daypanel{margin-top:14px}
+.daypanel h3{font:600 1rem Mitr,sans-serif;margin-bottom:8px}
+.switch{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.switch small{display:block;color:var(--muted);font-size:.8rem}
+.tg{width:50px;height:30px;border-radius:99px;background:#ddd5c7;border:0;position:relative;cursor:pointer;transition:background .2s}
+.tg::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tg.on{background:#a2482f}.tg.on::after{transform:translateX(20px)}
+.legend{display:flex;gap:14px;font-size:.8rem;color:var(--muted);margin-top:10px;flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px}
+.pre-only{display:none}
+.sheet.pre .pre-only{display:block}
+.sheet .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .btn2{border:0;border-radius:999px;padding:12px 20px;background:var(--ink);color:var(--cream);font:500 1rem Mitr,sans-serif;justify-self:start;cursor:pointer}
 header h1{font:600 1.15rem Mitr,sans-serif}
 header nav{display:flex;gap:14px;font-size:.9rem}
@@ -128,6 +165,7 @@ h2 small{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
     <div class="grp">ขาย</div>
     <a href="#orders"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>ออเดอร์<span class="badge">3 วันนี้</span></a>
     <a href="#expenses"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg>รายจ่าย</a>
+    <a href="#calendar"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>ปฏิทิน<span class="badge" id="navPick"></span></a>
     <div class="grp">หน้าเว็บ</div>
     <a href="#gallery"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg>Gallery</a>
     <a href="#menu"><svg viewBox="0 0 24 24"><path d="M4 20h16M5 20v-7h14v7M5 13c2 0 2-2 3.5-2S10 13 12 13s2-2 3.5-2 1.5 2 3.5 2M12 7v4"/></svg>เมนูขนม</a>
@@ -148,6 +186,7 @@ h2 small{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
   <p class="note">mock · ตัวเลขทั้งหมดเป็นตัวอย่าง · กดปุ่มล่างจอเพื่อลองบันทึกออเดอร์/รายจ่าย</p>
   <div class="seg" id="range"><button data-r="1" class="on">วันนี้</button><button data-r="7">7 วัน</button><button data-r="30">เดือนนี้</button></div>
 
+  <div class="pick" id="pickToday"></div>
   <div class="tiles" id="tiles"></div>
 
   <h2>เงินเข้า-ออก <small id="moneyRange">เดือนนี้</small></h2>
@@ -187,6 +226,14 @@ h2 small{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
   <div class="seg"><button class="on">เดือนนี้</button><button>เดือนก่อน</button></div>
   <table class="tbl"><thead><tr><th>วันที่</th><th>หมวด</th><th>จด</th><th class="r">จำนวน</th></tr></thead><tbody id="etable"></tbody></table>
 </section>
+<section class="view" data-view="calendar" hidden>
+  <div class="cal">
+    <div class="cal-h"><button id="mPrev" aria-label="เดือนก่อน">‹</button><b id="mTitle"></b><button id="mNext" aria-label="เดือนถัดไป">›</button></div>
+    <div class="grid7" id="cal"></div>
+    <div class="legend"><span><i style="background:var(--peach)"></i>มีนัดรับ (ตัวเลข = จำนวนนัด)</span><span><i style="background:repeating-linear-gradient(135deg,#f3e1da 0 3px,#fbefea 3px 6px)"></i>ร้านหยุด</span></div>
+  </div>
+  <div class="daypanel" id="dayPanel"></div>
+</section>
 <section class="view" data-view="gallery" hidden>
   <div class="empty-view"><b>รูปและวิดีโอใน Gallery</b>หน้าอัปโหลดรูป (ทำแล้วบนเว็บจริง) จะย้ายมาอยู่ในเมนูนี้<br><br><a class="btn2" href="gallery-upload.html" style="display:inline-block;text-decoration:none">เปิดหน้าอัปโหลด</a></div>
 </section>
@@ -213,6 +260,12 @@ h2 small{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
 <div class="veil" id="veil"></div>
 <section class="sheet" id="order" aria-label="บันทึกออเดอร์">
   <h3>บันทึกออเดอร์</h3>
+  <div class="chips" data-g="kind" id="kind"><button class="on">ขายเลย</button><button>สั่งล่วงหน้า (สัมมนา / break)</button></div>
+  <div class="pre-only">
+    <div class="row2"><div><label for="pDate">วันรับ</label><input id="pDate" type="date"></div><div><label for="pTime">เวลารับ</label><input id="pTime" type="time" value="10:00"></div></div>
+    <label for="pWho">ชื่องาน / ลูกค้า</label><input id="pWho" placeholder="เช่น สัมมนาบริษัท A · คุณฝน">
+    <label for="pNote">จด (ไม่ใส่ก็ได้)</label><input id="pNote" placeholder="เช่น 50 ที่ แยกกล่อง ส่งชั้น 3">
+  </div>
   <label>จำนวนชิ้น · ชิฟฟ่อนมะพร้าวใบเตย ฿45</label>
   <div class="step"><button data-q="-1">−</button><output id="qty">1</output><button data-q="1">+</button></div>
   <label>สั่งทาง</label>
@@ -242,6 +295,45 @@ const days=[...Array(30)].map((_,i)=>{const d=new Date(2026,10,18-29+i),wk=d.get
   return{d,visits,taps,orders,pcs,sales:pcs*PRICE,src:{'Rich menu':.46,'Instagram':.24,'Facebook':.12,'เข้าตรง / อื่น ๆ':.18}}});
 const expenses=[{t:'วัตถุดิบ',m:'แป้ง ไข่ กะทิ ใบเตย',amt:1280,ago:'วันนี้ 09:10'},{t:'กล่อง/ถุง',m:'กล่อง 200 ใบ',amt:640,ago:'เมื่อวาน'},{t:'ค่าเช่า',m:'',amt:6000,ago:'1 พ.ย.'}];
 const monthOut=6000+640+1280+[...Array(12)].reduce(a=>a+600+Math.round(rnd()*700),0);
+/* sample pre-orders (pickups) and closed days — all made up for the mock */
+const TODAY='2026-11-18';
+const iso=d=>d.toISOString().slice(0,10);const addDays=(s,n)=>{const d=new Date(s+'T00:00');d.setDate(d.getDate()+n);return d.toLocaleDateString('sv')};
+const pickups=[
+  {date:'2026-11-18',time:'14:30',who:'(ตัวอย่าง) break บ่าย ร้านกาแฟ B',qty:30,note:'แยกกล่อง'},
+  {date:'2026-11-19',time:'09:30',who:'(ตัวอย่าง) สัมมนาบริษัท A',qty:50,note:'ส่งชั้น 3'},
+  {date:'2026-11-21',time:'13:00',who:'(ตัวอย่าง) อบรมโรงเรียน C',qty:40,note:''},
+  {date:'2026-11-26',time:'10:00',who:'(ตัวอย่าง) ประชุมคุณฝน',qty:20,note:''},
+];
+const closed=new Set(['2026-11-23','2026-11-30']);
+const thDate=s=>new Date(s+'T00:00').toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'});
+const pkRow=(p,showDay)=>`<div class="pk"><time>${p.time}</time><div><b>${p.who}</b><small>${p.qty} ชิ้น${p.note?' · '+p.note:''}${showDay?` · <span class="day">${thDate(p.date)}</span>`:''}</small></div><b>${baht(p.qty*PRICE)}</b></div>`;
+function renderPick(){
+  const t=pickups.filter(p=>p.date===TODAY),n=pickups.filter(p=>p.date===addDays(TODAY,1));
+  const el=document.getElementById('pickToday');
+  el.innerHTML=`<h3>นัดรับวันนี้ <a href="#calendar">ดูปฏิทิน</a></h3>${t.length?t.map(p=>pkRow(p)).join(''):'<p style="color:var(--muted);font-size:.9rem">วันนี้ไม่มีนัดรับ</p>'}`+
+    (n.length?`<h3 style="margin-top:10px">พรุ่งนี้ <small style="font:400 .8rem Anuphan;color:var(--muted)">เตรียม ${n.reduce((a,p)=>a+p.qty,0)} ชิ้น</small></h3>${n.map(p=>pkRow(p)).join('')}`:'');
+  const up=pickups.filter(p=>p.date>=TODAY).length;document.getElementById('navPick').textContent=up?up+' นัด':'';
+}
+let month=new Date(TODAY+'T00:00');month.setDate(1);let sel=TODAY;
+function renderCal(){
+  document.getElementById('mTitle').textContent=month.toLocaleDateString('th-TH',{month:'long',year:'numeric'});
+  const first=new Date(month),start=new Date(first);start.setDate(1-first.getDay());
+  let h=['อา','จ','อ','พ','พฤ','ศ','ส'].map(d=>`<div class="dw">${d}</div>`).join('');
+  for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const k=d.toLocaleDateString('sv'),c=pickups.filter(p=>p.date===k).length;
+    h+=`<button class="dc${d.getMonth()!==month.getMonth()?' out':''}${k===TODAY?' today':''}${k===sel?' sel':''}${closed.has(k)?' closed':''}" data-d="${k}"><span>${d.getDate()}</span>${c?`<span class="cnt">${c}</span>`:closed.has(k)?'<span class="off">หยุด</span>':''}</button>`}
+  document.getElementById('cal').innerHTML=h;
+  const list=pickups.filter(p=>p.date===sel).sort((a,b)=>a.time.localeCompare(b.time)),off=closed.has(sel);
+  document.getElementById('dayPanel').innerHTML=`<h3>${new Date(sel+'T00:00').toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long'})}</h3>
+    <div class="switch"><div><b>ร้านหยุดวันนี้</b><small>ขึ้นบนหน้าเว็บด้วยว่าวันนี้ร้านหยุด</small></div><button class="tg${off?' on':''}" id="tgOff" aria-label="ร้านหยุดวันนี้"></button></div>
+    <div class="pick">${list.length?list.map(p=>pkRow(p)).join(''):'<p style="color:var(--muted);font-size:.9rem">ไม่มีนัดรับ</p>'}</div>
+    <button class="btn2" id="addPick">+ เพิ่มนัดรับ</button>`;
+  document.getElementById('tgOff').onclick=()=>{off?closed.delete(sel):closed.add(sel);toast(off?'เปิดร้านวันนี้':'ตั้งเป็นวันหยุดแล้ว');renderCal()};
+  document.getElementById('addPick').onclick=()=>{openOrder(true,sel)};
+}
+document.getElementById('cal').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b){sel=b.dataset.d;renderCal()}});
+document.getElementById('mPrev').onclick=()=>{month.setMonth(month.getMonth()-1);renderCal()};
+document.getElementById('mNext').onclick=()=>{month.setMonth(month.getMonth()+1);renderCal()};
+
 const recent=[{k:'o',t:'3 ชิ้น',s:'LINE · โอน',amt:135,ago:'10:42'},{k:'o',t:'1 ชิ้น',s:'หน้าร้าน · เงินสด',amt:45,ago:'10:15'},{k:'e',...expenses[0]},{k:'o',t:'6 ชิ้น',s:'LINE · โอน',amt:270,ago:'09:02'}];
 
 const baht=n=>'฿'+n.toLocaleString('th-TH');
@@ -297,19 +389,29 @@ function renderRecent(){document.getElementById('recent').innerHTML=recent.map(r
 /* ---------- bottom sheets ---------- */
 const veil=document.getElementById('veil');let open=null;
 const close=()=>{open?.classList.remove('on');veil.classList.remove('on');open=null};
-document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{open=document.getElementById(b.dataset.open);open.classList.add('on');veil.classList.add('on')});
+document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>{if(b.dataset.open==='order')return openOrder(false);open=document.getElementById(b.dataset.open);open.classList.add('on');veil.classList.add('on')});
+function openOrder(pre,date){const sh=document.getElementById('order');open=sh;sh.classList.add('on');veil.classList.add('on');
+  const ks=[...document.querySelectorAll('#kind button')];ks.forEach((x,i)=>x.classList.toggle('on',i===(pre?1:0)));sh.classList.toggle('pre',!!pre);
+  document.getElementById('pDate').value=date||addDays(TODAY,1)}
+document.getElementById('kind').addEventListener('click',()=>setTimeout(()=>document.getElementById('order').classList.toggle('pre',document.querySelector('#kind button.on')!==document.querySelector('#kind button'))));
 veil.onclick=close;
 document.querySelectorAll('.chips').forEach(c=>c.onclick=e=>{const b=e.target.closest('button');if(!b)return;c.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
 let qty=1;const q=document.getElementById('qty'),ot=document.getElementById('oTotal');
 document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{qty=Math.max(1,qty+ +b.dataset.q);q.textContent=qty;ot.textContent=baht(qty*PRICE)});
 const toast=t=>{const el=document.getElementById('toast');el.textContent=t;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),1800)};
 document.querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>{
+  if(b.dataset.save==='order'&&document.getElementById('order').classList.contains('pre')){
+    const who=document.getElementById('pWho').value.trim();if(!who){toast('ใส่ชื่องานหรือลูกค้าก่อน');return}
+    const date=document.getElementById('pDate').value;if(closed.has(date)){toast('วันนั้นร้านหยุด');return}
+    pickups.push({date,time:document.getElementById('pTime').value,who,qty,note:document.getElementById('pNote').value});
+    toast('บันทึกนัดรับแล้ว');qty=1;q.textContent=1;ot.textContent=baht(PRICE);document.getElementById('pWho').value='';document.getElementById('pNote').value='';
+    close();renderPick();sel=date;month=new Date(date+'T00:00');month.setDate(1);renderCal();return}
   if(b.dataset.save==='order'){const via=document.querySelector('[data-g=via] .on').textContent,pay=document.querySelector('[data-g=pay] .on').textContent;
     recent.unshift({k:'o',t:qty+' ชิ้น',s:`${via} · ${pay}`,amt:qty*PRICE,ago:'เมื่อกี้'});days[29].orders++;days[29].pcs+=qty;days[29].sales+=qty*PRICE;toast('บันทึกออเดอร์แล้ว');qty=1;q.textContent=1;ot.textContent=baht(PRICE)}
   else{const amt=+document.getElementById('amt').value||0;if(!amt){toast('ใส่จำนวนเงินก่อน');return}
     recent.unshift({k:'e',t:document.querySelector('[data-g=cat] .on').textContent,m:document.getElementById('memo').value,amt,ago:'เมื่อกี้'});toast('บันทึกรายจ่ายแล้ว');document.getElementById('amt').value='';document.getElementById('memo').value=''}
   close();render();renderRecent();bars('cSales','tSales','sales',baht,'var(--bar)',170)});
-render();renderRecent();
+render();renderRecent();renderPick();renderCal();
 
 /* side menu: switch views by #hash; on phones it is a drawer */
 const side=document.getElementById('side'),sveil=document.getElementById('sveil');
@@ -320,7 +422,7 @@ function route(){
   document.querySelectorAll('.view').forEach(s=>s.hidden=s.dataset.view!==v);
   document.querySelectorAll('#snav a').forEach(x=>x.classList.toggle('on',x===a));
   document.getElementById('vtitle').textContent=a.childNodes[1].textContent.trim();
-  document.querySelector('.fab').style.display=['summary','orders','expenses'].includes(v)?'':'none';
+  document.querySelector('.fab').style.display=['summary','orders','expenses','calendar'].includes(v)?'':'none';
   drawer(false);scrollTo(0,0);
 }
 addEventListener('hashchange',route);route();
