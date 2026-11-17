@@ -42,7 +42,9 @@ void main(){
     float bead=length(p-vec2(q.x,bot+5.-q.y*.64))-q.y*.64;
     f=smin(f,smin(body,bead,10.),24.);
   }
-  float aa=${deriv ? 'max(fwidth(f)*.6,.02)' : '.75'};
+  // antialias width from the field's slope, capped: where a far drip is culled the field jumps between neighbouring
+  // columns, and an uncapped fwidth there smeared a faint cream line down the whole strip
+  float aa=${deriv ? 'clamp(fwidth(f)*.6,.02,1.5)' : '.75'};
   float a=1.-smoothstep(-aa,aa,f);
   gl_FragColor=vec4(col*a,a);
 }`
