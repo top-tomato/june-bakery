@@ -162,8 +162,52 @@ section {
 .june-logo.intro .word {
   animation: june-word 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
 }
-.june-logo.paused path {
+.june-logo.paused path,
+.june-logo.paused g {
   animation-play-state: paused;
+}
+/* Loading screen letter wave (mock/loading-letters.html, B): J-u-n-e pop up one by one, then stretch and squash in a
+   wave standing on the baseline (joins stay closed) until the page is ready. The palm rides on the J and its leaves
+   droop as it rises and flick gently when it lands. */
+.june-logo .ltr {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+}
+.june-logo .flut {
+  transform-box: view-box;
+  transform-origin: 380px 192px;
+}
+.june-logo.intro .word {
+  animation: none;
+}
+.june-logo.intro .ltr {
+  animation:
+    june-ltr-in 0.7s cubic-bezier(0.33, 0, 0.2, 1) calc(0.15s + var(--k) * 0.14s) both,
+    june-ltr-wave 1.6s cubic-bezier(0.45, 0, 0.55, 1) calc(1s + var(--k) * 0.14s) infinite;
+}
+.june-logo.intro .flut {
+  animation: june-flutter 1.6s cubic-bezier(0.45, 0, 0.55, 1) calc(1s + var(--fd)) infinite;
+}
+.june-logo .f1 { --fa: 1; --fd: 0s; }
+.june-logo .f2 { --fa: -1.25; --fd: 0.05s; }
+.june-logo .f3 { --fa: 0.85; --fd: 0.1s; }
+.june-logo .f4 { --fa: -1.1; --fd: 0.15s; }
+@keyframes june-ltr-in {
+  0% { opacity: 0; transform: scale(1, 0.4); }
+  60% { opacity: 1; transform: scale(0.98, 1.06); }
+  100% { transform: none; }
+}
+@keyframes june-ltr-wave {
+  0%, 60%, 100% { transform: none; }
+  22% { transform: scale(0.985, 1.07); }
+  42% { transform: scale(1.015, 0.98); }
+}
+@keyframes june-flutter {
+  0%, 100% { transform: none; }
+  18% { transform: rotate(calc(var(--fa) * -2deg)); }
+  40% { transform: rotate(calc(var(--fa) * 4deg)) skewX(calc(var(--fa) * -1.5deg)); }
+  62% { transform: rotate(calc(var(--fa) * -1.5deg)); }
+  82% { transform: rotate(calc(var(--fa) * 0.5deg)); }
 }
 @keyframes june-grow {
   from { opacity: 0; transform: scale(0.05) rotate(-40deg); }
@@ -188,6 +232,9 @@ section {
   to { opacity: 1; transform: none; }
 }
 @media (prefers-reduced-motion: reduce) {
+  .june-logo g {
+    animation: none !important;
+  }
   .june-logo path {
     animation: none !important;
     opacity: 1 !important;

@@ -1,4 +1,4 @@
-import type { SVGProps } from 'react'
+import { useId, type CSSProperties, type SVGProps } from 'react'
 
 /**
  * The June logo as separate shapes so the palm can move (mock/logo-anim.html). Traced from assets/logo.png, same
@@ -20,14 +20,40 @@ const TICKS = [
   'M753.5 293.9C750.0 292.7 745.6 290.2 742.0 287.4C738.0 284.4 737.8 284.2 736.2 282.2C735.4 281.2 734.5 280.1 734.1 279.7C733.0 278.5 731.8 276.5 730.8 273.8C729.9 271.6 729.9 271.3 729.9 265.2C729.8 260.2 730.0 258.4 730.4 256.8C731.2 254.0 733.7 248.5 735.3 246.0C737.9 242.1 737.1 240.1 731.9 237.2C727.7 234.8 727.1 234.1 726.8 229.9C726.6 227.4 726.7 226.7 729.1 219.3C731.3 212.2 735.0 210.2 742.0 212.5C745.4 213.7 752.9 218.7 755.3 221.5C755.8 222.0 756.8 223.1 757.5 223.8C759.3 225.5 762.9 231.1 763.4 232.8C764.0 234.8 764.0 246.7 763.4 249.0C763.1 250.0 762.3 252.3 761.4 254.1C758.3 261.1 759.0 264.9 764.2 268.8C767.4 271.2 768.0 272.4 768.0 276.1C768.0 278.0 767.8 279.2 767.1 280.9C766.7 282.1 765.7 284.7 765.0 286.7C763.5 290.7 762.2 292.5 759.6 293.8C757.5 294.9 756.5 294.9 753.5 293.9Z',
 ]
 
+/**
+ * u, n and e are one joined stroke, so for the loading screen's letter wave each is cut out of WORD[1] along the gap
+ * between letters (measured row by row in mock/loading-letters.html; the cuts overlap a few units, same colour).
+ */
+const CUTS = {
+  u: '300,300 574,300 569,335 564,350 559,365 555,380 550,395 545,410 540,425 536,440 532,455 529,470 524,485 523,500 522,515 521,530 521,560 300,560',
+  n: '568,300 563,335 558,350 553,365 549,380 544,395 539,410 534,425 530,440 526,455 523,470 518,485 517,500 516,515 515,530 515,560 753,560 753,530 751,515 751,500 730,485 732,470 733,455 736,440 739,425 743,410 749,395 755,380 762,365 768,350 775,335 779,300',
+  e: '773,300 769,335 762,350 756,365 749,380 743,395 737,410 733,425 730,440 727,455 726,470 724,485 745,500 745,515 747,530 747,560 960,560 960,300',
+} as const
+
 export function JuneLogo({ className = '', ...rest }: SVGProps<SVGSVGElement>) {
+  const id = useId().replace(/:/g, '')
   return (
     <svg className={`june-logo ${className}`} viewBox='0 0 1000 660' fill='currentColor' aria-hidden='true' {...rest}>
-      {LEAVES.map((d, i) => (
-        <path key={d} className={`leaf l${i + 1}`} d={d} />
-      ))}
-      {WORD.map((d) => (
-        <path key={d} className='word' d={d} />
+      <defs>
+        {Object.entries(CUTS).map(([k, pts]) => (
+          <clipPath key={k} id={`${id}${k}`}>
+            <polygon points={pts} />
+          </clipPath>
+        ))}
+      </defs>
+      {/* the J carries the palm: when it stretches the leaves ride along, and flutter (.flut) when it lands */}
+      <g className='ltr' style={{ '--k': 0 } as CSSProperties}>
+        {LEAVES.map((d, i) => (
+          <g key={d} className={`flut f${i + 1}`}>
+            <path className={`leaf l${i + 1}`} d={d} />
+          </g>
+        ))}
+        <path className='word' d={WORD[0]} />
+      </g>
+      {(['u', 'n', 'e'] as const).map((k, i) => (
+        <g key={k} className='ltr' style={{ '--k': i + 1 } as CSSProperties}>
+          <path className='word' d={WORD[1]} clipPath={`url(#${id}${k})`} />
+        </g>
       ))}
       {TICKS.map((d, i) => (
         <path key={d} className={`tick t${i + 1}`} d={d} />
