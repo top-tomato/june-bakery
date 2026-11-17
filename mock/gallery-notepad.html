@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>June — สมุดรูปแบบห่วงด้านบน (mock มือถือ)</title>
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500;600&family=Itim&display=swap" rel="stylesheet">
+<style>
+/* Phone photo book as a top-bound notepad (reporter's pad): the rings run across the top and pages flip UP and over.
+   A tall, narrow pad matches a phone screen, so each page is bigger than a side-bound page would be.
+   Hand-rolled (page-flip only turns left/right): each leaf is one plane hinged at its top edge, rotateX 0 -> -180deg.
+   Drag up to turn, drag down to bring the last page back; only transform/opacity change per frame. */
+:root{
+  --cream:#FFF6E6;--paper:#FFFBF3;--ink:#2F4A45;--peach:#F3A18F;--board:#E7B3A0;
+  --display:"Mitr",system-ui,sans-serif;--hand:"Itim","Mitr",cursive;
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .45 0 0 0 0 .35 0 0 0 0 .25 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  --ring:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='34'%3E%3Cdefs%3E%0A%3ClinearGradient id='w' x1='0' y1='0' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%23eef2f1'/%3E%3Cstop offset='.45' stop-color='%23a9b5b2'/%3E%3Cstop offset='1' stop-color='%2356625f'/%3E%3C/linearGradient%3E%0A%3Cfilter id='b' x='-60%25' y='-30%25' width='220%25' height='160%25'%3E%3CfeGaussianBlur stdDeviation='1'/%3E%3C/filter%3E%3C/defs%3E%0A%3Cpath d='M14.5 3.5C21 3 24.5 9 23 16' fill='none' stroke='%234a5654' stroke-width='3' stroke-linecap='round'/%3E%0A%3Cpath d='M18.5 18Q16.5 23 17.5 29' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='3' stroke-linecap='round' filter='url(%23b)'/%3E%0A%3Cpath d='M14 28C3.5 22 3.5 5 14.5 3.5' fill='none' stroke='url(%23w)' stroke-width='3.2' stroke-linecap='round'/%3E%0A%3Cpath d='M8.2 22C5.6 17 6 9 10.5 6.2' fill='none' stroke='%23fff' stroke-opacity='.9' stroke-width='.9' stroke-linecap='round'/%3E%0A%3Ccircle cx='14' cy='28' r='2.2' fill='%232b3533'/%3E%3C/svg%3E");
+}
+*{box-sizing:border-box;margin:0}
+html,body{height:100%}
+body{font-family:var(--display);color:var(--ink);background:#3E5D58 var(--grain);overflow:hidden;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  padding:max(10px,env(safe-area-inset-top)) 12px max(10px,env(safe-area-inset-bottom));
+  -webkit-user-select:none;user-select:none}
+.hint{color:var(--cream);opacity:.75;font:.95rem var(--hand);text-align:center}
+
+/* the pad: rings strip on top, then the stack of leaves */
+.pad{position:relative;padding-top:16px;touch-action:none}
+.rings{position:absolute;left:10px;right:10px;top:0;height:34px;z-index:500;pointer-events:none;
+  background:var(--ring) 0 0/28px 34px space no-repeat;filter:drop-shadow(0 1px 0 rgba(0,0,0,.15))}
+.stack{position:relative;perspective:1700px;perspective-origin:50% 0}
+/* page edges under the top leaf: thicker while there is more left to read */
+.edges{position:absolute;left:3px;right:3px;top:6px;bottom:calc(var(--t,6px) * -1);border-radius:0 0 8px 8px;z-index:0;
+  background:repeating-linear-gradient(0deg,#efe6d6 0 1px,#fffaf1 1px 2.5px);box-shadow:0 10px 22px rgba(0,0,0,.35);transition:bottom .3s}
+
+.leaf{position:absolute;inset:0;transform-origin:50% 0;transform-style:preserve-3d;will-change:transform}
+.face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;border-radius:0 0 8px 8px;overflow:hidden;container-type:size}
+.face.back{transform:rotateX(180deg)}
+/* paper: grain + dot grid + a row of punched holes along the top */
+.paper{background:var(--grain),radial-gradient(circle,rgba(47,74,69,.22) .9px,transparent 1.3px) 0 0/16px 16px,var(--paper)}
+.board{background:var(--grain),radial-gradient(rgba(255,255,255,.18) 1px,transparent 1.3px) 0 0/8px 8px,var(--board)}
+.face::before{content:"";position:absolute;left:10px;right:10px;top:4px;height:16px;z-index:2;
+  background:radial-gradient(circle,#2b3a37 3.6px,#4a5f5b 4.4px,transparent 4.9px) 0 50%/28px 16px space no-repeat}
+.face.back::before{display:none}
+.face.back.paper{filter:brightness(.97)}
+/* light and shadow while turning: the lifting leaf darkens as it tips away; the page under it gets its shadow */
+.shade{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.05),rgba(0,0,0,.35))}
+.under{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;
+  background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,0) 70%)}
+
+.in{position:absolute;inset:34px 8cqw 5cqh;display:flex;flex-direction:column}
+.cover .in{align-items:center;justify-content:center;text-align:center}
+.plate{background:var(--paper);border-radius:10px;padding:7cqh 8cqw 6cqh;width:100%;box-shadow:0 3px 0 rgba(0,0,0,.08)}
+.logo{width:62cqw;aspect-ratio:1000/660;margin:0 auto;background:var(--ink);-webkit-mask:url(img/logo.png) center/contain no-repeat;mask:url(img/logo.png) center/contain no-repeat}
+.rule{width:30%;height:2px;background:var(--ink);opacity:.25;margin:3cqh auto}
+.kicker{font:400 6.5cqw var(--hand);opacity:.8}
+.cap{font:400 5.6cqw var(--hand);opacity:.8;margin-top:6cqh}
+.brand{font:600 12cqw/1.1 var(--display)}
+.h-num{font:400 6cqw var(--hand);color:var(--peach)}
+.h-name{font:600 10cqw/1.1 var(--display)}
+.h-desc{font:400 6cqw/1.45 var(--hand);opacity:.85;margin-top:2cqh}
+.snaps{display:grid;gap:4cqh;margin-top:3cqh;flex:1;min-height:0;grid-template-rows:1fr 1fr}
+.snaps.one{grid-template-rows:1fr}
+.snap{position:relative;display:flex;flex-direction:column;min-height:0;transform:rotate(var(--r))}
+.snap .ph{flex:1;min-height:0;background:#e9e2d4 center/cover;border:2.2cqw solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.14)}
+.snap video.ph{width:100%;object-fit:cover;display:block}
+.snap .tape{position:absolute;top:-2cqh;left:50%;width:22cqw;height:3.4cqh;margin-left:-11cqw;background:rgba(243,161,143,.55);transform:rotate(-4deg);z-index:1}
+.snap p{font:400 5.4cqw/1.2 var(--hand);text-align:center;margin-top:1cqh}
+.d{position:absolute;pointer-events:none}
+.dd{fill:none;stroke:var(--ink);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.dd.peach{stroke:var(--peach)}
+.order{display:inline-block;font:500 5.4cqw var(--display);color:var(--cream);background:var(--ink);text-decoration:none;padding:2.6cqw 6cqw;border-radius:999px}
+
+.nav{display:flex;align-items:center;gap:14px;color:var(--cream)}
+.nav button{width:44px;height:44px;border-radius:50%;border:2px solid var(--cream);background:none;color:var(--cream);display:grid;place-items:center;cursor:pointer}
+.nav button:disabled{opacity:.3}
+.nav svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.count{min-width:86px;text-align:center;font-weight:500}
+</style>
+</head>
+<body>
+<div class="hint">สมุดรูปจากครัว June · ปัดขึ้นเพื่อพลิก</div>
+<div class="pad" id="pad">
+  <div class="rings" aria-hidden="true"></div>
+  <div class="stack" id="stack"><div class="edges" id="edges"></div></div>
+</div>
+<div class="nav">
+  <button id="prev" type="button" aria-label="หน้าก่อน"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7 7 7-7"/></svg></button>
+  <span class="count" id="count"></span>
+  <button id="next" type="button" aria-label="หน้าถัดไป"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7-7 7 7"/></svg></button>
+</div>
+<script>
+const LINE_ID='@561hgrea';
+const lineURL=t=>`https://line.me/R/oaMessage/${encodeURIComponent(LINE_ID)}/${t?'?'+encodeURIComponent(t):''}`;
+const D={
+  sparkle:'<path class="dd peach" d="M50 10l5 35 35 5-35 5-5 35-5-35-35-5 35-5Z"/>',
+  whisk:'<path class="dd" d="M50 96V58"/><path class="dd" d="M50 58C26 40 30 6 50 6s24 34 0 52Z"/><path class="dd" d="M50 58C40 40 42 10 50 6M50 58c10-18 8-48 0-52"/>',
+  leaf:'<path class="dd" d="M8 92C28 66 58 34 94 8C74 42 46 72 8 92Z"/><path class="dd" d="M8 92C40 64 64 40 94 8"/><path class="dd" d="M30 92C44 70 60 52 78 36"/>',
+};
+const svg=(k,css)=>`<svg class="d" viewBox="0 0 100 100" style="${css}" aria-hidden="true">${D[k]}</svg>`;
+const SHOTS=[
+  ['img/shop-12.jpg','ชิฟฟ่อนมะพร้าวใบเตย'],['img/shop-05.jpg','ออกจากเตา'],
+  ['img/shop-07.jpg','อุ่น ๆ'],['img/shop-14.jpg','วันที่ครัวยุ่ง'],
+  ['img/shop-13.jpg','จัดโต๊ะ'],['img/shop-10.jpg','หลายหน้าตา'],
+  ['img/shop-11.jpg',''],['img/shop-02.jpg',''],
+  ['img/shop-08.jpg',''],['img/shop-15.jpg',''],
+];
+const snap=([img,cap],j,k)=>`<div class="snap" style="--r:${(j+k)%2?2:-2}deg"><span class="tape"></span><div class="ph" style="background-image:url('${img}')"></div><p>${cap||'&nbsp;'}</p></div>`;
+// each leaf: [front html, front class, back class]
+const L=[];
+L.push([`<div class="in">${svg('leaf','left:8%;top:12%;width:20cqw;transform:rotate(-10deg)')}${svg('whisk','right:8%;bottom:4%;width:13cqw;transform:rotate(16deg)')}
+  <div class="plate"><div class="logo" role="img" aria-label="June"></div><div class="rule"></div><div class="kicker">สมุดรูปจากครัว</div></div>
+  <div class="cap">ปัดขึ้นเพื่อเปิด</div></div>`,'board cover','board']);
+L.push([`<div class="in"><div class="h-num">วิดีโอ</div><div class="h-name">Snack box</div>
+  <div class="snaps one"><div class="snap" style="--r:-1.5deg"><span class="tape"></span>
+  <video class="ph" src="img/snackbox.mp4" poster="img/snackbox-poster.jpg" autoplay muted loop playsinline preload="metadata"></video><p>ทำเสร็จ แพ็กใส่กล่อง</p></div></div></div>`,'paper','paper']);
+for(let k=0;k<SHOTS.length/2;k++)L.push([`<div class="in"><div class="h-num">หน้า ${k+2}</div><div class="snaps">${SHOTS.slice(k*2,k*2+2).map((s,j)=>snap(s,j,k)).join('')}</div></div>`,'paper','paper']);
+L.push([`<div class="in" style="justify-content:center;align-items:center;text-align:center">${svg('whisk','position:relative;width:16cqw;margin-bottom:4cqh')}
+  <div class="h-name">อยากชิมแล้ว?</div><div class="h-desc" style="margin-bottom:5cqh">ทักมาสั่งทาง LINE ได้เลย</div>
+  <a class="order" href="${lineURL('สนใจสั่งชิฟฟ่อนมะพร้าวใบเตย')}">สั่งทาง LINE</a></div>`,'paper','board']);
+// last leaf = back cover, never turned
+L.push([`<div class="in" style="align-items:center;justify-content:center;text-align:center"><div class="plate"><div class="brand">ขอบคุณนะ</div><div class="rule"></div><div class="kicker">June · อบใหม่ทุกวัน</div></div></div>`,'board cover','board']);
+const N=L.length, LAST=N-1;
+
+/* size: as big as the screen allows, notepad proportions */
+const pad=document.getElementById('pad'),stack=document.getElementById('stack'),edges=document.getElementById('edges');
+function size(){
+  const h=innerHeight-(innerHeight<560?110:140),w=Math.min(innerWidth-24,Math.round(h*.64),460);
+  stack.style.width=w+'px';stack.style.height=Math.round(Math.min(h,w/.64))+'px';pad.style.width=w+'px';
+}
+size();addEventListener('resize',size);
+
+stack.insertAdjacentHTML('beforeend',L.map(([html,fc,bc],i)=>`<div class="leaf" style="z-index:${N-i}">
+  <div class="face front ${fc}">${html}<div class="under"></div><div class="shade"></div></div><div class="face back ${bc}"></div></div>`).join(''));
+const leaves=[...stack.querySelectorAll('.leaf')];
+const ang=new Float32Array(N);       // 0 = lying on the pad, 180 = turned over the top
+let cur=0;                           // index of the leaf on top
+
+function paint(i){
+  const a=ang[i],el=leaves[i];
+  el.style.transform=`rotateX(${a}deg)`;
+  // past ~100deg the leaf is above the pad, off toward the top of the screen: fade it out, then hide it entirely
+  // opacity on the leaf itself would flatten its 3D (and show the front mirrored through the back), so fade the faces
+  const o=a<100?'':String(Math.max(0,1-(a-100)/60));for(const f of el.children)f.style.opacity=o;
+  el.style.visibility=a>=179.5?'hidden':'visible';
+  el.style.zIndex=a>90?N+5:N-i;      // once past upright it is above everything still on the pad
+  el.querySelector('.shade').style.opacity=Math.min(1,a/90)*.9;
+  const below=leaves[i+1];
+  if(below)below.querySelector('.under').style.opacity=a>0&&a<180?Math.sin(a*Math.PI/180)*.8:0;
+}
+function label(){
+  const c=document.getElementById('count');
+  c.textContent=cur===0?'ปกหน้า':cur===LAST?'ปกหลัง':`หน้า ${cur} / ${N-2}`;
+  document.getElementById('prev').disabled=cur===0;document.getElementById('next').disabled=cur===LAST;
+  const left=LAST-cur;edges.style.setProperty('--t',(cur===0||cur>=LAST-1?0:Math.min(8,2+left))+'px');   // covers hide the stack
+}
+leaves.forEach((_,i)=>paint(i));label();
+
+/* animation: one rAF loop, eased toward the target angle */
+let anim=null;
+function animate(i,to,ms=520){
+  const from=ang[i],t0=performance.now();
+  anim={i,to};
+  const step=t=>{
+    if(!anim||anim.i!==i)return;
+    const k=Math.min(1,(t-t0)/ms),e=1-Math.pow(1-k,3);
+    ang[i]=from+(to-from)*e;paint(i);
+    if(k<1)requestAnimationFrame(step);else anim=null;
+  };
+  requestAnimationFrame(step);
+}
+function next(){if(cur>=LAST)return;const i=cur;cur++;label();animate(i,180)}
+function prev(){if(cur<=0)return;cur--;const i=cur;label();animate(i,0)}
+document.getElementById('next').onclick=next;document.getElementById('prev').onclick=prev;
+addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='ArrowRight')next();if(e.key==='ArrowDown'||e.key==='ArrowLeft')prev()});
+
+/* drag: up turns the top leaf, down brings the last turned leaf back. The angle follows the finger. */
+let drag=null;
+pad.addEventListener('pointerdown',e=>{
+  if(e.target.closest('a,button')||anim)return;
+  drag={y:e.clientY,t:performance.now(),i:null,v:0,ly:e.clientY,lt:performance.now()};
+  pad.setPointerCapture(e.pointerId);
+});
+pad.addEventListener('pointermove',e=>{
+  if(!drag)return;
+  const dy=e.clientY-drag.y,H=stack.offsetHeight;
+  if(drag.i===null){
+    if(Math.abs(dy)<6)return;
+    if(dy<0&&cur<LAST)drag.i=cur,drag.dir='up';
+    else if(dy>0&&cur>0)drag.i=cur-1,drag.dir='down';
+    else return;
+  }
+  const f=Math.min(1,Math.abs(dy)/(H*.75));
+  ang[drag.i]=drag.dir==='up'?f*180:180-f*180;paint(drag.i);
+  const now=performance.now();drag.v=(e.clientY-drag.ly)/Math.max(1,now-drag.lt);drag.ly=e.clientY;drag.lt=now;
+});
+function end(){
+  if(!drag)return;const d=drag;drag=null;if(d.i===null)return;
+  const a=ang[d.i],flick=Math.abs(d.v)>.5;
+  if(d.dir==='up'){ if(a>70||(flick&&d.v<0)){cur=d.i+1;label();animate(d.i,180,380)} else animate(d.i,0,300) }
+  else { if(a<110||(flick&&d.v>0)){cur=d.i;label();animate(d.i,0,380)} else animate(d.i,180,300) }
+}
+pad.addEventListener('pointerup',end);pad.addEventListener('pointercancel',end);
+</script>
+</body>
+</html>
