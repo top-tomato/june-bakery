@@ -237,13 +237,21 @@ def order_add(request: HttpRequest) -> HttpResponse:
         product=product,
         product_name=product.full_name if product else (p.get("product_name") or "ขนม"),
         qty=qty,
-        unit_price=product.price if product else 0,
+        unit_price=0,
         channel=p.get("channel") if p.get("channel") in dict(Order.CHANNELS) else "line",
         payment=p.get("payment") if p.get("payment") in dict(Order.PAYMENTS) else "transfer",
         who=(p.get("who") or "").strip()[:120],
         note=(p.get("note") or "").strip()[:160],
         created_by=request.user,  # type: ignore[misc]
     )
+    # the price typed in the form (prefilled from the menu; the menu may have none yet: "สอบถามราคา")
+    try:
+        o.unit_price = int(str(p.get("unit_price", "")).replace(",", "").split(".")[0])
+    except ValueError:
+        o.unit_price = product.price if product and product.price is not None else -1
+    if o.unit_price < 0:
+        messages.error(request, "ใส่ราคาต่อชิ้นก่อน")
+        return back(request, "backoffice:orders")
     if o.kind == "pre":
         try:
             d = date.fromisoformat(p.get("pickup_date", ""))

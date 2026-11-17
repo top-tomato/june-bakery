@@ -1,5 +1,5 @@
 import { useEffect, useRef, type CSSProperties, type RefObject } from 'react'
-import { fullName, lineChatUrl, type Product } from '@/api/menu'
+import { fullName, lineChatUrl, priceLabel, type Product } from '@/api/menu'
 import { calm } from '@/lib/env'
 import { onFrame } from '@/lib/frame'
 import { clamp, ease } from '@/lib/math'
@@ -72,7 +72,7 @@ export function Story({ product, lineOaId, stageRef, photo, motion }: Props) {
           </h2>
           <p className="desc">{product.description}</p>
           <div className="buy">
-            <strong>฿{product.price}</strong>
+            <strong className={product.price == null ? 'ask' : undefined}>{priceLabel(product)}</strong>
             <a className="btn" href={lineChatUrl(lineOaId, `สนใจสั่ง ${fullName(product)}`)} target="_blank" rel="noopener">
               สั่งทาง LINE
             </a>

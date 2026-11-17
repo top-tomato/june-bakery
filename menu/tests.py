@@ -300,7 +300,7 @@ class BackOfficeTests(MediaTestCase):
         self.assertEqual(self.client.get(reverse("backoffice:staff")).status_code, 302)  # owner only
 
     def test_sale_now_counts_in_summary(self) -> None:
-        r = self.client.post(reverse("backoffice:order-add"), {"kind": "now", "qty": "3", "channel": "store", "payment": "cash", "product": self.product.pk})
+        r = self.client.post(reverse("backoffice:order-add"), {"kind": "now", "qty": "3", "channel": "store", "payment": "cash", "product": self.product.pk, "unit_price": "45"})
         self.assertEqual(r.status_code, 302)
         o = Order.objects.get()
         self.assertEqual((o.total, o.channel, o.product_name), (135, "store", "ชิฟฟ่อนใบเตย"))
@@ -313,13 +313,24 @@ class BackOfficeTests(MediaTestCase):
         self.client.post(add, {"kind": "pre", "qty": "50", "pickup_date": "", "who": ""})
         self.assertEqual(Order.objects.count(), 0)
         ClosedDay.objects.create(date=date(2030, 1, 5))
-        self.client.post(add, {"kind": "pre", "qty": "50", "pickup_date": "2030-01-05", "pickup_time": "09:30", "who": "สัมมนา A"})
+        self.client.post(add, {"kind": "pre", "qty": "50", "pickup_date": "2030-01-05", "pickup_time": "09:30", "who": "สัมมนา A", "unit_price": "45"})
         self.assertEqual(Order.objects.count(), 0)
-        self.client.post(add, {"kind": "pre", "qty": "50", "pickup_date": "2030-01-06", "pickup_time": "09:30", "who": "สัมมนา A", "note": "ชั้น 3"})
+        self.client.post(add, {"kind": "pre", "qty": "50", "pickup_date": "2030-01-06", "pickup_time": "09:30", "who": "สัมมนา A", "note": "ชั้น 3", "unit_price": "45"})
         o = Order.objects.get()
         self.assertEqual((o.kind, o.who, timezone.localtime(o.pickup_at).strftime("%Y-%m-%d %H:%M")), ("pre", "สัมมนา A", "2030-01-06 09:30"))
         cal = self.client.get(reverse("backoffice:calendar") + "?m=2030-01&d=2030-01-06").content.decode()
         self.assertIn("สัมมนา A", cal)
+
+    def test_price_on_request(self) -> None:
+        self.product.price = None
+        self.product.save()
+        self.assertIsNone(self.client.get(reverse("menu:api-menu")).json()["products"][0]["price"])
+        self.assertContains(self.client.get(reverse("menu:index")), "สอบถามราคา")
+        add = reverse("backoffice:order-add")
+        self.client.post(add, {"kind": "now", "qty": "2", "product": self.product.pk, "unit_price": ""})
+        self.assertEqual(Order.objects.count(), 0)  # no price anywhere: refused
+        self.client.post(add, {"kind": "now", "qty": "2", "product": self.product.pk, "unit_price": "50"})
+        self.assertEqual(Order.objects.get().total, 100)
 
     def test_order_filters(self) -> None:
         Order.objects.create(kind="now", product_name="ก", qty=1, unit_price=45, channel="line")

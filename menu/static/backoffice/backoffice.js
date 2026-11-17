@@ -37,13 +37,15 @@
   addEventListener('keydown', (e) => { if (e.key === 'Escape') { close(); drawer(false) } })
 
   // qty stepper + total
-  const qty = $('#qty'), qtyIn = $('#qtyIn'), total = $('#oTotal'), prod = $('#oProduct')
-  const price = () => +(prod?.selectedOptions?.[0]?.dataset.price ?? prod?.dataset.price ?? 0)
+  const qty = $('#qty'), qtyIn = $('#qtyIn'), total = $('#oTotal'), prod = $('#oProduct'), priceIn = $('#oPrice')
+  const price = () => +(priceIn?.value || 0)
   const paint = () => { if (total) total.textContent = '฿' + (qtyIn.value * price()).toLocaleString('th-TH') }
   document.querySelectorAll('[data-q]').forEach((b) => b.addEventListener('click', () => {
     qtyIn.value = Math.max(1, +qtyIn.value + +b.dataset.q); qty.textContent = qtyIn.value; paint()
   }))
-  prod?.addEventListener('change', paint)
+  // picking another cake fills in its price (staff can still change it, e.g. a discount)
+  prod?.addEventListener('change', () => { if (priceIn) priceIn.value = prod.selectedOptions[0]?.dataset.price || ''; paint() })
+  priceIn?.addEventListener('input', paint)
   if (qtyIn) paint()
 
   // chart tooltips (each bar group carries data-tip)

@@ -35,7 +35,7 @@
   {# shown until the app starts (and to crawlers / no-JS): the same facts as the real page #}
   <main id="boot-text" style="max-width:40rem;margin:0 auto;padding:48px 20px">
     <h1>June — อบใหม่ หอม นุ่มนาน</h1>
-    <ul>{% for p in products %}<li><b>{{ p.name|join:"" }}</b> ฿{{ p.price }} — {{ p.description }}</li>{% endfor %}</ul>
+    <ul>{% for p in products %}<li><b>{{ p.name|join:"" }}</b> {% if p.price is not None %}฿{{ p.price }}{% else %}สอบถามราคา{% endif %} — {{ p.description }}</li>{% endfor %}</ul>
     <p>{{ shop.name }} · {{ shop.address }}</p>
     <p><a style="color:inherit" href="{{ bootstrap.line.addUrl }}">ทักสั่งทาง LINE {{ bootstrap.line.oaId }}</a></p>
   </main>

@@ -1,5 +1,5 @@
 import { useEffect, type RefObject } from 'react'
-import { fullName, lineChatUrl, type Product } from '@/api/menu'
+import { fullName, lineChatUrl, priceLabel, type Product } from '@/api/menu'
 import { ChatIcon } from '@/components/icons'
 import logo from '@/assets/logo.png'
 import { viewportHeight } from '@/lib/env'
@@ -84,7 +84,7 @@ export function Hero({ products, active, onPick, onOpen, spotRef, photo, motion,
       )}
       <div className="pick">
         <h2>
-          {fullName(product)} <span className="price-chip">฿{product.price}</span>
+          {fullName(product)} <span className="price-chip">{priceLabel(product)}</span>
         </h2>
         <p>{product.description}</p>
         <p className="hint">{products.length > 1 ? 'ลากเพื่อหมุนดู กดลูกศรเพื่อเปลี่ยนเมนู' : 'ลากเพื่อหมุนดูรอบชิ้น'}</p>

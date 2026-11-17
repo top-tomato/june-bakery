@@ -296,6 +296,10 @@ main .buy strong {
   font-family: var(--display);
   font-size: 2rem;
 }
+/* no published price yet: "สอบถามราคา" is longer, so smaller */
+main .buy strong.ask {
+  font-size: 1.25rem;
+}
 .stagewrap {
   display: grid;
   place-items: center start;

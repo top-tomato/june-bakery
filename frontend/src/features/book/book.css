@@ -247,6 +247,9 @@
   font: 600 11cqw/1 var(--display);
   padding: 2cqw 4cqw;
 }
+.book-page .price.ask {
+  font-size: 6.5cqw;
+}
 .book-page .price svg {
   position: absolute;
   inset: -12% -14%;

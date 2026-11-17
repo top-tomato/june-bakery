@@ -5,7 +5,8 @@ export interface Product {
   id: number
   name: [string, string]
   description: string
-  price: number
+  /** baht per piece; null = not published yet (the site shows "สอบถามราคา") */
+  price: number | null
   image: string
   /** URL of a .glb model, or "" when the cake has only a photo */
   model: string
@@ -77,3 +78,6 @@ export const lineChatUrl = (oaId: string, text?: string) =>
   `https://line.me/R/oaMessage/${encodeURIComponent(oaId)}/${text ? `?${encodeURIComponent(text)}` : ''}`
 
 export const fullName = (p: Product) => p.name.join('')
+
+/** "฿45", or "สอบถามราคา" while the shop hasn't published a price */
+export const priceLabel = (p: Pick<Product, 'price'>) => (p.price == null ? 'สอบถามราคา' : `฿${p.price}`)

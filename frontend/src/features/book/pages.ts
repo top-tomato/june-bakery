@@ -1,4 +1,4 @@
-import { fullName, lineChatUrl, type MenuData } from '@/api/menu'
+import { fullName, lineChatUrl, priceLabel, type MenuData } from '@/api/menu'
 
 /**
  * The menu book's pages as HTML (mock/menu-book-v2.html). page-flip takes over and moves these elements itself, so they
@@ -77,7 +77,7 @@ export function buildPages({ products, line }: MenuData): string[] {
         <div class="h-name">${esc(p.name[0])}<br>${esc(p.name[1])}</div>
         <div class="h-desc">${esc(p.description)}</div>
         <ul class="notes">${p.highlights.map((h) => `<li>${esc(h)}</li>`).join('')}</ul>
-        <div class="buy"><span class="price">฿${esc(p.price)}${RING}</span><a class="order" href="${chat(`สนใจสั่ง ${fullName(p)}`)}" target="_blank" rel="noopener">สั่งทาง LINE</a></div>`,
+        <div class="buy"><span class="price${p.price == null ? ' ask' : ''}">${esc(priceLabel(p))}${RING}</span><a class="order" href="${chat(`สนใจสั่ง ${fullName(p)}`)}" target="_blank" rel="noopener">สั่งทาง LINE</a></div>`,
       ),
     )
   })
