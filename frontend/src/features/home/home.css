@@ -114,6 +114,26 @@
   position: relative;
   width: min(46vw, 260px);
 }
+/* thin progress bar right under the logo (replaces the 0–100% number) */
+.intro-count {
+  gap: 6px;
+}
+.intro-count .bar {
+  display: block;
+  width: calc(min(46vw, 260px) * 0.62);
+  height: 5px;
+  border-radius: 99px;
+  background: rgba(47, 74, 69, 0.14);
+  overflow: hidden;
+}
+.intro-count .bar i {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: var(--ink);
+  transform-origin: left;
+  transform: scaleX(0);
+}
 
 /* fixed 3D layer, sized to the tallest viewport so it never resizes while toolbars slide */
 .cake-layer {

@@ -8,12 +8,13 @@ import { CURTAIN_HOLD_MS, curtainWillPlay, markCurtainPlayed } from './intro'
 /** the count runs as long as the logo takes to open (base.css `.june-logo.intro`) */
 const COUNT_MS = 850 + CURTAIN_HOLD_MS
 
-/** Cream curtain + "June" logo opening its palm leaves while the count runs 0–100%. Removes itself when done. */
+/** Cream curtain + "June" logo opening its palm leaves over a thin progress bar (mock/loading-bar.html, option A).
+ * Removes itself when done. */
 export function Curtain() {
   const [done, setDone] = useState(() => !curtainWillPlay())
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const countRef = useRef<HTMLDivElement>(null)
-  const pctRef = useRef<HTMLSpanElement>(null)
+  const barRef = useRef<HTMLElement>(null)
   const loadRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -30,7 +31,7 @@ export function Curtain() {
         const ms = t - t0
         curtain?.draw(ms - CURTAIN_HOLD_MS)
         const p = clamp(ms / COUNT_MS)
-        if (pctRef.current) pctRef.current.textContent = `${Math.round(p * 100)}%`
+        if (barRef.current) barRef.current.style.transform = `scaleX(${p})`
         if (loadRef.current) loadRef.current.style.transform = `translateY(${Math.sin(ms / 180) * 2}px)`
         if (p >= 1 && countRef.current) countRef.current.style.opacity = '0'
       },
@@ -52,7 +53,9 @@ export function Curtain() {
         <div ref={loadRef} className="load">
           <JuneLogo className="go intro" />
         </div>
-        <span ref={pctRef}>0%</span>
+        <span className="bar">
+          <i ref={barRef} />
+        </span>
       </div>
     </>
   )
