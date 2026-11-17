@@ -49,7 +49,8 @@ section{position:relative}
 #count .load .ghost{position:static;opacity:.16}
 #count .load .fill{clip-path:inset(100% 0 0 0)}
 
-#gl{position:fixed;inset:0;width:100%;height:100%;z-index:7;pointer-events:none}
+/* sized to the tallest viewport (browser bar hidden) so it never has to resize while the bar slides in/out on phones */
+#gl{position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:7;pointer-events:none}
 #heroSpot{position:absolute;left:50%;top:40vh;top:40svh;height:31vh;height:31svh;aspect-ratio:1;transform:translateX(-50%)}
 .hint{font-size:.85rem;opacity:.6}
 .card.soon{border:2px dashed rgba(36,59,55,.4);background:transparent;box-shadow:none;display:grid;place-items:center;text-align:center;min-height:180px;font-family:var(--display);font-size:1.1rem}
@@ -588,7 +589,15 @@ window.GLSTART=true;window.GLBAD=false;window.photo();
 scene.environment=new THREE.PMREMGenerator(R).fromScene(new RoomEnvironment(),.04).texture;
 const sun=new THREE.DirectionalLight(0xfff1dd,1.2);sun.position.set(2,4,3);scene.add(sun);
 let wpp=1;
-function size(){R.setSize(innerWidth,innerHeight,false);cam.aspect=innerWidth/innerHeight;cam.updateProjectionMatrix();wpp=2*Math.tan(cam.fov*Math.PI/360)*cam.position.z/innerHeight}
+// Phones fire resize every frame while the browser bar slides in (mostly when scrolling up).
+// Re-allocating the WebGL buffer each time caused the stutter, so the canvas keeps the tallest viewport height
+// and is only resized when the width changes (rotation) or the tall height itself changes.
+const glCv=document.getElementById('gl');let CW=0,CH=0;
+function size(){
+  const w=glCv.clientWidth,h=glCv.clientHeight;
+  if(w===CW&&h===CH)return;
+  CW=w;CH=h;R.setSize(CW,CH,false);cam.aspect=CW/CH;cam.updateProjectionMatrix();wpp=2*Math.tan(cam.fov*Math.PI/360)*cam.position.z/CH;
+}
 size();addEventListener('resize',size);
 const MODELS=window.F.map(f=>({url:f.model})),items=[];
 MODELS.forEach((m,i)=>{
@@ -618,7 +627,7 @@ function tick(t){
   const gap=(innerWidth<700?innerWidth*.6:Math.min(innerWidth*.3,440))*(1+S.a*5),k=ease(clamp(S.p/.18));
   items.forEach((it,i)=>{
     const dI=i-sm,near=1-Math.min(1,Math.abs(dI)),d=calm?1:clamp((t-(window.T0||0)-2500-i*200)/900),drop=-(1-outC(d))*innerHeight*.12,grow=lerp(.6,1,outBack(d));
-    it.grp.position.set((cx+dI*gap-innerWidth/2)*wpp,-(cy-drop-innerHeight/2)*wpp,0);
+    it.grp.position.set((cx+dI*gap-CW/2)*wpp,-(cy-drop-CH/2)*wpp,0);
     const hide=(1-near)*ease(clamp(scrollY/(innerHeight*.3)));it.grp.visible=!!it.loaded&&hide<.99&&d>0;it.grp.scale.setScalar(px*wpp*(.55+.45*near)*(1-hide)*grow);
     const free=((calm?0:t*.0004)+dragX+i*1.3+(1-d)*1.5)%(Math.PI*2);
     it.grp.rotation.set(lerp(.5,.75,S.a)-Math.sin(S.p*Math.PI)*.35*near,lerp(free,.35,k)+ease(clamp((S.p-.15)/.8))*Math.PI*2*near,0);
