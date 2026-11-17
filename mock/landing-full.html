@@ -35,6 +35,7 @@ section{position:relative;padding:96px clamp(16px,6vw,96px)}
 .hero .cake{width:min(64vw,340px);aspect-ratio:1;border-radius:50%;margin:26px auto 18px;background:center/cover url(../seed/img/pandan.jpg);box-shadow:0 20px 40px rgba(0,0,0,.35);border:6px solid var(--cream)}
 .hero .tag3d{font:.8rem var(--hand);opacity:.7}
 .hero .name{font:600 1.5rem var(--display)}
+.hero .price{display:inline-block;margin-left:6px;padding:0 12px;border-radius:999px;background:var(--tea);color:var(--ink);font-size:1.1rem;vertical-align:middle}
 .hero .chips{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:12px 0 22px}
 .hero .chips span{font-size:.85rem;padding:3px 12px;border-radius:999px;background:rgba(255,246,230,.12)}
 .hero .ctas{display:flex;flex-wrap:wrap;gap:10px;justify-content:center}
@@ -62,7 +63,10 @@ section{position:relative;padding:96px clamp(16px,6vw,96px)}
 .step{background:var(--cream);border-radius:22px;padding:22px;counter-increment:s;position:relative}
 .step::before{content:counter(s);position:absolute;top:-16px;left:18px;width:36px;height:36px;border-radius:50%;background:var(--tea);display:grid;place-items:center;font:600 1.1rem var(--display)}
 .step b{display:block;font:600 1.15rem var(--display);margin:8px 0 4px}
-.lead{margin-top:20px;font-weight:600}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:26px}
+.facts div{background:rgba(255,246,230,.7);border-radius:16px;padding:14px 16px}
+.facts b{display:block;font:600 1rem var(--display)}
+@media (max-width:760px){.facts{grid-template-columns:1fr}}
 
 /* 5 reviews */
 .reviews{background:var(--indigo);--from:var(--pink)}
@@ -114,7 +118,7 @@ details p{margin-top:8px;opacity:.85}
 </style>
 </head>
 <body>
-<p class="note">mock: หน้าแรกแบบเต็มสำหรับชิฟฟ่อนอย่างเดียว · กรอบเส้นประสีส้ม = ข้อความ/รูปตัวอย่าง รอข้อมูลจริงจากร้าน · บนเว็บจริง ขนมยังเป็น 3D และม่าน/หยดครีมยังขยับเหมือนเดิม</p>
+<p class="note">mock: หน้าแรก 8 ส่วนสำหรับชิฟฟ่อนอย่างเดียว · กรอบเส้นประสีส้ม = ข้อความ/รูปตัวอย่าง รอข้อมูลจริงจากร้าน · บนเว็บจริง ขนมยังเป็น 3D และม่าน/หยดครีมยังขยับเหมือนเดิม</p>
 
 <!-- 1 hero -->
 <section class="hero">
@@ -123,7 +127,7 @@ details p{margin-top:8px;opacity:.85}
     <h1>อบใหม่ หอม นุ่มนาน</h1>
     <div class="cake" role="img" aria-label="ชิฟฟ่อนมะพร้าวใบเตย"></div>
     <div class="tag3d">(บนเว็บจริงเป็นขนม 3D หมุนได้)</div>
-    <div class="name">ชิฟฟ่อนมะพร้าวใบเตย</div>
+    <div class="name">ชิฟฟ่อนมะพร้าวใบเตย <span class="price">฿45</span></div>
     <div class="chips"><span>อบใหม่ทุกวัน</span><span>ใกล้อนุสาวรีย์ชัยฯ</span></div>
     <div class="ctas">
       <a class="btn" href="#"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4C7 4 3 7.2 3 11.2c0 3.6 3.2 6.6 7.5 7.1l-.4 2.2c-.1.4.3.7.7.5l3.4-2.6C18.4 17.8 21 14.8 21 11.2 21 7.2 17 4 12 4Z"/></svg>สั่งทาง LINE</a>
@@ -146,20 +150,7 @@ details p{margin-top:8px;opacity:.85}
   </div>
 </section>
 
-<!-- 3 price -->
-<section class="price">
-  <div class="drip"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v22c-40 0-30 28-64 28s-26-30-56-30-20 36-50 36-30-26-60-26-22 22-50 22-26-34-58-34-24 40-54 40-26-28-54-28-28 18-52 18-30-24-58-24-20 32-50 32-28-22-56-22-24 14-50 14-26-26-54-26V0Z"/></svg></div>
-  <div class="wrap">
-    <div class="kicker">ขนาดและราคา</div>
-    <h2 class="sec-title">เลือกได้ตามโอกาส</h2>
-    <div class="cards">
-      <div class="card"><b>ชิ้นเดี่ยว</b><div class="p">฿45</div><small>ราคาบนเว็บตอนนี้</small></div>
-      <div class="card todo"><b>กล่อง / ถาด</b><div class="p">฿—</div><small>ถ้ามีขนาดอื่น ใส่ตรงนี้</small></div>
-    </div>
-  </div>
-</section>
-
-<!-- 4 how to order -->
+<!-- 3 how to order -->
 <section class="how">
   <div class="drip"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v18c-30 0-40 30-62 30s-20-24-48-24-22 40-52 40-24-30-52-30-20 18-46 18-30-26-60-26-24 44-56 44-28-36-56-36-24 20-50 20-30-24-58-24-26 36-54 36-24-28-52-28-24 16-48 16-28-22-56-22-20 30-48 30-26-20-56-20V0Z"/></svg></div>
   <div class="wrap">
@@ -170,11 +161,11 @@ details p{margin-top:8px;opacity:.85}
       <div class="step todo"><b>ร้านยืนยัน</b>แจ้งยอด และวิธีจ่ายเงิน</div>
       <div class="step"><b>รับที่หน้าร้าน</b>10 พหลโยธิน ใกล้อนุสาวรีย์ชัยฯ</div>
     </div>
-    <p class="lead todo" style="display:inline-block;padding:4px 10px">สั่งล่วงหน้าอย่างน้อย — วัน</p>
+    <div class="facts todo"><div><b>สั่งล่วงหน้า</b>อย่างน้อย — วัน</div><div><b>เก็บได้</b>— วัน (แช่เย็น / ไม่ต้องแช่)</div></div>
   </div>
 </section>
 
-<!-- 5 reviews -->
+<!-- 4 reviews -->
 <section class="reviews">
   <div class="drip"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v22c-40 0-30 28-64 28s-26-30-56-30-20 36-50 36-30-26-60-26-22 22-50 22-26-34-58-34-24 40-54 40-26-28-54-28-28 18-52 18-30-24-58-24-20 32-50 32-28-22-56-22-24 14-50 14-26-26-54-26V0Z"/></svg></div>
   <div class="wrap">
@@ -188,11 +179,11 @@ details p{margin-top:8px;opacity:.85}
   </div>
 </section>
 
-<!-- 6 about -->
+<!-- 5 about -->
 <section class="about">
   <div class="drip"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v18c-30 0-40 30-62 30s-20-24-48-24-22 40-52 40-24-30-52-30-20 18-46 18-30-26-60-26-24 44-56 44-28-36-56-36-24 20-50 20-30-24-58-24-26 36-54 36-24-28-52-28-24 16-48 16-28-22-56-22-20 30-48 30-26-20-56-20V0Z"/></svg></div>
   <div class="wrap grid">
-    <div class="photo todo">รูปคนทำขนม หรือในครัว</div>
+    <div class="photo" style="background:center/cover url(../seed/img/pandan.jpg)" role="img" aria-label="ชิฟฟ่อนบนตะแกรงพักขนม"></div>
     <div class="todo" style="padding:8px">
       <div class="kicker">เรื่องของ June</div>
       <h2 class="sec-title">ตัวอย่างหัวข้อ</h2>
@@ -201,7 +192,7 @@ details p{margin-top:8px;opacity:.85}
   </div>
 </section>
 
-<!-- 7 gallery -->
+<!-- 6 gallery -->
 <section class="gallery">
   <div class="wrap">
     <div class="kicker">รูปชิฟฟ่อน</div>
@@ -213,7 +204,7 @@ details p{margin-top:8px;opacity:.85}
   </div>
 </section>
 
-<!-- 8 where -->
+<!-- 7 where -->
 <section class="where">
   <div class="drip"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v22c-40 0-30 28-64 28s-26-30-56-30-20 36-50 36-30-26-60-26-22 22-50 22-26-34-58-34-24 40-54 40-26-28-54-28-28 18-52 18-30-24-58-24-20 32-50 32-28-22-56-22-24 14-50 14-26-26-54-26V0Z"/></svg></div>
   <div class="wrap grid">
@@ -227,23 +218,7 @@ details p{margin-top:8px;opacity:.85}
   </div>
 </section>
 
-<!-- 9 FAQ -->
-<section class="faq">
-  <div class="drip"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v18c-30 0-40 30-62 30s-20-24-48-24-22 40-52 40-24-30-52-30-20 18-46 18-30-26-60-26-24 44-56 44-28-36-56-36-24 20-50 20-30-24-58-24-26 36-54 36-24-28-52-28-24 16-48 16-28-22-56-22-20 30-48 30-26-20-56-20V0Z"/></svg></div>
-  <div class="wrap">
-    <div class="kicker">ถามบ่อย</div>
-    <h2 class="sec-title">ก่อนสั่ง ลองดูตรงนี้</h2>
-    <div class="todo" style="padding:4px 12px">
-      <details open><summary>เก็บได้กี่วัน ต้องแช่เย็นไหม</summary><p>คำตอบจากร้าน</p></details>
-      <details><summary>ต้องสั่งล่วงหน้ากี่วัน</summary><p>คำตอบจากร้าน</p></details>
-      <details><summary>มีส่งไหม</summary><p>คำตอบจากร้าน</p></details>
-      <details><summary>มีส่วนผสมที่แพ้ได้ไหม (เช่น ไข่ นม แป้งสาลี)</summary><p>คำตอบจากร้าน</p></details>
-      <details><summary>จ่ายเงินยังไง</summary><p>คำตอบจากร้าน</p></details>
-    </div>
-  </div>
-</section>
-
-<!-- 10 footer -->
+<!-- 8 footer -->
 <section class="end">
   <div class="drip"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path fill="currentColor" d="M0 0h1000v22c-40 0-30 28-64 28s-26-30-56-30-20 36-50 36-30-26-60-26-22 22-50 22-26-34-58-34-24 40-54 40-26-28-54-28-28 18-52 18-30-24-58-24-20 32-50 32-28-22-56-22-24 14-50 14-26-26-54-26V0Z"/></svg></div>
   <div class="wrap">
