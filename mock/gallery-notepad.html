@@ -168,7 +168,7 @@ function buildCurl(i){
 function dropCurl(i){const el=leaves[i];if(el._curl){el._curl.root.remove();el._curl=null}}
 function paint(i){
   const a=ang[i],el=leaves[i],flat=a<=0.01||a>=179.99;
-  el.style.zIndex=a>90?N+5:N-i;      // once past upright it is above everything still on the pad
+  el.style.zIndex=a>90?N+5+i:N-i;    // past upright it lies over the pad and over leaves turned before it
   el.style.visibility=a>=179.99?'hidden':'visible';
   for(const f of el.querySelectorAll(':scope > .face'))f.style.visibility=flat?'':'hidden';
   if(flat)dropCurl(i);
@@ -198,21 +198,29 @@ function label(){
 }
 leaves.forEach((_,i)=>paint(i));label();
 
-/* animation: one rAF loop, eased toward the target angle */
-let anim=null;
-function animate(i,to,ms=520){
-  const from=ang[i],t0=performance.now();
-  anim={i,to};
-  const step=t=>{
-    if(!anim||anim.i!==i)return;
-    const k=Math.min(1,(t-t0)/ms),e=1-Math.pow(1-k,3);
-    ang[i]=from+(to-from)*e;paint(i);
-    if(k<1)requestAnimationFrame(step);else anim=null;
+/* animation: every leaf has a resting place — turned (180) if it is before `cur`, flat (0) otherwise. One rAF loop eases
+   each leaf toward it, so quick repeated taps just queue more leaves into the same loop; none is left half-turned.
+   (The first version gave each tap its own animation and a new tap cancelled the one still running.) */
+let looping=false;
+const target=i=>i<cur?180:0;
+function settle(){
+  if(looping)return;looping=true;let last=performance.now();
+  const tick=t=>{
+    const dt=Math.min(50,t-last);last=t;let busy=false;
+    for(let i=0;i<N;i++){
+      if(drag&&drag.i===i)continue;                  // the finger owns this one
+      const to=target(i),d=to-ang[i];if(d===0)continue;
+      // ease out, with a floor on speed so the tail doesn't crawl
+      const stepA=Math.sign(d)*Math.max(Math.abs(d)*(1-Math.exp(-dt/95)),dt*.12);
+      ang[i]=Math.abs(stepA)>=Math.abs(d)?to:ang[i]+stepA;paint(i);
+      if(ang[i]!==to)busy=true;
+    }
+    if(busy)requestAnimationFrame(tick);else looping=false;
   };
-  requestAnimationFrame(step);
+  requestAnimationFrame(tick);
 }
-function next(){if(cur>=LAST)return;const i=cur;cur++;label();animate(i,180)}
-function prev(){if(cur<=0)return;cur--;const i=cur;label();animate(i,0)}
+function next(){if(cur>=LAST)return;cur++;label();settle()}
+function prev(){if(cur<=0)return;cur--;label();settle()}
 document.getElementById('next').onclick=next;document.getElementById('prev').onclick=prev;
 addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='ArrowRight')next();if(e.key==='ArrowDown'||e.key==='ArrowLeft')prev()});
 
@@ -220,7 +228,7 @@ addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='ArrowRight')next()
    The axis is picked from the first few pixels of movement. */
 let drag=null;
 pad.addEventListener('pointerdown',e=>{
-  if(e.target.closest('a,button')||anim)return;
+  if(e.target.closest('a,button'))return;
   drag={x:e.clientX,y:e.clientY,i:null,v:0,lp:0,lt:performance.now()};
   pad.setPointerCapture(e.pointerId);
 });
@@ -243,8 +251,9 @@ pad.addEventListener('pointermove',e=>{
 function end(){
   if(!drag)return;const g=drag;drag=null;if(g.i===null)return;
   const a=ang[g.i],flick=Math.abs(g.v)>.5;
-  if(g.dir==='fwd'){ if(a>70||(flick&&g.v<0)){cur=g.i+1;label();animate(g.i,180,380)} else animate(g.i,0,300) }
-  else { if(a<110||(flick&&g.v>0)){cur=g.i;label();animate(g.i,0,380)} else animate(g.i,180,300) }
+  if(g.dir==='fwd'){if(a>70||(flick&&g.v<0))cur=g.i+1}
+  else if(a<110||(flick&&g.v>0))cur=g.i;
+  label();settle();
 }
 pad.addEventListener('pointerup',end);pad.addEventListener('pointercancel',end);
 </script>
