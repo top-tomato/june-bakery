@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>June — ข้อความขยับตอนเลื่อน (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&family=Itim&display=swap" rel="stylesheet">
+<style>
+/* Small reveal as you scroll: section headings fade in while rising ~12px; lists (steps, reviews) follow one by one.
+   Plays once. Only opacity + transform (the compositor does it; no per-frame JS). Body text never waits.
+   prefers-reduced-motion: everything is simply there. */
+:root{--ink:#2F4A45;--cream:#FFF6E6;--green:#3E5D58;--pink:#DCEBB5;--peach:#F3A18F;--hand:"Itim",cursive;--display:"Mitr",sans-serif}
+*{box-sizing:border-box;margin:0}
+body{font-family:Anuphan,system-ui,sans-serif;color:var(--ink);background:var(--green)}
+.note{position:sticky;top:0;z-index:5;background:#1c2b28;color:var(--cream);padding:10px 16px;font-size:.85rem;text-align:center}
+.note button{margin-left:8px;border:1px solid var(--cream);background:none;color:var(--cream);border-radius:99px;padding:3px 10px;font:inherit;cursor:pointer}
+section{padding:110px clamp(18px,6vw,96px)}
+.wrap{max-width:1040px;margin:0 auto}
+.kicker{font:1.1rem var(--hand);color:var(--peach)}
+h2{font:600 clamp(2rem,6vw,3.2rem)/1.15 var(--display);margin:4px 0 26px}
+.hero{min-height:90vh;display:grid;place-items:center;text-align:center;color:var(--cream)}
+.hero h1{font:600 clamp(2.4rem,9vw,4.4rem)/1.1 var(--display)}
+.hero p{font:1.2rem var(--hand);opacity:.85;margin-top:10px}
+.how{background:var(--pink)}
+.steps{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:s}
+.steps li{background:#fff;border-radius:18px;padding:22px 18px;counter-increment:s}
+.steps li::before{content:counter(s);display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--peach);font:600 1rem var(--display);margin-bottom:10px}
+.steps b{display:block;font:600 1.1rem var(--display)}
+.reviews{background:var(--green);color:var(--cream)}
+.quotes{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.quote{background:rgba(255,246,230,.08);border-radius:18px;padding:22px}
+.quote blockquote{font:1.15rem/1.5 var(--hand)}
+.quote figcaption{margin-top:10px;opacity:.7}
+.where{background:var(--green);color:var(--cream);border-top:1px solid rgba(255,246,230,.12)}
+.where p{font-size:1.05rem;opacity:.85;line-height:1.7;max-width:36rem}
+@media (max-width:760px){.steps,.quotes{grid-template-columns:1fr}}
+
+/* ---- the reveal ---- */
+.reveal{opacity:0;transform:translateY(12px);transition:opacity .6s ease-out,transform .7s cubic-bezier(.2,.7,.2,1);transition-delay:calc(var(--i,0) * 90ms)}
+.reveal.in{opacity:1;transform:none}
+html.off .reveal{opacity:1;transform:none;transition:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none;transition:none}}
+</style>
+</head>
+<body>
+<p class="note">mock: เลื่อนลงช้า ๆ ดูหัวข้อกับรายการค่อย ๆ ขึ้น · เล่นครั้งเดียว <button id="toggle" type="button">ปิดแอนิเมชัน (เทียบแบบเดิม)</button></p>
+<section class="hero"><div><h1>อบใหม่ หอม<br>นุ่มนาน</h1><p>(ส่วนหัวเว็บมีแอนิเมชันของตัวเองอยู่แล้ว ไม่เปลี่ยน)</p></div></section>
+<section class="how"><div class="wrap">
+  <p class="kicker reveal">วิธีสั่ง</p>
+  <h2 class="reveal" style="--i:1">ง่าย ๆ 3 ขั้น</h2>
+  <ol class="steps">
+    <li class="reveal" style="--i:2"><b>ทัก LINE</b>บอกจำนวน และวันที่อยากรับ</li>
+    <li class="reveal" style="--i:3"><b>ร้านตอบกลับ</b>ยืนยันออเดอร์ให้ในแชต</li>
+    <li class="reveal" style="--i:4"><b>รับที่หน้าร้าน</b>หน้าร้าน June</li>
+  </ol>
+</div></section>
+<section class="reviews"><div class="wrap">
+  <p class="kicker reveal">คนที่ลองแล้ว</p>
+  <h2 class="reveal" style="--i:1">เสียงจากลูกค้า</h2>
+  <div class="quotes">
+    <figure class="quote reveal" style="--i:2"><blockquote>“(ตัวอย่าง) นุ่มมาก หอมใบเตย”</blockquote><figcaption>— ลูกค้า 1</figcaption></figure>
+    <figure class="quote reveal" style="--i:3"><blockquote>“(ตัวอย่าง) มะพร้าวอ่อนเยอะดี”</blockquote><figcaption>— ลูกค้า 2</figcaption></figure>
+    <figure class="quote reveal" style="--i:4"><blockquote>“(ตัวอย่าง) สั่งไปเบรกประชุม ทุกคนชอบ”</blockquote><figcaption>— ลูกค้า 3</figcaption></figure>
+  </div>
+</div></section>
+<section class="where"><div class="wrap">
+  <h2 class="reveal">แวะหยิบได้<br>ที่หน้าร้าน</h2>
+  <p>ข้อความยาว ๆ แบบนี้ขึ้นทันที ไม่ต้องรอ อ่านได้เลยตั้งแต่เลื่อนมาถึง · 10 พหลโยธิน ใกล้อนุสาวรีย์ชัยสมรภูมิ</p>
+</div></section>
+<script>
+/* one IntersectionObserver for every .reveal; once in, it stays in (never replays) */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{rootMargin:'0px 0px -12% 0px'});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+document.getElementById('toggle').onclick=e=>{const off=document.documentElement.classList.toggle('off');e.target.textContent=off?'เปิดแอนิเมชัน':'ปิดแอนิเมชัน (เทียบแบบเดิม)'};
+</script>
+</body>
+</html>
