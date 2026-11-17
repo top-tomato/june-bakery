@@ -845,6 +845,10 @@ main .board {
   object-fit: cover;
   background: #eee;
 }
+/* while loading (or if a photo fails) show only the blurred preview, never alt text / a broken-image icon */
+.gsnap img {
+  color: transparent;
+}
 .gsnap.tall {
   grid-row: span 2;
 }

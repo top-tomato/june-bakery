@@ -44,6 +44,9 @@ export function About({ about, above }: { about: NonNullable<MenuData['about']>;
   )
 }
 
+/** The tiny preview behind a photo/video: a soft blur of it until the real file has loaded. */
+const blur = (preview: string): CSSProperties | undefined => (preview ? { background: `url("${preview}") center / cover` } : undefined)
+
 /** Rotations for the taped snapshots (cycled), so the board looks hand-pinned, not gridded. */
 const TILT = [-2, 2, 3, -3, 1.5, -1.5]
 const SHOWN = 6
@@ -100,9 +103,18 @@ export function Gallery({ photos, above }: { photos: MenuData['gallery']; above:
             <figure key={p.id} className={p.video || k === 0 ? 'gsnap tall' : 'gsnap'} style={{ '--r': `${TILT[k % TILT.length]}deg` } as CSSProperties}>
               <span className={k % 2 ? 'gtape g' : 'gtape'} />
               {p.video ? (
-                <video src={p.image ? p.video : `${p.video}#t=0.1`} poster={p.image || undefined} muted loop playsInline preload="metadata" aria-label={p.caption} />
+                <video
+                  src={p.image ? p.video : `${p.video}#t=0.1`}
+                  poster={p.image || undefined}
+                  style={blur(p.preview)}
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  aria-label={p.caption}
+                />
               ) : (
-                <img src={p.image} alt={p.caption} loading="lazy" decoding="async" />
+                <img src={p.image} alt={p.caption} loading="lazy" decoding="async" style={blur(p.preview)} />
               )}
               {p.video && <span className="badge">วิดีโอ</span>}
               {p.caption && <figcaption>{p.caption}</figcaption>}

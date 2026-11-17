@@ -15,8 +15,9 @@ export interface Sheet {
 const snap = (g: GalleryItem, k: number) => {
   const media = g.video
     ? // no poster uploaded: #t=0.1 makes browsers show the first frame instead of a blank box
-      `<video class="ph" src="${esc(g.video)}${g.image ? '' : '#t=0.1'}"${g.image ? ` poster="${esc(g.image)}"` : ''} muted loop playsinline preload="metadata"></video>`
-    : `<div class="ph" style="background-image:url('${esc(g.image)}')" role="img" aria-label="${esc(g.caption)}"></div>`
+      `<video class="ph" src="${esc(g.video)}${g.image ? '' : '#t=0.1'}"${g.image ? ` poster="${esc(g.image)}"` : ''} ${g.preview ? ` style="background:url('${g.preview}') center/cover"` : ''} muted loop playsinline preload="metadata"></video>`
+    : // the preview sits under the photo as a second background layer: it shows until the photo has loaded
+      `<div class="ph" style="background-image:url('${esc(g.image)}')${g.preview ? `,url('${g.preview}')` : ''}" role="img" aria-label="${esc(g.caption)}"></div>`
   return `<div class="snap" style="--r:${k % 2 ? 2.2 : -2.2}deg"><span class="tape"></span>${media}<p>${esc(g.caption) || '&nbsp;'}</p></div>`
 }
 

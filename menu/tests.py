@@ -208,6 +208,13 @@ class GalleryUploadTests(MediaTestCase):
         self.assertEqual(max(g.image.width, g.image.height), 1600)
         self.assertEqual(self.client.get(reverse("menu:api-menu")).json()["gallery"][0]["caption"], "ชิ้นแรก")
 
+    def test_photo_gets_a_tiny_blur_preview(self) -> None:
+        self.client.force_login(self.staff)
+        self.client.post(reverse("gallery-upload-file"), {"file": SimpleUploadedFile("big.png", png_bytes(), "image/png")})
+        preview = self.client.get(reverse("menu:api-menu")).json()["gallery"][0]["preview"]
+        self.assertTrue(preview.startswith("data:image/jpeg;base64,"))
+        self.assertLess(len(preview), 3000)
+
     def test_video_without_poster(self) -> None:
         self.client.force_login(self.staff)
         r = self.client.post(reverse("gallery-upload-file"), {"file": SimpleUploadedFile("clip.mp4", b"\x00" * 100, "video/mp4")})
