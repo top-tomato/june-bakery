@@ -1,0 +1,71 @@
+{% load i18n static %}<!doctype html>
+{% comment %}
+  Admin sign-in in the shop's look (same palette as the gallery upload page), phone first. Replaces Django's admin
+  login template only: the form, CSRF and the redirect back to ?next= are Django's own.
+{% endcomment %}
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>เข้าสู่ระบบ · June</title>
+<link rel="icon" href="{% static 'favicon.png' %}">
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2F4A45;--cream:#FFF6E6;--paper:#FFFBF3;--peach:#F3A18F;--green:#3E5D58;--line:#e6dccb}
+*{box-sizing:border-box;margin:0}
+html,body{min-height:100%}
+body{font-family:Anuphan,system-ui,sans-serif;color:var(--ink);background:var(--green);display:grid;place-items:center;
+  min-height:100vh;min-height:100dvh;padding:24px 16px max(24px,env(safe-area-inset-bottom))}
+.card{width:min(100%,380px);background:var(--paper);border-radius:22px;padding:30px 24px 26px;box-shadow:0 24px 50px rgba(0,0,0,.28);
+  background-image:radial-gradient(circle,rgba(47,74,69,.16) .9px,transparent 1.3px);background-size:16px 16px}
+.logo{width:120px;aspect-ratio:1000/660;margin:0 auto 6px;background:var(--ink);
+  -webkit-mask:url("{% static 'login-logo.png' %}") center/contain no-repeat;mask:url("{% static 'login-logo.png' %}") center/contain no-repeat}
+h1{font:600 1.25rem Mitr,sans-serif;text-align:center}
+.sub{text-align:center;opacity:.65;font-size:.92rem;margin:4px 0 22px}
+label{display:block;font:500 .92rem Mitr,sans-serif;margin:14px 0 6px}
+input[type=text],input[type=password]{width:100%;font:1.05rem Anuphan,sans-serif;padding:13px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+input:focus{outline:none;border-color:var(--peach);box-shadow:0 0 0 3px rgba(243,161,143,.25)}
+.pw{position:relative}
+.pw button{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:0;background:none;padding:8px;cursor:pointer;border-radius:8px}
+.pw svg{width:20px;height:20px;fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;opacity:.6}
+.go{width:100%;margin-top:22px;border:0;border-radius:999px;padding:14px;background:var(--ink);color:var(--cream);font:500 1.05rem Mitr,sans-serif;cursor:pointer}
+.err{background:#fde8e2;color:#8e2f1d;border-radius:12px;padding:10px 12px;font-size:.92rem;margin-bottom:6px}
+.foot{text-align:center;margin-top:18px;font-size:.88rem}
+.foot a{color:var(--ink);opacity:.7}
+</style>
+</head>
+<body>
+<main class="card">
+  <div class="logo" role="img" aria-label="June"></div>
+  <h1>เข้าสู่ระบบร้าน</h1>
+  <p class="sub">สำหรับ staff ของ June</p>
+
+  {% if form.errors and not form.non_field_errors %}
+    <p class="err">กรอกข้อมูลไม่ครบ ลองอีกครั้ง</p>
+  {% endif %}
+  {% if form.non_field_errors %}
+    <p class="err">ชื่อผู้ใช้หรือรหัสผ่านไม่ถูก ลองอีกครั้ง</p>
+  {% endif %}
+  {% if user.is_authenticated %}
+    <p class="err">บัญชี {{ user.get_username }} ยังไม่ได้เป็น staff ให้เจ้าของร้านเปิดสิทธิ์ให้ก่อน</p>
+  {% endif %}
+
+  <form action="{{ app_path }}" method="post" id="login-form">{% csrf_token %}
+    <label for="id_username">ชื่อผู้ใช้</label>
+    <input type="text" name="username" id="id_username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required autofocus value="{{ form.username.value|default:'' }}">
+    <label for="id_password">รหัสผ่าน</label>
+    <div class="pw">
+      <input type="password" name="password" id="id_password" autocomplete="current-password" required>
+      <button type="button" id="show" aria-label="แสดงรหัสผ่าน"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>
+    </div>
+    <input type="hidden" name="next" value="{{ next }}">
+    <button class="go" type="submit">เข้าสู่ระบบ</button>
+  </form>
+  <p class="foot"><a href="/">← กลับหน้าเว็บ</a></p>
+</main>
+<script>
+document.getElementById('show').addEventListener('click',()=>{const p=document.getElementById('id_password');p.type=p.type==='password'?'text':'password'});
+</script>
+</body>
+</html>

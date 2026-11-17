@@ -100,7 +100,7 @@ export function Gallery({ photos, above }: { photos: MenuData['gallery']; above:
             <figure key={p.id} className={p.video || k === 0 ? 'gsnap tall' : 'gsnap'} style={{ '--r': `${TILT[k % TILT.length]}deg` } as CSSProperties}>
               <span className={k % 2 ? 'gtape g' : 'gtape'} />
               {p.video ? (
-                <video src={p.video} poster={p.image} muted loop playsInline preload="metadata" aria-label={p.caption} />
+                <video src={p.image ? p.video : `${p.video}#t=0.1`} poster={p.image || undefined} muted loop playsInline preload="metadata" aria-label={p.caption} />
               ) : (
                 <img src={p.image} alt={p.caption} loading="lazy" decoding="async" />
               )}
