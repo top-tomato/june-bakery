@@ -40,8 +40,14 @@ h2{font:600 1.05rem Mitr,sans-serif;margin:26px 0 10px}
 .ic svg{width:18px;height:18px;fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .ic.on{background:#eaf3dd;border-color:#bcd79a}
 .item.off{opacity:.5}
+.item.sortable{grid-template-columns:34px 72px 1fr auto}
+.grip{width:34px;height:56px;border:0;background:none;display:grid;place-items:center;cursor:grab;touch-action:none;border-radius:8px}
+.grip svg{width:20px;height:20px;fill:var(--ink);opacity:.55}
+.item.dragging{box-shadow:0 14px 30px rgba(0,0,0,.18);transform:scale(1.02);z-index:3;position:relative;cursor:grabbing}
+.item.sortable{transition:transform .18s}
+.item.dragging{transition:none}
 .empty{opacity:.6;text-align:center;padding:20px}
-@media (max-width:480px){.item{grid-template-columns:60px 1fr}.item .th{width:60px;height:60px}.tools{grid-column:1/-1;justify-content:flex-end}}
+@media (max-width:480px){.item.sortable{grid-template-columns:30px 60px 1fr}.item{grid-template-columns:60px 1fr}.item .th{width:60px;height:60px}.tools{grid-column:1/-1;justify-content:flex-end}}
 </style>
 </head>
 <body>
@@ -59,12 +65,12 @@ h2{font:600 1.05rem Mitr,sans-serif;margin:26px 0 10px}
   <h2 id="upH" hidden>กำลังอัปโหลด</h2>
   <div class="list" id="up"></div>
 
-  <h2>บนเว็บตอนนี้ <small style="font:400 .85rem Anuphan;opacity:.6">(เรียงตามที่ลูกค้าเห็น)</small></h2>
+  <h2>บนเว็บตอนนี้ <small style="font:400 .85rem Anuphan;opacity:.6">(เรียงตามที่ลูกค้าเห็น · จับจุด ⠿ แล้วลากเพื่อสลับ)</small></h2>
   <div class="list" id="now"></div>
 </main>
 <script>
 const ICON={
-  up:'<path d="M12 19V5M5 12l7-7 7 7"/>',down:'<path d="M12 5v14M5 12l7 7 7-7"/>',
+  grip:'<circle cx="9" cy="6" r="1.3"/><circle cx="15" cy="6" r="1.3"/><circle cx="9" cy="12" r="1.3"/><circle cx="15" cy="12" r="1.3"/><circle cx="9" cy="18" r="1.3"/><circle cx="15" cy="18" r="1.3"/>',
   eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
   trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/>',
 };
@@ -76,15 +82,13 @@ let items=[
 ];
 function renderNow(){
   const el=document.getElementById('now');
-  el.innerHTML=items.length?items.map((g,i)=>`<div class="item${g.on?'':' off'}" data-i="${i}">
-    <div class="th">${g.video?`<img src="${g.src}"><i>วิดีโอ</i>`:`<img src="${g.src}">`}</div>
+  el.innerHTML=items.length?items.map((g,i)=>`<div class="item sortable${g.on?'':' off'}" data-i="${i}">
+    <button class="grip" title="ลากเพื่อสลับลำดับ" aria-label="ลากเพื่อสลับลำดับ"><svg viewBox="0 0 24 24">${ICON.grip}</svg></button><div class="th">${g.video?`<img src="${g.src}"><i>วิดีโอ</i>`:`<img src="${g.src}">`}</div>
     <div><input value="${g.cap}" placeholder="คำบรรยาย (ไม่ใส่ก็ได้)"><div class="st">${g.on?'แสดงบนเว็บ':'ซ่อนอยู่'}</div></div>
-    <div class="tools">${ic('up','เลื่อนขึ้น')}${ic('down','เลื่อนลง')}${ic('eye',g.on?'ซ่อน':'แสดง',g.on)}${ic('trash','ลบ')}</div></div>`).join(''):'<p class="empty">ยังไม่มีรูป</p>';
+    <div class="tools">${ic('eye',g.on?'ซ่อน':'แสดง',g.on)}${ic('trash','ลบ')}</div></div>`).join(''):'<p class="empty">ยังไม่มีรูป</p>';
 }
 document.getElementById('now').addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b)return;const i=+b.closest('.item').dataset.i,a=b.dataset.a;
-  if(a==='up'&&i>0)[items[i-1],items[i]]=[items[i],items[i-1]];
-  if(a==='down'&&i<items.length-1)[items[i+1],items[i]]=[items[i],items[i+1]];
   if(a==='eye')items[i].on=!items[i].on;
   if(a==='trash'&&confirm('ลบรูปนี้ออกจากเว็บ?'))items.splice(i,1);
   renderNow();
@@ -109,6 +113,26 @@ file.addEventListener('change',()=>add(file.files));
 ['dragleave','drop'].forEach(t=>drop.addEventListener(t,e=>{e.preventDefault();drop.classList.remove('over')}));
 drop.addEventListener('drop',e=>add(e.dataTransfer.files));
 renderNow();
+
+/* drag to reorder: hold the ⠿ handle and move (finger or mouse). The row follows the pointer; the others slide out of
+   the way; on release the order is saved (the real page sends the new order to the server). */
+const now=document.getElementById('now');
+now.addEventListener('pointerdown',e=>{
+  const h=e.target.closest('.grip');if(!h)return;e.preventDefault();
+  const row=h.closest('.item'),rows=[...now.querySelectorAll('.item')],from=rows.indexOf(row);
+  const tops=rows.map(r=>r.getBoundingClientRect().top),hgt=row.getBoundingClientRect().height+10,y0=e.clientY;
+  let to=from;row.classList.add('dragging');h.setPointerCapture(e.pointerId);
+  const move=ev=>{
+    const dy=ev.clientY-y0;row.style.transform=`translateY(${dy}px) scale(1.02)`;
+    const mid=tops[from]+dy+hgt/2;to=from;
+    rows.forEach((r,j)=>{if(j===from)return;const c=tops[j]+hgt/2;if(j<from&&mid<c)to=Math.min(to,j);if(j>from&&mid>c)to=Math.max(to,j)});
+    rows.forEach((r,j)=>{if(j===from)return;r.style.transform=j>=to&&j<from?`translateY(${hgt}px)`:j<=to&&j>from?`translateY(${-hgt}px)`:''});
+  };
+  const up=()=>{h.removeEventListener('pointermove',move);h.removeEventListener('pointerup',up);h.removeEventListener('pointercancel',up);
+    rows.forEach(r=>r.style.transform='');row.classList.remove('dragging');
+    if(to!==from){const [m]=items.splice(from,1);items.splice(to,0,m)}renderNow()};
+  h.addEventListener('pointermove',move);h.addEventListener('pointerup',up);h.addEventListener('pointercancel',up);
+});
 </script>
 </body>
 </html>
