@@ -30,10 +30,13 @@ section{position:relative}
 .nav a{color:inherit;text-decoration:none;font-weight:600}
 
 /* drips */
-.drips{position:absolute;left:-40px;right:-40px;top:-34px;height:320px;filter:url(#goo);pointer-events:none;z-index:6;color:var(--from);clip-path:inset(34px 40px 0 40px)}
+.drips{position:absolute;left:-40px;right:-40px;top:-34px;height:320px;pointer-events:none;z-index:6;color:var(--from);clip-path:inset(34px 40px 0 40px)}
 .drips::before{content:"";position:absolute;inset:0 0 auto 0;height:60px;background:currentColor}
 .drip{position:absolute;top:30px;background:currentColor;border-radius:0 0 99px 99px;height:calc(var(--len)*var(--g,1))}
 .drip::after{content:"";position:absolute;bottom:-5px;left:-14%;width:128%;aspect-ratio:1;border-radius:50%;background:currentColor}
+.drips:not(.gl){filter:url(#goo)} /* fallback only: WebGL strips draw their own band and goo */
+.drips.gl::before{display:none}
+.drips canvas{position:absolute;inset:0;width:100%;height:100%}
 
 /* intro curtain */
 /* drawn by WebGL in intro() (mock/intro-curtain-webgl.html, "WebGL ครีม"); the cream background covers the page until the first frame */
@@ -318,14 +321,64 @@ const vars=f=>`--fl:${f.fl}`;
 const pop=f=>`<span class="pic${f.soft?' soft':''}"><img src="${f.img}" alt="" draggable="false"></span>`;
 const inside=()=>'';
 
-/* drips */
+/* drips between sections (mock/section-drips.html).
+   They stretch with scroll. The old SVG blur filter made phones re-filter them on the CPU every scroll frame,
+   so now one shared WebGL context draws each strip (band + drips + beads merged with a smooth minimum)
+   and copies the result into that strip's own canvas. The canvas lives inside the section, so it scrolls with the page.
+   Without WebGL we fall back to the old divs + filter. */
+const dripGL=(()=>{
+  const MAXD=32,c=document.createElement('canvas'),gl=c.getContext('webgl',{premultipliedAlpha:true,alpha:true,antialias:false,preserveDrawingBuffer:true});
+  if(!gl)return null;
+  const deriv=!!gl.getExtension('OES_standard_derivatives');
+  const FS=`${deriv?'#extension GL_OES_standard_derivatives : enable\n':''}#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+uniform vec2 res;uniform float dpr;uniform vec3 col;uniform vec4 d[${MAXD}];uniform int n;uniform float g;
+float smin(float a,float b,float k){float h=max(k-abs(a-b),0.)/k;return min(a,b)-h*h*k*.25;}
+void main(){
+  vec2 p=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y)/dpr;
+  float f=p.y-60.;
+  for(int i=0;i<${MAXD};i++){if(i>=n)break;vec4 q=d[i];
+    float r=q.y*.5,bot=30.+q.z*g;
+    float body=length(p-vec2(q.x,clamp(p.y,-100.,bot-r)))-r;
+    float bead=length(p-vec2(q.x,bot+5.-q.y*.64))-q.y*.64;
+    f=smin(f,smin(body,bead,10.),24.);
+  }
+  float aa=${deriv?'max(fwidth(f)*.6,.02)':'.75'};
+  float a=1.-smoothstep(-aa,aa,f);
+  gl_FragColor=vec4(col*a,a);
+}`;
+  const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);return gl.getShaderParameter(o,gl.COMPILE_STATUS)?o:null};
+  const vs=sh(gl.VERTEX_SHADER,'attribute vec2 v;void main(){gl_Position=vec4(v,0.,1.);}'),fs=sh(gl.FRAGMENT_SHADER,FS);
+  if(!vs||!fs)return null;
+  const pr=gl.createProgram();gl.attachShader(pr,vs);gl.attachShader(pr,fs);gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS))return null;
+  gl.useProgram(pr);
+  gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+  const vl=gl.getAttribLocation(pr,'v');gl.enableVertexAttribArray(vl);gl.vertexAttribPointer(vl,2,gl.FLOAT,false,0,0);
+  const U=k=>gl.getUniformLocation(pr,k),uRes=U('res'),uDpr=U('dpr'),uCol=U('col'),uD=U('d'),uN=U('n'),uG=U('g'),buf=new Float32Array(MAXD*4);
+  // el: the .drips strip; W,H,rgb measured by the caller during its read phase
+  return (el,g,W,H,rgb)=>{
+    const dpr=Math.min(devicePixelRatio||1,1.5),cw=Math.round(W*dpr),ch=Math.round(H*dpr),out=el._cv;
+    if(c.width!==cw||c.height!==ch){c.width=cw;c.height=ch}
+    if(out.width!==cw||out.height!==ch){out.width=cw;out.height=ch}
+    gl.viewport(0,0,cw,ch);
+    buf.fill(0);el._d.slice(0,MAXD).forEach((q,i)=>buf.set([q.left/100*W+q.w/2,q.w,q.len,0],i*4));
+    gl.uniform2f(uRes,cw,ch);gl.uniform1f(uDpr,dpr);gl.uniform3f(uCol,rgb[0],rgb[1],rgb[2]);
+    gl.uniform4fv(uD,buf);gl.uniform1i(uN,Math.min(MAXD,el._d.length));gl.uniform1f(uG,g);
+    gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLES,0,3);
+    const x=el._ctx;x.clearRect(0,0,cw,ch);x.drawImage(c,0,0);
+  };
+})();
 $$('.drips').forEach(el=>{
   const n=Math.max(7,Math.round(+el.dataset.n*Math.min(1,innerWidth/1300)));
-  for(let i=0;i<n;i++){
-    const d=document.createElement('div');d.className='drip';
-    d.style.cssText=`left:${((i+rnd(.15,.85))/n*100).toFixed(2)}%;width:${rnd(20,50)|0}px;--len:${(Math.random()<.3?rnd(150,235):rnd(40,130))|0}px`;
-    el.append(d);
-  }
+  el._d=Array.from({length:n},(_,i)=>({left:(i+rnd(.15,.85))/n*100,w:rnd(20,50)|0,len:(Math.random()<.3?rnd(150,235):rnd(40,130))|0}));
+  if(dripGL){
+    el.classList.add('gl');el._cv=document.createElement('canvas');el._ctx=el._cv.getContext('2d');el.append(el._cv);
+  }else el._d.forEach(q=>{const d=document.createElement('div');d.className='drip';
+    d.style.cssText=`left:${q.left.toFixed(2)}%;width:${q.w}px;--len:${q.len}px`;el.append(d)});
 });
 
 let featured=0;
@@ -344,7 +397,7 @@ const story=$('#story'),stage=$('#stage');
 function setFeatured(i){
   featured=i;const f=F[i];
   story.style.cssText=`${vars(f)};--fink:${f.ink}`;
-  $('#boxDrips').style.setProperty('--from',f.fl);
+  $('#boxDrips').style.setProperty('--from',f.fl);lastY=-1; // redraw the drips in the new colour
   $('#sName1').textContent=f.n[0];$('#sName2').textContent=f.n[1];$('#sDesc').textContent=f.d;$('#sPrice').textContent='฿'+f.price;
   
   f.L.forEach((t,j)=>$('#c'+j).textContent=t);
@@ -418,12 +471,16 @@ function frame(){
   if(y!==lastY||vh!==lastH){lastY=y;lastH=vh;
     // --- reads ---
     const dripTops=dripEls.map(d=>d.parentElement.getBoundingClientRect().top);
+    const dripOn=dripTops.map(t=>t<vh+50&&t>-400);
+    // size + colour of the visible WebGL strips (read now, drawn in the write phase)
+    const dripInfo=dripEls.map((d,i)=>dripGL&&dripOn[i]?{W:d.clientWidth,H:d.clientHeight,rgb:getComputedStyle(d).color.match(/[\d.]+/g).slice(0,3).map(v=>v/255)}:null);
     let navHit=null;for(const s of navSecs){const r=s.getBoundingClientRect();if(r.top<=40&&r.bottom>40){navHit=s;break}}
     const sTop=story.offsetTop,sH=story.offsetHeight;
     const cardTops=cards.map(c=>c.parentElement.getBoundingClientRect().top);
     const mr=mark.getBoundingClientRect();
     // --- writes ---
-    dripEls.forEach((d,i)=>{const t=dripTops[i];if(t<vh+50&&t>-400)d.style.setProperty('--g',(.2+.8*ease(clamp((vh-t)/(vh*.85)))).toFixed(3))});
+    dripEls.forEach((d,i)=>{if(!dripOn[i])return;const g=.2+.8*ease(clamp((vh-dripTops[i])/(vh*.85)));
+      const k=dripInfo[i];if(k)dripGL(d,g,k.W,k.H,k.rgb);else d.style.setProperty('--g',g.toFixed(3))});
     if(navHit){nav.classList.toggle('dark',navHit.dataset.nav==='dark');nav.classList.toggle('top',navHit.id==='flavors')}
     const p=clamp((y-sTop)/(sH-vh));
     const a=calm?1:ease(clamp((y-sTop+vh*.5)/(vh*.9)));

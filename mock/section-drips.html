@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>June — หยดครีมระหว่างช่วง (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--tea:#F3A18F;--cream:#FFF6E6;--indigo:#3E5D58;--indigo-2:#2C4540;--pink:#DCEBB5;--ink:#243B37;--display:"Mitr","Anuphan",system-ui,sans-serif;--body:"Anuphan",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--body);background:var(--indigo-2);color:var(--cream);padding:24px 16px 48px;line-height:1.6}
+header{max-width:1100px;margin:0 auto 16px}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,3vw,1.9rem)}
+.note{opacity:.8;font-size:.95rem}
+.ctl{max-width:1100px;margin:0 auto 16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+input[type=range]{width:min(100%,320px)}
+button{font:600 .95rem var(--body);padding:8px 18px;border-radius:999px;border:0;background:var(--cream);color:var(--ink);cursor:pointer}
+.row{max-width:1100px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.col b{font-family:var(--display);font-weight:600;font-size:1.05rem;display:block;margin-bottom:6px}
+.col.rec .sec{outline:3px solid var(--tea)}
+/* a fake section boundary: indigo section above, pink section below */
+.sec{position:relative;height:360px;border-radius:20px;overflow:hidden;background:var(--pink);--from:var(--indigo)}
+.sec .above{position:absolute;left:0;right:0;top:0;height:40px;background:var(--from)}
+.sec .txt{position:absolute;left:0;right:0;bottom:24px;text-align:center;color:var(--ink);font:600 1.3rem var(--display)}
+
+/* ---------- OLD (copied from the live page) ---------- */
+.old .drips{position:absolute;left:-40px;right:-40px;top:6px;height:320px;filter:url(#goo);pointer-events:none;z-index:6;color:var(--from);clip-path:inset(34px 40px 0 40px)}
+.old .drips::before{content:"";position:absolute;inset:0 0 auto 0;height:60px;background:currentColor}
+.old .drip{position:absolute;top:30px;background:currentColor;border-radius:0 0 99px 99px;height:calc(var(--len)*var(--g,1))}
+.old .drip::after{content:"";position:absolute;bottom:-5px;left:-14%;width:128%;aspect-ratio:1;border-radius:50%;background:currentColor}
+
+/* ---------- NEW: no filter. Drips keep a fixed size and only slide (transform), so nothing is re-laid-out or re-filtered while scrolling ---------- */
+.new .drips{position:absolute;left:-40px;right:-40px;top:6px;height:320px;pointer-events:none;z-index:6;color:var(--from);clip-path:inset(34px 40px 0 40px)}
+.new .drips::before{content:"";position:absolute;inset:0 0 auto 0;height:60px;background:currentColor;z-index:1}
+/* body + bead of one drip, drawn as a single SVG shape so the neck is smooth without a blur filter */
+.new .drip{position:absolute;top:30px;height:calc(var(--len) + 5px);width:calc(var(--w) * 1.28);margin-left:calc(var(--w) * -.14);
+  transform:translateY(calc((var(--g,1) - 1) * var(--len)));will-change:transform}
+.new .drip svg{display:block;width:100%;height:100%;overflow:visible;fill:currentColor}
+/* the soft curve where a drip leaves the band (what the blur used to fake) */
+.new .neck{position:absolute;top:60px;height:9px;width:calc(var(--w) + 18px);margin-left:-9px;background:currentColor;z-index:1;
+  -webkit-mask:radial-gradient(circle 9px at 0 100%,#0000 97%,#000) left/50% 100% no-repeat,radial-gradient(circle 9px at 100% 100%,#0000 97%,#000) right/50% 100% no-repeat;
+          mask:radial-gradient(circle 9px at 0 100%,#0000 97%,#000) left/50% 100% no-repeat,radial-gradient(circle 9px at 100% 100%,#0000 97%,#000) right/50% 100% no-repeat}
+
+@media (max-width:640px){.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="8"/><feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 24 -10"/></filter>
+</svg>
+<header>
+  <h1>หยดครีมระหว่างช่วงของหน้าเว็บ</h1>
+  <p class="note">หยดพวกนี้ยืด/หดตามการเลื่อนหน้า · เลื่อนแถบด้านล่างหรือกด "เล่น" เพื่อดูท่า · กรอบสีส้ม = แบบใหม่</p>
+</header>
+<div class="ctl"><span>ความยาวหยด</span><input type="range" id="g" min="0.2" max="1" step="0.01" value="1"><button id="play">เล่น</button></div>
+<div class="row">
+  <div class="col old"><b>แบบเดิม (ฟิลเตอร์เบลอ)</b><div class="sec" id="sOld"><div class="above"></div><div class="drips"></div><div class="txt">ช่วงถัดไป</div></div></div>
+  <div class="col new rec"><b>แบบใหม่ (WebGL)</b><div class="sec" id="sNew"><div class="above"></div><div class="drips"></div><div class="txt">ช่วงถัดไป</div></div></div>
+</div>
+<script>
+// seeded random so both columns get identical drips
+let seed=7;const rnd=(a,b)=>{seed=(seed*16807)%2147483647;return a+(seed/2147483647)*(b-a)};
+function gen(){const out=[];const n=Math.max(7,Math.round(22*Math.min(1,innerWidth/1300)));
+  for(let i=0;i<n;i++)out.push({left:((i+rnd(.15,.85))/n*100).toFixed(2),w:rnd(20,50)|0,len:(rnd(0,1)<.3?rnd(150,235):rnd(40,130))|0});return out}
+const D=gen();
+// one drip outline in a 128 x (len+64) box: straight body, then a smooth neck into a round bead
+const dripPath=(w,len)=>{const W=w*1.28,r=W/2,s=w*.14,by=len+5-r;  // bead centre y; bead bottom sits 5px past the body like the old ::after
+  return `M${s} 0 L${s} ${by-r*.55} C${s} ${by-r*.25} 0 ${by-r*.35} 0 ${by} A${r} ${r} 0 0 0 ${W} ${by} C${W} ${by-r*.35} ${W-s} ${by-r*.25} ${W-s} ${by-r*.55} L${W-s} 0 Z`};
+sOld.querySelector('.drips').innerHTML=D.map(d=>`<div class="drip" style="left:${d.left}%;width:${d.w}px;--len:${d.len}px"></div>`).join('');
+/* NEW: one shared WebGL context draws the gooey strip (smooth-min of band + drips + beads), copied into a plain canvas */
+const MAXD=32;
+const glc=document.createElement('canvas'),gl=glc.getContext('webgl',{premultipliedAlpha:true,alpha:true,antialias:false,preserveDrawingBuffer:true});
+const FS=`#extension GL_OES_standard_derivatives : enable
+#ifdef GL_FRAGMENT_PRECISION_HIGH
+precision highp float;
+#else
+precision mediump float;
+#endif
+uniform vec2 res;uniform float dpr;uniform vec3 col;uniform vec4 d[${MAXD}];uniform int n;uniform float g;
+float smin(float a,float b,float k){float h=max(k-abs(a-b),0.)/k;return min(a,b)-h*h*k*.25;}
+void main(){
+  vec2 p=vec2(gl_FragCoord.x,res.y-gl_FragCoord.y)/dpr;
+  float f=p.y-60.;                                   // the solid band at the top
+  for(int i=0;i<${MAXD};i++){if(i>=n)break;vec4 q=d[i];   // q = (centre x, width, len, unused)
+    float r=q.y*.5,bot=30.+q.z*g;
+    float body=length(p-vec2(q.x,clamp(p.y,-100.,bot-r)))-r;
+    float bead=length(p-vec2(q.x,bot+5.-q.y*.64))-q.y*.64;
+    f=smin(f,smin(body,bead,10.),24.);
+  }
+  float aa=max(fwidth(f)*.6,.02);   // edge width follows the field slope, so merged areas stay crisp
+  float a=1.-smoothstep(-aa,aa,f);
+  gl_FragColor=vec4(col*a,a);
+}`;
+gl.getExtension('OES_standard_derivatives');
+const shd=(t,src)=>{const o=gl.createShader(t);gl.shaderSource(o,src);gl.compileShader(o);if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))console.error(gl.getShaderInfoLog(o));return o};
+const pr=gl.createProgram();gl.attachShader(pr,shd(gl.VERTEX_SHADER,'attribute vec2 v;void main(){gl_Position=vec4(v,0.,1.);}'));gl.attachShader(pr,shd(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);gl.useProgram(pr);
+gl.bindBuffer(gl.ARRAY_BUFFER,gl.createBuffer());gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,3,-1,-1,3]),gl.STATIC_DRAW);
+const vl=gl.getAttribLocation(pr,'v');gl.enableVertexAttribArray(vl);gl.vertexAttribPointer(vl,2,gl.FLOAT,false,0,0);
+const UL=k=>gl.getUniformLocation(pr,k);
+const strip=sNew.querySelector('.drips'),cv2=document.createElement('canvas');cv2.style.cssText='position:absolute;inset:0;width:100%;height:100%';strip.append(cv2);
+const ctx=cv2.getContext('2d');
+function drawNew(g){
+  const dpr=Math.min(devicePixelRatio||1,1.5),W=strip.clientWidth,H=strip.clientHeight;
+  if(cv2.width!==Math.round(W*dpr)){cv2.width=glc.width=Math.round(W*dpr);cv2.height=glc.height=Math.round(H*dpr)}
+  gl.viewport(0,0,glc.width,glc.height);
+  const buf=new Float32Array(MAXD*4);D.forEach((q,i)=>buf.set([q.left/100*W+q.w/2,q.w,q.len,0],i*4));
+  const c=getComputedStyle(strip).color.match(/\d+/g).map(v=>v/255);
+  gl.uniform2f(UL('res'),glc.width,glc.height);gl.uniform1f(UL('dpr'),dpr);gl.uniform3f(UL('col'),c[0],c[1],c[2]);
+  gl.uniform4fv(UL('d'),buf);gl.uniform1i(UL('n'),D.length);gl.uniform1f(UL('g'),g);
+  gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.drawArrays(gl.TRIANGLES,0,3);
+  ctx.clearRect(0,0,cv2.width,cv2.height);ctx.drawImage(glc,0,0);
+}
+const set=v=>{sOld.querySelector('.drips').style.setProperty('--g',v);drawNew(+v)};
+set(1);
+g.oninput=()=>set(g.value);
+play.onclick=()=>{const t0=performance.now();(function f(t){const p=((t-t0)/2400)%1,v=.2+.8*(.5-.5*Math.cos(p*2*Math.PI));set(v.toFixed(3));g.value=v;if(t-t0<4800)requestAnimationFrame(f)})(t0)};
+const q=new URLSearchParams(location.search).get('g');if(q){g.value=q;set(q)}
+</script>
+</body>
+</html>
