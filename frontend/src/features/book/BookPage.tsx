@@ -14,13 +14,16 @@ import { buildPages } from './pages'
  * zoom), that fake click is ignored on phones, where the left edge isn't a page corner, so the "←" button did nothing.
  * Allow click-flips just for this call.
  */
-function flipPrev(pf: PageFlip | null) {
+function withClickFlip(pf: PageFlip | null, run: (pf: PageFlip) => void) {
   if (!pf) return
   const s = pf.getSettings()
   s.disableFlipByClick = false
-  pf.flipPrev()
+  run(pf)
   s.disableFlipByClick = true
 }
+const flipPrev = (pf: PageFlip | null) => withClickFlip(pf, (f) => f.flipPrev())
+/** jumping to an earlier page (contents links) goes through the same fake click */
+const flipTo = (pf: PageFlip | null, page: number) => withClickFlip(pf, (f) => f.flip(page))
 
 const layoutKey = () => {
   const l = bookLayout(innerWidth, viewportHeight())
@@ -94,7 +97,7 @@ function Book({ data, single, pageW }: { data: MenuData; single: boolean; pageW:
     const onClick = (e: MouseEvent) => {
       const target = e.target as Element
       const go = target.closest<HTMLElement>('[data-go]')
-      if (go) return pf.flip(Number(go.dataset.go))
+      if (go) return flipTo(pf, Number(go.dataset.go))
       if (target.closest('a,button') || single || state !== 'read') return
       const pg = target.closest<HTMLElement>('.pg')
       if (!pg || pg.classList.contains('cover') || !sheetRef.current) return
@@ -153,7 +156,7 @@ function Book({ data, single, pageW }: { data: MenuData; single: boolean; pageW:
           const go = (e.target as Element).closest<HTMLElement>('[data-go]')
           if (go) {
             setZoomed(false)
-            flipRef.current?.flip(Number(go.dataset.go))
+            flipTo(flipRef.current, Number(go.dataset.go))
           } else if (e.target === e.currentTarget) setZoomed(false)
         }}
       >

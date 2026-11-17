@@ -81,9 +81,10 @@ h2{font:600 clamp(2rem,6vw,3.4rem)/1.15 var(--display);margin:4px 0 6px}
 /* the bend into the rings + punched holes on the inner edge */
 .pg.left .in{box-shadow:inset -22px 0 22px -18px rgba(0,0,0,.28)}
 .pg.right .in{box-shadow:inset 22px 0 22px -18px rgba(0,0,0,.28)}
-.pg.left .in::after,.pg.right .in::after{content:"";position:absolute;top:0;bottom:0;width:16px;
-  background:radial-gradient(circle,#3E5D58 4.2px,transparent 4.8px) 50% 14px/16px 28px repeat-y}
-.pg.left .in::after{right:4px}.pg.right .in::after{left:4px}
+.pg .in::after{content:"";position:absolute;top:10px;bottom:10px;width:16px;
+  background:radial-gradient(circle,#2b3a37 3.6px,#4a5f5b 4.4px,transparent 4.9px) 50% 0/16px 28px no-repeat space}
+.pg.left .in::after{right:4px}.pg.right .in::after,.pg.cover .in::after{left:4px}
+.stage:not(.single) .pg.cover.back .in::after{left:auto;right:4px}
 .pad{position:absolute;inset:7cqh 9cqw 6cqh 9cqw;display:flex;flex-direction:column}
 .pg.right .pad{left:13cqw}.pg.left .pad{right:13cqw}
 
@@ -141,13 +142,13 @@ svg.d{position:absolute;overflow:visible}
 .steps li{counter-increment:s;font:400 6.2cqw/1.35 var(--hand);display:flex;gap:3cqw}
 .steps li::before{content:counter(s);flex:none;width:8cqw;height:8cqw;border-radius:50%;background:var(--peach-soft);display:grid;place-items:center;font:600 4.6cqw var(--display)}
 
-/* spiral rings down the spine, lined up with the holes (14px offset, 28px step) */
 /* page-flip puts the whole book in its own layer (.stf__parent has transform, .stf__block has perspective),
    so the rings are moved inside .stf__block next to the pages. Pages rest at startZIndex+3/+4 and the turning
    page is +5; with startZIndex 10 the rings (15, placed before the pages) sit above resting pages and under the turning one. */
-.rings{position:absolute;left:50%;top:0;bottom:0;width:30px;margin-left:-15px;z-index:15;pointer-events:none;
-  background:linear-gradient(180deg,transparent 0 11px,#7f8d8a 11px,#f1f4f3 14px,#9aa8a5 16px,#6f7c79 17px,transparent 17px) 0 0/30px 28px repeat-y;
-  border-radius:8px;filter:drop-shadow(0 2px 1px rgba(0,0,0,.35))}
+/* wire rings down the spine: one 28px tile per ring, each end drops into a page hole (holes: 12px from the spine,
+   centred at 14px + 28px steps — same numbers as the hole pattern above). Drawn as SVG: shaded wire, highlight, soft shadow. */
+.rings{position:absolute;left:50%;top:10px;bottom:10px;width:44px;margin-left:-22px;z-index:15;pointer-events:none;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='44' height='28'%3E%3Cdefs%3E%0A%3ClinearGradient id='w' x1='0' x2='1'%3E%3Cstop offset='0' stop-color='%233d4846'/%3E%3Cstop offset='.22' stop-color='%239aa7a4'/%3E%3Cstop offset='.5' stop-color='%23c9d2d0'/%3E%3Cstop offset='.78' stop-color='%239aa7a4'/%3E%3Cstop offset='1' stop-color='%233d4846'/%3E%3C/linearGradient%3E%0A%3Cfilter id='b' x='-20%25' y='-60%25' width='140%25' height='220%25'%3E%3CfeGaussianBlur stdDeviation='1.1'/%3E%3C/filter%3E%3C/defs%3E%0A%3Cpath d='M11 17.5Q22 13 33 17.5' fill='none' stroke='%23000' stroke-opacity='.28' stroke-width='3.4' stroke-linecap='round' filter='url(%23b)'/%3E%0A%3Cpath d='M10 14Q22 7.5 34 14' fill='none' stroke='url(%23w)' stroke-width='3.2' stroke-linecap='round'/%3E%0A%3Cpath d='M14 11.6Q22 8.4 30 11.6' fill='none' stroke='%23fff' stroke-opacity='.85' stroke-width='.9' stroke-linecap='round'/%3E%0A%3Ccircle cx='10' cy='14' r='2.2' fill='%232b3533'/%3E%3Ccircle cx='34' cy='14' r='2.2' fill='%232b3533'/%3E%3C/svg%3E") 0 0/44px 28px no-repeat space}
 
 /* tap a page to read it full size (the spread is small on phones) */
 .zoom{position:fixed;inset:0;z-index:100;background:rgba(30,46,43,.86);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
@@ -161,7 +162,10 @@ svg.d{position:absolute;overflow:visible}
 .stage.single .pg .in{box-shadow:inset 22px 0 22px -18px rgba(0,0,0,.28)}
 .stage.single .pg .in::after{left:4px;right:auto}
 .stage.single .pg.left .pad{left:13cqw;right:9cqw}
-.stage.single .rings{left:0}
+.stage.single .rings{left:0;width:34px;margin-left:-16px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='28'%3E%3Cdefs%3E%0A%3ClinearGradient id='w' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23eef2f1'/%3E%3Cstop offset='.45' stop-color='%23a9b5b2'/%3E%3Cstop offset='1' stop-color='%2356625f'/%3E%3C/linearGradient%3E%0A%3Cfilter id='b' x='-30%25' y='-60%25' width='160%25' height='220%25'%3E%3CfeGaussianBlur stdDeviation='1'/%3E%3C/filter%3E%3C/defs%3E%0A%3Cpath d='M3.5 14.5C3 21 9 24.5 16 23' fill='none' stroke='%234a5654' stroke-width='3' stroke-linecap='round'/%3E%0A%3Cpath d='M18 18.5Q23 16.5 29 17.5' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='3' stroke-linecap='round' filter='url(%23b)'/%3E%0A%3Cpath d='M28 14C22 3.5 5 3.5 3.5 14.5' fill='none' stroke='url(%23w)' stroke-width='3.2' stroke-linecap='round'/%3E%0A%3Cpath d='M22 8.2C17 5.6 9 6 6.2 10.5' fill='none' stroke='%23fff' stroke-opacity='.9' stroke-width='.9' stroke-linecap='round'/%3E%0A%3Ccircle cx='28' cy='14' r='2.2' fill='%232b3533'/%3E%3C/svg%3E") 0 0/34px 28px no-repeat space}
+/* closed book on a wide screen: only one page is there, so the rings wrap round its edge like on a phone */
+.stage:not(.single) .shift.closed-front .rings{width:34px;margin-left:-16px;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='28'%3E%3Cdefs%3E%0A%3ClinearGradient id='w' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23eef2f1'/%3E%3Cstop offset='.45' stop-color='%23a9b5b2'/%3E%3Cstop offset='1' stop-color='%2356625f'/%3E%3C/linearGradient%3E%0A%3Cfilter id='b' x='-30%25' y='-60%25' width='160%25' height='220%25'%3E%3CfeGaussianBlur stdDeviation='1'/%3E%3C/filter%3E%3C/defs%3E%0A%3Cpath d='M3.5 14.5C3 21 9 24.5 16 23' fill='none' stroke='%234a5654' stroke-width='3' stroke-linecap='round'/%3E%0A%3Cpath d='M18 18.5Q23 16.5 29 17.5' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='3' stroke-linecap='round' filter='url(%23b)'/%3E%0A%3Cpath d='M28 14C22 3.5 5 3.5 3.5 14.5' fill='none' stroke='url(%23w)' stroke-width='3.2' stroke-linecap='round'/%3E%0A%3Cpath d='M22 8.2C17 5.6 9 6 6.2 10.5' fill='none' stroke='%23fff' stroke-opacity='.9' stroke-width='.9' stroke-linecap='round'/%3E%0A%3Ccircle cx='28' cy='14' r='2.2' fill='%232b3533'/%3E%3C/svg%3E") 0 0/34px 28px no-repeat space}
+.stage:not(.single) .shift.closed-back .rings{width:34px;margin-left:-18px;transform:scaleX(-1);background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='28'%3E%3Cdefs%3E%0A%3ClinearGradient id='w' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23eef2f1'/%3E%3Cstop offset='.45' stop-color='%23a9b5b2'/%3E%3Cstop offset='1' stop-color='%2356625f'/%3E%3C/linearGradient%3E%0A%3Cfilter id='b' x='-30%25' y='-60%25' width='160%25' height='220%25'%3E%3CfeGaussianBlur stdDeviation='1'/%3E%3C/filter%3E%3C/defs%3E%0A%3Cpath d='M3.5 14.5C3 21 9 24.5 16 23' fill='none' stroke='%234a5654' stroke-width='3' stroke-linecap='round'/%3E%0A%3Cpath d='M18 18.5Q23 16.5 29 17.5' fill='none' stroke='%23000' stroke-opacity='.25' stroke-width='3' stroke-linecap='round' filter='url(%23b)'/%3E%0A%3Cpath d='M28 14C22 3.5 5 3.5 3.5 14.5' fill='none' stroke='url(%23w)' stroke-width='3.2' stroke-linecap='round'/%3E%0A%3Cpath d='M22 8.2C17 5.6 9 6 6.2 10.5' fill='none' stroke='%23fff' stroke-opacity='.9' stroke-width='.9' stroke-linecap='round'/%3E%0A%3Ccircle cx='28' cy='14' r='2.2' fill='%232b3533'/%3E%3C/svg%3E") 0 0/34px 28px no-repeat space}
 .stage.single .edges .l{display:none}
 .stage.single .edges .r{width:100%}
 .stage.single .shift{transform:none}
@@ -260,7 +264,7 @@ for(let k=0;k<SHOTS.length/2;k++){
 P.push(`<div class="pg ${(SHOTS.length/2)%2?'left':'right'}"><div class="in"><div class="pad" style="justify-content:center;text-align:center;align-items:center">
   ${svg('sparkle','position:relative;width:20cqw;margin-bottom:4cqh')}
   <div class="h-name" style="font-size:9cqw">ติดตามรูปใหม่</div><div class="h-desc">Instagram ของร้าน</div></div></div></div>`);
-P.push(`<div class="pg cover" data-density="hard"><div class="in"><div class="pad">
+P.push(`<div class="pg cover back" data-density="hard"><div class="in"><div class="pad">
   <div class="plate"><div class="brand" style="font-size:13cqw">ขอบคุณนะ</div><div class="rule"></div><div class="kicker">June · อบใหม่ทุกวัน</div></div></div></div></div>`);
 if(P.length%2)P.splice(P.length-1,0,`<div class="pg left"><div class="in"><div class="pad"></div></div></div>`);   // page-flip needs an even page count
 let pf=null;
@@ -349,7 +353,7 @@ async function openAlbum(){
 }
 async function closeAlbum(){
   if(reduce||!document.startViewTransition||!topCard){swap(false);return}
-  if(pf.getCurrentPageIndex()!==0){pf.flip(0);await wait(700)}   // close the book first
+  if(pf.getCurrentPageIndex()!==0){const st=pf.getSettings();st.disableFlipByClick=false;pf.flip(0);st.disableFlipByClick=true;await wait(900)}   // close the book first (same page-flip quirk as flipBack)
   shiftEl.style.viewTransitionName='album';
   const t=document.startViewTransition(()=>{shiftEl.style.viewTransitionName='';swap(false);topCard.style.viewTransitionName='album'});
   await t.finished;topCard.style.viewTransitionName='';
