@@ -40,7 +40,12 @@ section{position:relative}
 #curtain i{position:absolute;background:currentColor;display:block}
 #curtain .t{top:0;border-radius:0 0 999px 999px}
 #curtain .b{bottom:0;border-radius:999px 999px 0 0}
-#count{position:fixed;inset:0;z-index:101;display:grid;place-items:center;font-family:var(--display);font-weight:600;font-size:1.25rem;color:var(--ink);pointer-events:none;transition:opacity .3s}
+#count{position:fixed;inset:0;z-index:101;display:grid;place-items:center;align-content:center;gap:10px;font-family:var(--display);font-weight:600;font-size:1.25rem;color:var(--ink);pointer-events:none;transition:opacity .3s}
+/* loading logo: faint June that fills with ink from the bottom as the count goes up (mock/intro-logo.html, option 1) */
+#count .load{position:relative;width:min(46vw,260px)}
+#count .load .logo-mask{position:absolute;inset:0}
+#count .load .ghost{position:static;opacity:.16}
+#count .load .fill{clip-path:inset(100% 0 0 0)}
 
 #gl{position:fixed;inset:0;width:100%;height:100%;z-index:7;pointer-events:none}
 #heroSpot{position:absolute;left:50%;top:40vh;top:40svh;height:31vh;height:31svh;aspect-ratio:1;transform:translateX(-50%)}
@@ -216,7 +221,7 @@ section{position:relative}
 
 <canvas id="gl" aria-hidden="true"></canvas>
 <div id="curtain"></div>
-<div id="count">0%</div>
+<div id="count"><div class="load" aria-hidden="true"><span class="logo-mask ghost"></span><span class="logo-mask fill"></span></div><span class="pct">0%</span></div>
 
 <header class="nav top" id="nav">
   <a href="#flavors">เมนู</a>
@@ -440,7 +445,8 @@ function intro(){
     t.animate([{height:'125%'},{height:len+'%'}],{duration:rnd(1000,1500),delay:900+rnd(0,380),easing:'cubic-bezier(.7,0,.2,1)',fill:'forwards'});
     t.animate([{height:len+'%'},{height:'0%'}],{duration:800,delay:3500+rnd(0,300),easing:'ease-in',fill:'forwards'});
   }
-  const t0=performance.now();(function c(t){const p=clamp((t-t0)/850);cnt.textContent=Math.round(p*100)+'%';p<1?requestAnimationFrame(c):cnt.style.opacity=0})(t0);
+  const pct=cnt.querySelector('.pct'),fill=cnt.querySelector('.fill'),load=cnt.querySelector('.load');
+  const t0=performance.now();(function c(t){const p=clamp((t-t0)/850);pct.textContent=Math.round(p*100)+'%';fill.style.clipPath=`inset(${(1-p)*100}% 0 0 0)`;load.style.transform=`translateY(${Math.sin((t-t0)/180)*2}px)`;p<1?requestAnimationFrame(c):cnt.style.opacity=0})(t0);
   setTimeout(()=>{cur.remove();cnt.remove()},4700);
 }
 
@@ -489,7 +495,7 @@ function tick(t){
   const cx=lerp(h.left+h.width/2,st.left+st.width/2,S.a),cy=lerp(Math.max(h.top+h.height/2,innerHeight*.42),st.top+st.height/2,S.a),px=lerp(h.height,st.height*.86,S.a);
   const gap=(innerWidth<700?innerWidth*.6:Math.min(innerWidth*.3,440))*(1+S.a*5),k=ease(clamp(S.p/.18));
   items.forEach((it,i)=>{
-    const dI=i-sm,near=1-Math.min(1,Math.abs(dI)),d=calm?1:clamp((t-(window.T0||0)-1700-i*180)/650),drop=-(1-outC(d))*innerHeight*.12,grow=lerp(.6,1,outBack(d));
+    const dI=i-sm,near=1-Math.min(1,Math.abs(dI)),d=calm?1:clamp((t-(window.T0||0)-2500-i*200)/900),drop=-(1-outC(d))*innerHeight*.12,grow=lerp(.6,1,outBack(d));
     it.grp.position.set((cx+dI*gap-innerWidth/2)*wpp,-(cy-drop-innerHeight/2)*wpp,0);
     const hide=(1-near)*ease(clamp(scrollY/(innerHeight*.3)));it.grp.visible=!!it.loaded&&hide<.99&&d>0;it.grp.scale.setScalar(px*wpp*(.55+.45*near)*(1-hide)*grow);
     const free=((calm?0:t*.0004)+dragX+i*1.3+(1-d)*1.5)%(Math.PI*2);

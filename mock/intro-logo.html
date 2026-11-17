@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>June — โลโก้ขยับตอนโหลด (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--tea:#F3A18F;--cream:#FFF6E6;--indigo:#3E5D58;--indigo-2:#2C4540;--ink:#243B37;--display:"Mitr","Anuphan",system-ui,sans-serif;--body:"Anuphan",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--body);background:var(--indigo-2);color:var(--cream);padding:24px 16px 48px;line-height:1.6}
+header{max-width:1200px;margin:0 auto 20px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,3vw,1.9rem)}
+.note{opacity:.75;font-size:.95rem}
+.ctl{display:flex;gap:8px;flex-wrap:wrap}
+button{font:600 1rem var(--body);padding:10px 22px;border-radius:999px;border:0;background:var(--cream);color:var(--ink);cursor:pointer}
+button.ghost{background:transparent;color:var(--cream);border:2px solid var(--cream)}
+.grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.card{border-radius:24px;overflow:hidden;border:2px solid transparent;background:var(--indigo-2)}
+.card.rec{border-color:var(--tea)}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:12px 16px}
+.head b{font-family:var(--display);font-weight:600;font-size:1.1rem}
+.head small{display:block;opacity:.75;font-size:.85rem}
+.tag{font-size:.75rem;font-weight:600;background:var(--tea);color:var(--ink);padding:2px 10px;border-radius:999px;white-space:nowrap}
+
+/* the cream curtain screen */
+.screen{aspect-ratio:4/3;background:var(--cream);color:var(--ink);display:grid;place-items:center;align-content:center;gap:10px}
+.logo{position:relative;width:46%;aspect-ratio:250/165}
+.mask{position:absolute;inset:0;background:currentColor;-webkit-mask:url(../menu/static/menu/img/logo.png) center/contain no-repeat;mask:url(../menu/static/menu/img/logo.png) center/contain no-repeat}
+.ghostlogo{opacity:.16}
+.pct{font:600 1.15rem var(--display)}
+
+@media (max-width:860px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>โลโก้ June ขยับระหว่างโหลด 0–100%</h1>
+    <p class="note">ของจริงนับ 0–100% ใน 0.85 วินาที · กด "ช้าลง" เพื่อดูท่าชัด ๆ · กรอบสีส้ม = แบบที่แนะนำ</p>
+  </div>
+  <div class="ctl"><button id="speed" class="ghost">ช้าลง 3 เท่า</button><button id="all">เล่นใหม่</button></div>
+</header>
+<div class="grid" id="grid"></div>
+
+<script>
+const ease=t=>t*t*(3-2*t);
+let slow=1;
+
+const STYLES=[
+  {name:'1 · ครีมเติมเต็มโลโก้',sub:'โลโก้จาง ๆ ค่อย ๆ เติมสีจากล่างขึ้นบนตามตัวเลข',rec:true,
+   build:l=>{l.innerHTML='<span class="mask ghostlogo"></span><span class="mask fill"></span>';return l.querySelector('.fill')},
+   frame:(el,p,t,l)=>{el.style.clipPath=`inset(${(1-p)*100}% 0 0 0)`;l.style.transform=p>=1?'':`translateY(${Math.sin(t/180)*2}px)`}},
+  {name:'2 · กระโดดดึ๋ง ๆ',sub:'โลโก้กระโดดเหมือนแป้งนุ่ม ยุบตอนแตะพื้น',
+   build:l=>{l.innerHTML='<span class="mask"></span>';l.style.transformOrigin='50% 100%';return l},
+   frame:(el,p,t)=>{const c=(t/420)%1,h=Math.sin(c*Math.PI),sq=c<.12?(1-c/.12):0;
+     el.style.transform=p>=1?'':`translateY(${-h*14}%) scale(${1+sq*.12},${1-sq*.14})`}},
+  {name:'3 · เยลลี่ส่ายไปมา',sub:'โลโก้เอียงซ้ายขวา ยืดหดเบา ๆ',
+   build:l=>{l.innerHTML='<span class="mask"></span>';l.style.transformOrigin='50% 90%';return l},
+   frame:(el,p,t)=>{const a=Math.sin(t/140);el.style.transform=p>=1?'':`rotate(${a*6}deg) scale(${1+a*.04},${1-a*.04})`}},
+];
+
+const grid=document.getElementById('grid'),runs=[];
+STYLES.forEach(st=>{
+  const card=document.createElement('div');card.className='card'+(st.rec?' rec':'');
+  card.innerHTML=`<div class="head"><div><b>${st.name}</b><small>${st.sub}</small></div>${st.rec?'<span class="tag">แนะนำ</span>':''}</div><div class="screen"><div class="logo"></div><div class="pct">0%</div></div>`;
+  grid.append(card);
+  const logo=card.querySelector('.logo'),pct=card.querySelector('.pct'),el=st.build(logo);
+  let t0=0;
+  const run=()=>{t0=performance.now()};
+  (function f(t){requestAnimationFrame(f);
+    const dur=850*slow,p=Math.min(1,(t-t0)/dur);
+    pct.textContent=Math.round(p*100)+'%';
+    st.frame(el,p,(t-t0)/slow,logo);
+    if(t-t0>dur+1200)t0=t; // loop with a short pause at 100%
+  })(performance.now());
+  runs.push(run);
+});
+document.getElementById('all').onclick=()=>runs.forEach(r=>r());
+document.getElementById('speed').onclick=e=>{slow=slow===1?3:1;e.target.textContent=slow===1?'ช้าลง 3 เท่า':'ความเร็วจริง';runs.forEach(r=>r())};
+runs.forEach(r=>r());
+</script>
+</body>
+</html>

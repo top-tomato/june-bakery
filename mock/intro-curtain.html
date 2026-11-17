@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>June — เทียบม่านครีมตอนเปิดเว็บ (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--tea:#F3A18F;--cream:#FFF6E6;--indigo:#3E5D58;--indigo-2:#2C4540;--ink:#243B37;--display:"Mitr","Anuphan",system-ui,sans-serif;--body:"Anuphan",system-ui,sans-serif}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--body);background:var(--indigo-2);color:var(--cream);padding:24px 16px 48px;line-height:1.6}
+header{max-width:1200px;margin:0 auto 20px;display:flex;flex-wrap:wrap;gap:12px 24px;align-items:center;justify-content:space-between}
+h1{font-family:var(--display);font-weight:600;font-size:clamp(1.3rem,3vw,1.9rem)}
+.note{opacity:.75;font-size:.95rem}
+button{font:600 1rem var(--body);padding:10px 22px;border-radius:999px;border:0;background:var(--cream);color:var(--ink);cursor:pointer}
+.grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.card{border-radius:24px;overflow:hidden;border:2px solid transparent;background:var(--indigo)}
+.card.rec{border-color:var(--tea)}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:12px 16px;background:var(--indigo-2)}
+.head b{font-family:var(--display);font-weight:600;font-size:1.1rem}
+.head small{display:block;opacity:.75;font-size:.85rem}
+.tag{font-size:.75rem;font-weight:600;background:var(--tea);color:var(--ink);padding:2px 10px;border-radius:999px;white-space:nowrap}
+.foot{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 16px;background:var(--indigo-2);font-size:.85rem}
+.foot button{padding:6px 14px;font-size:.85rem}
+.fps{opacity:.8}
+
+/* fake page inside each card */
+.screen{position:relative;aspect-ratio:16/10;overflow:hidden;background:var(--indigo);container-type:size}
+.page{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;padding-top:6cqh}
+.page .logo{font:600 9cqh/1 var(--display);letter-spacing:.02em}
+.page h2{font:600 7cqh/1.2 var(--display);margin-top:3cqh}
+.page .cake{width:34cqh;height:34cqh;border-radius:50%;margin-top:5cqh;background:center/cover url(../seed/img/pandan.jpg);box-shadow:0 2cqh 3cqh rgba(0,0,0,.3)}
+.count{position:absolute;inset:0;display:grid;place-items:center;font:600 4.5cqh var(--display);color:var(--ink);pointer-events:none;z-index:3}
+
+/* original: goo filter over many bars */
+.goo{position:absolute;inset:-12px;filter:url(#goo12);color:var(--cream);z-index:2}
+.goo i{position:absolute;background:currentColor;display:block}
+.goo .t{top:0;border-radius:0 0 999px 999px}
+.goo .b{bottom:0;border-radius:999px 999px 0 0}
+
+/* new: plain shapes moved with transform only */
+.sheet{position:absolute;left:0;right:0;top:0;height:100%;z-index:2;will-change:transform}
+.sheet .fill{position:absolute;inset:0;background:var(--cream)}
+.sheet svg{position:absolute;left:0;top:calc(100% - 1px);width:100%;height:28%;overflow:visible}
+.sheet .drip{transform-box:fill-box;transform-origin:50% 0;will-change:transform}
+
+@media (max-width:720px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <filter id="goo12"><feGaussianBlur in="SourceGraphic" stdDeviation="14"/><feColorMatrix values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 26 -11"/></filter>
+</svg>
+
+<header>
+  <div>
+    <h1>ม่านครีมตอนเปิดหน้าเว็บ</h1>
+    <p class="note">กด "เล่นใหม่" ทีละช่องเพื่อดูความลื่น (ตัวเลข fps ยิ่งใกล้ 60 ยิ่งลื่น) · กรอบสีส้ม = แบบที่แนะนำ</p>
+  </div>
+  <button id="all">เล่นใหม่ทั้งหมด</button>
+</header>
+<div class="grid" id="grid"></div>
+
+<script>
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const PAGE='<div class="page"><div class="logo">June</div><h2>อบใหม่ หอม นุ่มนาน</h2><div class="cake"></div></div>';
+
+function counter(screen,ms){
+  const c=document.createElement('div');c.className='count';c.textContent='0%';screen.append(c);
+  const t0=performance.now();(function s(t){const p=Math.min(1,(t-t0)/ms);c.textContent=Math.round(p*100)+'%';
+    if(p<1)requestAnimationFrame(s);else c.animate([{opacity:1},{opacity:0}],{duration:250,fill:'forwards'})})(t0);
+  return c;
+}
+
+/* drip sheet: one cream sheet + an SVG row of drips hanging from its bottom edge */
+function sheet(screen,n){
+  const sh=document.createElement('div');sh.className='sheet';
+  let drips='';
+  for(let i=0;i<n;i++){
+    const w=100/n,x=i*w+rnd(-.15,.15)*w,dw=w*rnd(.55,.8),len=rnd(35,100),cx=x+w/2;
+    // rounded tongue with soft shoulders so it reads as one piece with the sheet
+    drips+=`<path class="drip" d="M${cx-dw/2-3} 0 Q${cx-dw/2} 0 ${cx-dw/2} 6 L${cx-dw/2} ${len-dw/2} A${dw/2} ${dw/2} 0 0 0 ${cx+dw/2} ${len-dw/2} L${cx+dw/2} 6 Q${cx+dw/2} 0 ${cx+dw/2+3} 0 Z"/>`;
+  }
+  sh.innerHTML=`<div class="fill"></div><svg viewBox="0 0 100 100" preserveAspectRatio="none" fill="#FFF6E6">${drips}</svg>`;
+  screen.append(sh);return{sh,drips:[...sh.querySelectorAll('.drip')]};
+}
+
+const STYLES=[
+  {name:'แบบเดิม',sub:'ฟิลเตอร์ goo ทั้งจอ · ประมาณ 4.7 วินาที',play(screen){
+    const g=document.createElement('div');g.className='goo';screen.append(g);const N=screen.clientWidth<500?6:12;
+    for(let i=0;i<N;i++){const w=100/N*1.35,l=i*100/N-w*.13;
+      const t=document.createElement('i');t.className='t';t.style.cssText=`left:${l}%;width:${w}%;height:125%`;g.append(t);
+      const b=document.createElement('i');b.className='b';b.style.cssText=`left:${l}%;width:${w}%;height:${rnd(50,68)}%`;g.append(b);
+      b.animate([{height:b.style.height},{height:'0%'}],{duration:rnd(800,1100),delay:1550+rnd(0,250),easing:'cubic-bezier(.6,0,.8,.4)',fill:'forwards'});
+      const len=rnd(7,24);
+      t.animate([{height:'125%'},{height:len+'%'}],{duration:rnd(1000,1500),delay:900+rnd(0,380),easing:'cubic-bezier(.7,0,.2,1)',fill:'forwards'});
+      t.animate([{height:len+'%'},{height:'0%'}],{duration:800,delay:3500+rnd(0,300),easing:'ease-in',fill:'forwards'});}
+    counter(screen,850);return 4700;}},
+
+  {name:'1 · หน้าตาเดิม แต่เบาลง',sub:'ครีมเป็นรูปทรงสำเร็จ ขยับแบบไม่วาดใหม่ · ประมาณ 2 วินาที',rec:true,play(screen){
+    const {sh,drips}=sheet(screen,screen.clientWidth<500?6:12);
+    counter(screen,600);
+    drips.forEach(d=>d.animate([{transform:'scaleY(.15)'},{transform:'scaleY(1)'}],{duration:rnd(500,700),delay:450+rnd(0,250),easing:'cubic-bezier(.3,0,.2,1)',fill:'both'}));
+    sh.animate([{transform:'translateY(0)'},{transform:'translateY(-135%)'}],{duration:850,delay:1150,easing:'cubic-bezier(.6,0,.3,1)',fill:'forwards'});
+    return 2000;}},
+
+  {name:'2 · ไหลลงครั้งเดียวแล้วจาง',sub:'ครีมไหลลงนิดหนึ่งแล้วจางหาย · ประมาณ 1 วินาที',play(screen){
+    const {sh,drips}=sheet(screen,screen.clientWidth<500?6:12);
+    drips.forEach(d=>d.animate([{transform:'scaleY(.2)'},{transform:'scaleY(1)'}],{duration:rnd(450,650),delay:rnd(0,150),easing:'cubic-bezier(.3,0,.2,1)',fill:'both'}));
+    sh.animate([{transform:'translateY(0)',opacity:1},{transform:'translateY(18%)',opacity:0}],{duration:550,delay:450,easing:'ease-in',fill:'forwards'});
+    return 1000;}},
+
+  {name:'3 · ไม่มีม่าน',sub:'หน้าเว็บขึ้นทันที',play(screen){
+    screen.querySelector('.page').animate([{opacity:0},{opacity:1}],{duration:250});return 250;}},
+];
+
+const grid=document.getElementById('grid'),runs=[];
+STYLES.forEach(st=>{
+  const card=document.createElement('div');card.className='card'+(st.rec?' rec':'');
+  card.innerHTML=`<div class="head"><div><b>${st.name}</b><small>${st.sub}</small></div>${st.rec?'<span class="tag">แนะนำ</span>':''}</div><div class="screen"></div><div class="foot"><span class="fps">–</span><button>เล่นใหม่</button></div>`;
+  grid.append(card);
+  const screen=card.querySelector('.screen'),fps=card.querySelector('.fps');
+  const run=()=>{
+    screen.innerHTML=PAGE;const ms=st.play(screen);
+    // measure smoothness while this animation runs
+    let n=0,worst=0,last=performance.now();const t0=last;
+    (function f(t){n++;worst=Math.max(worst,t-last);last=t;
+      if(t-t0<ms)requestAnimationFrame(f);
+      else fps.textContent=`เฉลี่ย ${Math.round(n/((t-t0)/1000))} fps · เฟรมช้าสุด ${Math.round(worst)} ms`})(t0);
+    setTimeout(()=>[...screen.children].forEach(c=>{if(!c.classList.contains('page'))c.remove()}),ms+300);
+  };
+  card.querySelector('.foot button').onclick=run;runs.push(run);
+});
+document.getElementById('all').onclick=()=>runs.forEach(r=>r());
+runs.forEach(r=>r());
+</script>
+</body>
+</html>
