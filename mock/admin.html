@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>June — หลังร้าน (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+/* Staff "shop summary" page (would live at /admin/summary/). Phone first.
+   - visitors / "order on LINE" taps: counted by the site itself (no cookies, no personal data)
+   - orders, sales, expenses: the site can't see LINE chats, so staff log them with the two big buttons
+   Every number here is SAMPLE data. One chart per measure (no dual axes); single series -> no legend. */
+:root{--ink:#2F4A45;--muted:#6b7f7a;--cream:#FFF6E6;--paper:#FFFBF3;--peach:#F3A18F;--green:#3E5D58;--line:#e6dccb;
+  --bar:#3E5D58;--bar2:#E59A86;--good:#2e7d4f;--bad:#b4412b;--grid:#ece4d6}
+*{box-sizing:border-box;margin:0}
+body{font-family:Anuphan,system-ui,sans-serif;background:var(--paper);color:var(--ink);padding-bottom:40px}
+/* app shell: side menu (always open on wide screens, a drawer on phones) + content */
+.side{position:fixed;left:0;top:0;bottom:0;width:248px;background:var(--green);color:var(--cream);display:flex;flex-direction:column;z-index:20;
+  padding:18px 12px max(14px,env(safe-area-inset-bottom));transform:translateX(-100%);transition:transform .25s cubic-bezier(.3,.7,.2,1)}
+.side.on{transform:none}
+.brandbox{display:flex;align-items:center;gap:10px;padding:4px 10px 18px;border-bottom:1px solid rgba(255,246,230,.14);margin-bottom:10px}
+.brandbox .lg{width:64px;aspect-ratio:1000/660;background:var(--cream);-webkit-mask:url(img/logo.png) center/contain no-repeat;mask:url(img/logo.png) center/contain no-repeat}
+.brandbox small{display:block;opacity:.7;font-size:.8rem}
+.brandbox b{font:600 .95rem Mitr,sans-serif}
+.side nav{display:grid;gap:2px;overflow:auto}
+.side .grp{font-size:.72rem;letter-spacing:.06em;opacity:.55;padding:14px 12px 4px}
+.side a{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:12px;color:var(--cream);text-decoration:none;font-size:.97rem;opacity:.86}
+.side a:hover{background:rgba(255,246,230,.08);opacity:1}
+.side a.on{background:var(--cream);color:var(--ink);opacity:1;font-weight:600}
+.side a svg{width:20px;height:20px;flex:none;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.side a .badge{margin-left:auto;font-size:.72rem;background:var(--peach);color:var(--ink);border-radius:99px;padding:1px 8px}
+.side .me{margin-top:auto;border-top:1px solid rgba(255,246,230,.14);padding-top:10px}
+.sveil{position:fixed;inset:0;background:rgba(20,30,28,.45);z-index:19;opacity:0;pointer-events:none;transition:opacity .2s}
+.sveil.on{opacity:1;pointer-events:auto}
+.burger{width:40px;height:40px;border:0;border-radius:10px;background:rgba(255,246,230,.12);display:grid;place-items:center;cursor:pointer}
+.burger svg{width:22px;height:22px;stroke:var(--cream);stroke-width:2.2;stroke-linecap:round;fill:none}
+@media (min-width:900px){.side{transform:none}.sveil{display:none}.burger{display:none}body{padding-left:248px}.fab{left:248px}}
+header{background:var(--green);color:var(--cream);padding:12px 16px;position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px}
+@media (min-width:900px){header{background:var(--paper);color:var(--ink);border-bottom:1px solid var(--line)}}
+header h1{flex:1}
+.view[hidden]{display:none}
+/* order filters: compact, left-aligned, wrap on phones */
+.filters{display:flex;flex-wrap:wrap;gap:8px 10px;align-items:center;margin-bottom:10px}
+.fgrp{display:inline-flex;background:#efe7d8;border-radius:999px;padding:3px;gap:2px}
+.fgrp button{border:0;background:none;border-radius:999px;padding:7px 13px;font:500 .86rem Mitr,sans-serif;color:var(--ink);cursor:pointer;white-space:nowrap}
+.fgrp button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.search{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:6px 12px;flex:1;min-width:180px;max-width:280px}
+.search svg{width:16px;height:16px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round}
+.search input{border:0;outline:0;font:inherit;background:none;width:100%;color:var(--ink)}
+.osum{font-size:.92rem;color:var(--muted);margin:4px 2px 12px}
+.osum b{color:var(--ink);font-family:Mitr,sans-serif;font-weight:500}
+.kb{display:inline-block;font-size:.72rem;padding:1px 8px;border-radius:99px;background:#fde3da;color:#8b3a26;margin-left:4px;white-space:nowrap}
+.ocards{display:grid;gap:8px}
+.ocard{display:grid;grid-template-columns:1fr auto;gap:4px 10px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:10px 12px}
+.ocard .t{font-size:.95rem}.ocard .s{font-size:.8rem;color:var(--muted)}.ocard .m{font:500 1rem Mitr,sans-serif;text-align:right;grid-row:span 2;align-self:center}
+.fbtn{display:none;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:999px;padding:7px 14px;font:500 .88rem Mitr,sans-serif;color:var(--ink);cursor:pointer;white-space:nowrap}
+.fbtn svg{width:16px;height:16px;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;fill:none}
+.fbtn span:not(:empty){background:var(--ink);color:var(--cream);border-radius:99px;padding:0 7px;font-size:.75rem}
+.achips{display:none;flex-wrap:wrap;gap:6px;margin:-2px 0 8px}
+.achips button{display:inline-flex;align-items:center;gap:6px;border:0;background:var(--ink);color:var(--cream);border-radius:999px;padding:5px 10px 5px 12px;font:500 .8rem Mitr,sans-serif;cursor:pointer}
+/* phones: one row of time range, then search + a "ตัวกรอง" button; type and channel live in a sheet */
+@media (max-width:640px){
+  .filters [data-f=kind],.filters [data-f=via]{display:none}
+  .filters [data-f=range]{width:100%;display:flex}.filters [data-f=range] button{flex:1}
+  .search{max-width:none;min-width:0}
+  .fbtn{display:inline-flex}
+  .achips:not(:empty){display:flex}
+}
+/* each page's own "add" button, top right next to the title */
+.act{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:9px 16px;background:var(--cream);color:var(--ink);font:500 .92rem Mitr,sans-serif;cursor:pointer;white-space:nowrap}
+.act[hidden]{display:none}
+.act svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round}
+@media (min-width:900px){.act{background:var(--ink);color:var(--cream);padding:10px 20px}}
+@media (min-width:1100px){body main{max-width:1060px}.duo{display:grid;grid-template-columns:1fr 1fr;gap:18px}}
+.tbl{width:100%;border-collapse:collapse;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;font-size:.92rem}
+.tbl th,.tbl td{padding:11px 12px;text-align:left;border-bottom:1px solid var(--line)}
+.tbl th{font:500 .82rem Mitr,sans-serif;color:var(--muted);background:#faf6ee}
+.tbl td.r,.tbl th.r{text-align:right}
+.tbl tr:last-child td{border-bottom:0}
+.empty-view{background:#fff;border:1px dashed var(--line);border-radius:16px;padding:28px 18px;text-align:center;color:var(--muted)}
+.empty-view b{display:block;font:600 1.05rem Mitr,sans-serif;color:var(--ink);margin-bottom:6px}
+.form{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;display:grid;gap:12px}
+.form label{font:500 .88rem Mitr,sans-serif}
+.form input,.form textarea{width:100%;font:1rem Anuphan,sans-serif;padding:11px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--paper);color:var(--ink)}
+/* pickups (pre-orders for seminars / breaks) and the calendar */
+.pick{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:12px}
+.pick h3{font:600 .95rem Mitr,sans-serif;display:flex;justify-content:space-between;align-items:baseline;margin-bottom:6px}
+.pick h3 a{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
+.pk{display:grid;grid-template-columns:62px 1fr auto;gap:10px;align-items:center;padding:8px 0;border-top:1px dashed var(--line)}
+.pk:first-of-type{border-top:0}
+.pk time{font:600 1rem Mitr,sans-serif}
+.pk small{display:block;color:var(--muted);font-size:.8rem}
+.pk b{font:500 .95rem Mitr,sans-serif}
+.pk .day{font:400 .75rem Anuphan;color:var(--muted)}
+.cal{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px}
+.cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cal-h b{font:600 1.05rem Mitr,sans-serif}
+.cal-h button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:1.1rem;cursor:pointer;color:var(--ink)}
+.grid7{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.grid7 .dw{font-size:.75rem;color:var(--muted);text-align:center;padding:4px 0}
+.dc{position:relative;aspect-ratio:1/1.05;border-radius:10px;border:1px solid transparent;background:#faf6ee;padding:4px 5px;font-size:.85rem;text-align:left;cursor:pointer;color:var(--ink);display:flex;flex-direction:column;justify-content:space-between;font-family:inherit}
+.dc.out{opacity:.35}
+.dc.today{border-color:var(--ink)}
+.dc.sel{background:var(--ink);color:var(--cream)}
+.dc.closed{background:repeating-linear-gradient(135deg,#f3e1da 0 6px,#fbefea 6px 12px)}
+.dc.closed.sel{background:var(--ink)}
+.dc .cnt{align-self:flex-start;font:600 .7rem Mitr,sans-serif;background:var(--peach);color:var(--ink);border-radius:99px;padding:0 6px}
+.dc .off{font-size:.66rem;color:#a2482f}
+.dc.sel .off{color:var(--cream)}
+.daypanel{margin-top:14px}
+.daypanel h3{font:600 1rem Mitr,sans-serif;margin-bottom:8px}
+.switch{display:flex;align-items:center;justify-content:space-between;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:10px}
+.switch small{display:block;color:var(--muted);font-size:.8rem}
+.tg{width:50px;height:30px;border-radius:99px;background:#ddd5c7;border:0;position:relative;cursor:pointer;transition:background .2s}
+.tg::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.tg.on{background:#a2482f}.tg.on::after{transform:translateX(20px)}
+.legend{display:flex;gap:14px;font-size:.8rem;color:var(--muted);margin-top:10px;flex-wrap:wrap}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;vertical-align:-2px;margin-right:4px}
+.pre-only{display:none}
+.sheet.pre .pre-only{display:block}
+.sheet .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.btn2{border:0;border-radius:999px;padding:12px 20px;background:var(--ink);color:var(--cream);font:500 1rem Mitr,sans-serif;justify-self:start;cursor:pointer}
+header h1{font:600 1.15rem Mitr,sans-serif}
+header nav{display:flex;gap:14px;font-size:.9rem}
+header a{color:var(--cream);opacity:.85;text-decoration:none}
+main{max-width:760px;margin:0 auto;padding:14px 16px}
+.note{background:#1c2b28;color:var(--cream);padding:10px 14px;border-radius:10px;font-size:.85rem;margin-bottom:14px}
+.seg{display:flex;background:#efe7d8;border-radius:999px;padding:4px;gap:4px;margin-bottom:14px}
+.seg button{flex:1;border:0;background:none;border-radius:999px;padding:9px 0;font:500 .95rem Mitr,sans-serif;color:var(--ink);cursor:pointer}
+.seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+h2{font:600 1rem Mitr,sans-serif;margin:22px 0 10px;display:flex;justify-content:space-between;align-items:baseline}
+h2 small{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.tile{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px}
+.tile .k{font-size:.85rem;color:var(--muted);display:flex;align-items:center;gap:6px}
+.tile .k svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.tile .v{font:600 1.45rem/1.15 Mitr,sans-serif;margin-top:6px}
+.tiles .tile:not(.hero){padding:12px 10px}
+.tile .d{font-size:.8rem;margin-top:2px;color:var(--muted)}
+.tile .d b.up{color:var(--good)}.tile .d b.down{color:var(--bad)}
+.tile.hero{grid-column:1/-1;background:var(--green);color:var(--cream);border:0}
+.tile.hero .k,.tile.hero .d{color:rgba(255,246,230,.75)}
+.tile.hero .v{font-size:2.2rem}
+.money{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.money .tile{padding:12px}
+.money .v{font-size:1.25rem}
+.profit .v{color:var(--good)}
+.card{background:#fff;border:1px solid var(--line);border-radius:16px;padding:14px 12px 10px;position:relative}
+.chart{width:100%;height:auto;display:block;touch-action:pan-y}
+.chart text{font:11px Anuphan,sans-serif;fill:var(--muted)}
+.tip{position:absolute;pointer-events:none;background:var(--ink);color:var(--cream);font-size:.82rem;padding:6px 10px;border-radius:8px;white-space:nowrap;opacity:0;transform:translate(-50%,-110%);transition:opacity .1s}
+.tip b{font-family:Mitr,sans-serif;font-weight:500}
+.funnel{display:grid;gap:8px}
+.frow{display:grid;grid-template-columns:120px 1fr 54px;gap:10px;align-items:center;font-size:.9rem}
+.frow .track{height:14px;background:#f1ebe0;border-radius:4px;overflow:hidden}
+.frow .track span{display:block;height:100%;background:var(--bar);border-radius:0 4px 4px 0}
+.frow b{font-family:Mitr,sans-serif;font-weight:500;text-align:right}
+.list{display:grid;gap:8px}
+.row{display:grid;grid-template-columns:1fr auto;gap:8px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.row .t{font-size:.95rem}
+.row .s{font-size:.8rem;color:var(--muted)}
+.row .m{font:500 1rem Mitr,sans-serif;text-align:right}
+.row .m.out{color:var(--bad)}
+.tag{display:inline-block;font-size:.72rem;padding:1px 8px;border-radius:99px;background:#eef3e6;margin-left:4px}
+.fab{position:fixed;left:0;right:0;bottom:0;padding:12px 16px max(12px,env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--paper) 30%);display:flex;gap:10px;justify-content:center;z-index:6}
+.fab button{flex:1;max-width:260px;border:0;border-radius:999px;padding:15px;font:500 1.02rem Mitr,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.fab .o{background:var(--ink);color:var(--cream)}
+.fab .e{background:#fff;color:var(--ink);border:1.5px solid var(--ink)}
+.fab svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round}
+/* bottom sheets */
+.veil{position:fixed;inset:0;background:rgba(20,30,28,.45);opacity:0;pointer-events:none;transition:opacity .2s;z-index:9}
+.veil.on{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;background:var(--paper);border-radius:22px 22px 0 0;padding:18px 18px max(18px,env(safe-area-inset-bottom));transform:translateY(105%);transition:transform .25s cubic-bezier(.3,.7,.2,1);z-index:10;max-width:560px;margin:0 auto}
+.sheet.on{transform:none}
+.sheet h3{display:flex;align-items:center;justify-content:space-between}
+.sx{width:38px;height:38px;border-radius:50%;border:0;background:#efe7d8;display:grid;place-items:center;cursor:pointer;flex:none}
+.sx svg{width:18px;height:18px;stroke:var(--ink);stroke-width:2.4;stroke-linecap:round;fill:none}
+/* wide screens: a centred modal instead of a sheet stuck to the bottom edge */
+@media (min-width:900px){
+  .sheet{top:50%;bottom:auto;left:50%;right:auto;width:min(560px,92vw);max-height:88vh;overflow:auto;border-radius:22px;padding:22px 24px;
+    transform:translate(-50%,-46%) scale(.97);opacity:0;pointer-events:none;transition:opacity .18s,transform .22s cubic-bezier(.3,.7,.2,1);box-shadow:0 30px 60px rgba(0,0,0,.28)}
+  .sheet.on{transform:translate(-50%,-50%);opacity:1;pointer-events:auto}
+}
+.sheet h3{font:600 1.15rem Mitr,sans-serif;margin-bottom:14px}
+.sheet label{display:block;font:500 .9rem Mitr,sans-serif;margin:14px 0 8px}
+.step{display:flex;align-items:center;gap:14px}
+.step button{width:48px;height:48px;border-radius:14px;border:1.5px solid var(--line);background:#fff;font:600 1.4rem Mitr;color:var(--ink);cursor:pointer}
+.step output{font:600 2rem Mitr,sans-serif;min-width:52px;text-align:center}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips button{border:1.5px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;font:inherit;color:var(--ink);cursor:pointer}
+.chips button.on{border-color:var(--ink);background:var(--ink);color:var(--cream)}
+.sheet input{width:100%;font:1.05rem Anuphan,sans-serif;padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin-top:16px;padding-top:12px;border-top:1px dashed var(--line)}
+.total b{font:600 1.6rem Mitr,sans-serif}
+.save{width:100%;margin-top:16px;border:0;border-radius:999px;padding:15px;background:var(--ink);color:var(--cream);font:500 1.05rem Mitr,sans-serif;cursor:pointer}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--ink);color:var(--cream);padding:10px 18px;border-radius:999px;font-size:.9rem;opacity:0;transition:opacity .25s;pointer-events:none;z-index:11}
+.toast.on{opacity:1}
+@media (min-width:700px){.tiles{grid-template-columns:repeat(5,1fr)}.tile.hero{grid-column:span 2}}
+</style>
+</head>
+<body>
+<aside class="side" id="side" aria-label="เมนูหลังร้าน">
+  <div class="brandbox"><div class="lg" role="img" aria-label="June"></div><div><b>หลังร้าน</b><small>June Bakery</small></div></div>
+  <nav id="snav">
+    <a href="#summary" class="on"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>สรุปร้าน</a>
+    <div class="grp">ขาย</div>
+    <a href="#orders"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7Z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg>ออเดอร์<span class="badge">3 วันนี้</span></a>
+    <a href="#expenses"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h3"/></svg>รายจ่าย</a>
+    <a href="#calendar"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>ปฏิทิน<span class="badge" id="navPick"></span></a>
+    <div class="grp">หน้าเว็บ</div>
+    <a href="#gallery"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="m21 16-5-5-8 8"/></svg>Gallery</a>
+    <a href="#menu"><svg viewBox="0 0 24 24"><path d="M4 20h16M5 20v-7h14v7M5 13c2 0 2-2 3.5-2S10 13 12 13s2-2 3.5-2 1.5 2 3.5 2M12 7v4"/></svg>เมนูขนม</a>
+    <a href="#reviews"><svg viewBox="0 0 24 24"><path d="M12 4C7 4 3 7.2 3 11.2c0 3.6 3.2 6.6 7.5 7.1l-.4 2.2 3.8-2.4C18.4 17.8 21 14.8 21 11.2 21 7.2 17 4 12 4Z"/></svg>รีวิว</a>
+    <a href="#shop"><svg viewBox="0 0 24 24"><path d="M4 10 6 4h12l2 6M4 10h16v10H4ZM9 20v-5h6v5"/></svg>ข้อมูลร้าน</a>
+    <div class="grp">ตั้งค่า</div>
+    <a href="#staff"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.8-3.6 3.2-5.4 6-5.4s5.2 1.8 6 5.4M16 4.6a3.2 3.2 0 0 1 0 6.3M18 14.8c1.6.6 2.6 2.4 3 5.2"/></svg>บัญชี staff</a>
+  </nav>
+  <nav class="me">
+    <a href="../" target="_blank"><svg viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg>ดูหน้าเว็บ</a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 16l-4-4 4-4M6 12h10"/></svg>ออกจากระบบ <span style="margin-left:auto;font-size:.8rem;opacity:.6">staff</span></a>
+  </nav>
+</aside>
+<div class="sveil" id="sveil"></div>
+<header><button class="burger" id="burger" aria-label="เปิดเมนู"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button><h1 id="vtitle">สรุปร้าน</h1><button class="act" id="act" hidden><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span></span></button></header>
+<main>
+<section class="view" data-view="summary">
+  <p class="note">mock · ตัวเลขทั้งหมดเป็นตัวอย่าง · ปุ่มบันทึกอยู่มุมขวาบนของหน้าออเดอร์ / รายจ่าย / ปฏิทิน</p>
+  <div class="seg" id="range"><button data-r="1" class="on">วันนี้</button><button data-r="7">7 วัน</button><button data-r="30">เดือนนี้</button></div>
+
+  <div class="pick" id="pickToday"></div>
+  <div class="tiles" id="tiles"></div>
+
+  <h2>เงินเข้า-ออก <small id="moneyRange">เดือนนี้</small></h2>
+  <div class="money">
+    <div class="tile"><div class="k">รายรับ</div><div class="v" id="mIn"></div></div>
+    <div class="tile"><div class="k">รายจ่าย</div><div class="v" id="mOut"></div></div>
+    <div class="tile profit"><div class="k">กำไร</div><div class="v" id="mProfit"></div></div>
+  </div>
+
+  <div class="duo"><div>
+  <h2>ยอดขายรายวัน <small>30 วันล่าสุด · แตะแท่งดูตัวเลข</small></h2>
+  <div class="card"><svg class="chart" id="cSales" viewBox="0 0 360 170"></svg><div class="tip" id="tSales"></div></div>
+  </div><div>
+
+  <h2>คนเข้าเว็บรายวัน <small>30 วันล่าสุด</small></h2>
+  <div class="card"><svg class="chart" id="cVisits" viewBox="0 0 360 150"></svg><div class="tip" id="tVisits"></div></div>
+  </div></div>
+  <div class="duo"><div>
+
+  <h2>จากเข้าเว็บ ถึงซื้อ <small id="fRange">วันนี้</small></h2>
+  <div class="card"><div class="funnel" id="funnel"></div></div>
+  </div><div>
+
+  <h2>คนมาจากไหน <small id="sRange">วันนี้</small></h2>
+  <div class="card"><div class="funnel" id="sources"></div></div>
+  </div></div>
+
+  <h2>ล่าสุด <small>ออเดอร์และรายจ่าย</small></h2>
+  <div class="list" id="recent"></div>
+</section>
+
+<section class="view" data-view="orders" hidden>
+  <div class="filters" id="ofilters">
+    <div class="fgrp" data-f="range"><button data-v="1" class="on">วันนี้</button><button data-v="7">7 วัน</button><button data-v="30">เดือนนี้</button></div>
+    <div class="fgrp" data-f="kind"><button data-v="all" class="on">ทุกแบบ</button><button data-v="now">ขายเลย</button><button data-v="pre">สั่งล่วงหน้า</button></div>
+    <div class="fgrp" data-f="via"><button data-v="all" class="on">ทุกช่องทาง</button><button data-v="LINE">LINE</button><button data-v="หน้าร้าน">หน้าร้าน</button><button data-v="อื่น ๆ">อื่น ๆ</button></div>
+    <label class="search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg><input id="oq" placeholder="ค้นชื่องาน / ลูกค้า"></label>
+    <button class="fbtn" id="fbtn" type="button"><svg viewBox="0 0 24 24"><path d="M4 6h16M7 12h10M10 18h4"/></svg>ตัวกรอง<span id="fcount"></span></button>
+  </div>
+  <div class="achips" id="achips"></div>
+  <p class="osum" id="osum"></p>
+  <div id="olist"></div>
+</section>
+<section class="view" data-view="expenses" hidden>
+  <div class="filters"><div class="fgrp"><button class="on">เดือนนี้</button><button>เดือนก่อน</button></div></div>
+  <table class="tbl"><thead><tr><th>วันที่</th><th>หมวด</th><th>จด</th><th class="r">จำนวน</th></tr></thead><tbody id="etable"></tbody></table>
+</section>
+<section class="view" data-view="calendar" hidden>
+  <div class="cal">
+    <div class="cal-h"><button id="mPrev" aria-label="เดือนก่อน">‹</button><b id="mTitle"></b><button id="mNext" aria-label="เดือนถัดไป">›</button></div>
+    <div class="grid7" id="cal"></div>
+    <div class="legend"><span><i style="background:var(--peach)"></i>มีนัดรับ (ตัวเลข = จำนวนนัด)</span><span><i style="background:repeating-linear-gradient(135deg,#f3e1da 0 3px,#fbefea 3px 6px)"></i>ร้านหยุด</span></div>
+  </div>
+  <div class="daypanel" id="dayPanel"></div>
+</section>
+<section class="view" data-view="gallery" hidden>
+  <div class="empty-view"><b>รูปและวิดีโอใน Gallery</b>หน้าอัปโหลดรูป (ทำแล้วบนเว็บจริง) จะย้ายมาอยู่ในเมนูนี้<br><br><a class="btn2" href="gallery-upload.html" style="display:inline-block;text-decoration:none">เปิดหน้าอัปโหลด</a></div>
+</section>
+<section class="view" data-view="menu" hidden>
+  <div class="form"><label>ชื่อขนม</label><input value="ชิฟฟ่อนมะพร้าวใบเตย"><label>ราคาต่อชิ้น (บาท)</label><input value="45" inputmode="numeric"><label>คำบรรยาย</label><textarea rows="3">ชิฟฟ่อนใบเตยเนื้อนุ่ม หน้ามะพร้าวอ่อนอบสีทอง</textarea><button class="btn2">บันทึก</button></div>
+</section>
+<section class="view" data-view="reviews" hidden>
+  <div class="empty-view"><b>ยังไม่มีรีวิว</b>ใส่ข้อความรีวิวจากลูกค้า (ขออนุญาตก่อน) แล้วจะขึ้นหน้าเว็บส่วน "เสียงจากลูกค้า"<br><br><button class="btn2">+ เพิ่มรีวิว</button></div>
+</section>
+<section class="view" data-view="shop" hidden>
+  <div class="form"><label>สั่งล่วงหน้ากี่วัน</label><input inputmode="numeric" placeholder="เช่น 1"><label>เก็บได้นานแค่ไหน</label><input placeholder="เช่น 2 วันในตู้เย็น"><label>วิธีจ่ายเงิน</label><input placeholder="เช่น โอนพร้อมเพย์"><label>เวลาเปิด</label><input placeholder="เช่น ทุกวัน 9:00–17:00"><button class="btn2">บันทึก</button></div>
+</section>
+<section class="view" data-view="staff" hidden>
+  <table class="tbl"><thead><tr><th>ชื่อผู้ใช้</th><th>สิทธิ์</th><th>เข้าล่าสุด</th></tr></thead><tbody><tr><td>staff</td><td>staff</td><td>วันนี้</td></tr></tbody></table>
+  <p style="margin-top:12px"><button class="btn2">+ เพิ่ม staff</button></p>
+</section>
+</main>
+
+
+
+<div class="veil" id="veil"></div>
+<section class="sheet" id="order" aria-label="บันทึกออเดอร์">
+  <h3>บันทึกออเดอร์<button class="sx" type="button" aria-label="ปิด" data-x><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></h3>
+  <div class="chips" data-g="kind" id="kind"><button class="on">ขายเลย</button><button>สั่งล่วงหน้า (สัมมนา / break)</button></div>
+  <div class="pre-only">
+    <div class="row2"><div><label for="pDate">วันรับ</label><input id="pDate" type="date"></div><div><label for="pTime">เวลารับ</label><input id="pTime" type="time" value="10:00"></div></div>
+    <label for="pWho">ชื่องาน / ลูกค้า</label><input id="pWho" placeholder="เช่น สัมมนาบริษัท A · คุณฝน">
+    <label for="pNote">จด (ไม่ใส่ก็ได้)</label><input id="pNote" placeholder="เช่น 50 ที่ แยกกล่อง ส่งชั้น 3">
+  </div>
+  <label>จำนวนชิ้น · ชิฟฟ่อนมะพร้าวใบเตย ฿45</label>
+  <div class="step"><button data-q="-1">−</button><output id="qty">1</output><button data-q="1">+</button></div>
+  <label>สั่งทาง</label>
+  <div class="chips" data-g="via"><button class="on">LINE</button><button>หน้าร้าน</button><button>อื่น ๆ</button></div>
+  <label>จ่ายด้วย</label>
+  <div class="chips" data-g="pay"><button class="on">โอน</button><button>เงินสด</button></div>
+  <div class="total"><span>รวม</span><b id="oTotal">฿45</b></div>
+  <button class="save" data-save="order">บันทึก</button>
+</section>
+<section class="sheet" id="fsheet" aria-label="ตัวกรองออเดอร์">
+  <h3>ตัวกรอง<button class="sx" type="button" aria-label="ปิด" data-x><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></h3>
+  <label>แบบ</label>
+  <div class="chips" data-of="kind"><button data-v="all">ทุกแบบ</button><button data-v="now">ขายเลย</button><button data-v="pre">สั่งล่วงหน้า</button></div>
+  <label>ช่องทาง</label>
+  <div class="chips" data-of="via"><button data-v="all">ทุกช่องทาง</button><button data-v="LINE">LINE</button><button data-v="หน้าร้าน">หน้าร้าน</button><button data-v="อื่น ๆ">อื่น ๆ</button></div>
+  <div class="row2" style="margin-top:18px"><button class="save" style="background:#efe7d8;color:var(--ink);margin:0" id="fclear">ล้างตัวกรอง</button><button class="save" style="margin:0" id="fdone">ดูผล</button></div>
+</section>
+<section class="sheet" id="expense" aria-label="บันทึกรายจ่าย">
+  <h3>บันทึกรายจ่าย<button class="sx" type="button" aria-label="ปิด" data-x><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></h3>
+  <label>หมวด</label>
+  <div class="chips" data-g="cat"><button class="on">วัตถุดิบ</button><button>กล่อง/ถุง</button><button>ค่าเช่า</button><button>ค่าน้ำไฟ</button><button>ค่าส่ง</button><button>อื่น ๆ</button></div>
+  <label for="amt">จำนวนเงิน (บาท)</label>
+  <input id="amt" inputmode="decimal" placeholder="เช่น 350">
+  <label for="memo">จดสั้น ๆ (ไม่ใส่ก็ได้)</label>
+  <input id="memo" placeholder="เช่น แป้ง ไข่ กะทิ">
+  <button class="save" data-save="expense">บันทึก</button>
+</section>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- sample data (deterministic) ---------- */
+const PRICE=45;let seed=7;const rnd=()=>(seed=(seed*16807)%2147483647)/2147483647;
+const days=[...Array(30)].map((_,i)=>{const d=new Date(2026,10,18-29+i),wk=d.getDay()===0||d.getDay()===6;
+  const visits=Math.round((wk?95:60)+rnd()*40),taps=Math.round(visits*(.16+rnd()*.08)),orders=Math.round(taps*(.55+rnd()*.2)),pcs=orders+Math.round(orders*rnd()*1.4);
+  return{d,visits,taps,orders,pcs,sales:pcs*PRICE,src:{'Rich menu':.46,'Instagram':.24,'Facebook':.12,'เข้าตรง / อื่น ๆ':.18}}});
+const expenses=[{t:'วัตถุดิบ',m:'แป้ง ไข่ กะทิ ใบเตย',amt:1280,ago:'วันนี้ 09:10'},{t:'กล่อง/ถุง',m:'กล่อง 200 ใบ',amt:640,ago:'เมื่อวาน'},{t:'ค่าเช่า',m:'',amt:6000,ago:'1 พ.ย.'}];
+const monthOut=6000+640+1280+[...Array(12)].reduce(a=>a+600+Math.round(rnd()*700),0);
+/* sample pre-orders (pickups) and closed days — all made up for the mock */
+const TODAY='2026-11-18';
+const iso=d=>d.toISOString().slice(0,10);const addDays=(s,n)=>{const d=new Date(s+'T00:00');d.setDate(d.getDate()+n);return d.toLocaleDateString('sv')};
+const pickups=[
+  {date:'2026-11-18',time:'14:30',who:'(ตัวอย่าง) break บ่าย ร้านกาแฟ B',qty:30,note:'แยกกล่อง'},
+  {date:'2026-11-19',time:'09:30',who:'(ตัวอย่าง) สัมมนาบริษัท A',qty:50,note:'ส่งชั้น 3'},
+  {date:'2026-11-21',time:'13:00',who:'(ตัวอย่าง) อบรมโรงเรียน C',qty:40,note:''},
+  {date:'2026-11-26',time:'10:00',who:'(ตัวอย่าง) ประชุมคุณฝน',qty:20,note:''},
+];
+const closed=new Set(['2026-11-23','2026-11-30']);
+const thDate=s=>new Date(s+'T00:00').toLocaleDateString('th-TH',{weekday:'short',day:'numeric',month:'short'});
+const pkRow=(p,showDay)=>`<div class="pk"><time>${p.time}</time><div><b>${p.who}</b><small>${p.qty} ชิ้น${p.note?' · '+p.note:''}${showDay?` · <span class="day">${thDate(p.date)}</span>`:''}</small></div><b>${baht(p.qty*PRICE)}</b></div>`;
+function renderPick(){
+  const t=pickups.filter(p=>p.date===TODAY),n=pickups.filter(p=>p.date===addDays(TODAY,1));
+  const el=document.getElementById('pickToday');
+  el.innerHTML=`<h3>นัดรับวันนี้ <a href="#calendar">ดูปฏิทิน</a></h3>${t.length?t.map(p=>pkRow(p)).join(''):'<p style="color:var(--muted);font-size:.9rem">วันนี้ไม่มีนัดรับ</p>'}`+
+    (n.length?`<h3 style="margin-top:10px">พรุ่งนี้ <small style="font:400 .8rem Anuphan;color:var(--muted)">เตรียม ${n.reduce((a,p)=>a+p.qty,0)} ชิ้น</small></h3>${n.map(p=>pkRow(p)).join('')}`:'');
+  const up=pickups.filter(p=>p.date>=TODAY).length;document.getElementById('navPick').textContent=up?up+' นัด':'';
+}
+let month=new Date(TODAY+'T00:00');month.setDate(1);let sel=TODAY;
+function renderCal(){
+  document.getElementById('mTitle').textContent=month.toLocaleDateString('th-TH',{month:'long',year:'numeric'});
+  const first=new Date(month),start=new Date(first);start.setDate(1-first.getDay());
+  let h=['อา','จ','อ','พ','พฤ','ศ','ส'].map(d=>`<div class="dw">${d}</div>`).join('');
+  for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const k=d.toLocaleDateString('sv'),c=pickups.filter(p=>p.date===k).length;
+    h+=`<button class="dc${d.getMonth()!==month.getMonth()?' out':''}${k===TODAY?' today':''}${k===sel?' sel':''}${closed.has(k)?' closed':''}" data-d="${k}"><span>${d.getDate()}</span>${c?`<span class="cnt">${c}</span>`:closed.has(k)?'<span class="off">หยุด</span>':''}</button>`}
+  document.getElementById('cal').innerHTML=h;
+  const list=pickups.filter(p=>p.date===sel).sort((a,b)=>a.time.localeCompare(b.time)),off=closed.has(sel);
+  document.getElementById('dayPanel').innerHTML=`<h3>${new Date(sel+'T00:00').toLocaleDateString('th-TH',{weekday:'long',day:'numeric',month:'long'})}</h3>
+    <div class="switch"><div><b>ร้านหยุดวันนี้</b><small>ขึ้นบนหน้าเว็บด้วยว่าวันนี้ร้านหยุด</small></div><button class="tg${off?' on':''}" id="tgOff" aria-label="ร้านหยุดวันนี้"></button></div>
+    <div class="pick">${list.length?list.map(p=>pkRow(p)).join(''):'<p style="color:var(--muted);font-size:.9rem">ไม่มีนัดรับ</p>'}</div>
+    <button class="btn2" id="addPick">+ เพิ่มนัดรับ</button>`;
+  document.getElementById('tgOff').onclick=()=>{off?closed.delete(sel):closed.add(sel);toast(off?'เปิดร้านวันนี้':'ตั้งเป็นวันหยุดแล้ว');renderCal()};
+  document.getElementById('addPick').onclick=()=>{openOrder(true,sel)};
+}
+document.getElementById('cal').addEventListener('click',e=>{const b=e.target.closest('[data-d]');if(b){sel=b.dataset.d;renderCal()}});
+document.getElementById('mPrev').onclick=()=>{month.setMonth(month.getMonth()-1);renderCal()};
+document.getElementById('mNext').onclick=()=>{month.setMonth(month.getMonth()+1);renderCal()};
+
+const recent=[{k:'o',t:'3 ชิ้น',s:'LINE · โอน',amt:135,ago:'10:42'},{k:'o',t:'1 ชิ้น',s:'หน้าร้าน · เงินสด',amt:45,ago:'10:15'},{k:'e',...expenses[0]},{k:'o',t:'6 ชิ้น',s:'LINE · โอน',amt:270,ago:'09:02'}];
+
+const baht=n=>'฿'+n.toLocaleString('th-TH');
+const sum=(arr,k)=>arr.reduce((a,x)=>a+x[k],0);
+const ICON={eye:'<path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>',
+  chat:'<path d="M12 4C7 4 3 7.2 3 11.2c0 3.6 3.2 6.6 7.5 7.1l-.4 2.2 3.8-2.4C18.4 17.8 21 14.8 21 11.2 21 7.2 17 4 12 4Z"/>',
+  bag:'<path d="M6 7h12l-1 13H7Z"/><path d="M9 7a3 3 0 0 1 6 0"/>',cake:'<path d="M4 20h16M5 20v-7h14v7M5 13c2 0 2-2 3.5-2S10 13 12 13s2-2 3.5-2 1.5 2 3.5 2M12 7v4M12 4v.5"/>'};
+const tile=(k,ic,v,d,hero)=>`<div class="tile${hero?' hero':''}"><div class="k"><svg viewBox="0 0 24 24">${ICON[ic]}</svg>${k}</div><div class="v">${v}</div><div class="d">${d}</div></div>`;
+const change=(a,b)=>{if(!b)return'';const p=Math.round((a-b)/b*100);return `<b class="${p>=0?'up':'down'}">${p>=0?'▲':'▼'} ${Math.abs(p)}%</b> จากช่วงก่อน`};
+
+let range=1;
+function render(){
+  const cur=days.slice(-range),prev=range<30?days.slice(-range*2,-range):[];
+  const label={1:'วันนี้',7:'7 วัน',30:'เดือนนี้'}[range];
+  document.getElementById('tiles').innerHTML=
+    tile('ยอดขาย','bag',baht(sum(cur,'sales')),change(sum(cur,'sales'),sum(prev,'sales'))||`${sum(cur,'orders')} ออเดอร์`,true)+
+    tile('ขายได้','cake',sum(cur,'pcs')+' ชิ้น',sum(cur,'orders')+' ออเดอร์')+
+    tile('คนเข้าเว็บ','eye',sum(cur,'visits').toLocaleString(),change(sum(cur,'visits'),sum(prev,'visits'))||'คน')+
+    tile('กดสั่งทาง LINE','chat',sum(cur,'taps').toLocaleString(),Math.round(sum(cur,'taps')/sum(cur,'visits')*100)+'% ของคนเข้าเว็บ');
+  const inc=sum(days,'sales');
+  document.getElementById('mIn').textContent=baht(inc);document.getElementById('mOut').textContent=baht(monthOut);document.getElementById('mProfit').textContent=baht(inc-monthOut);
+  for(const id of ['fRange','sRange'])document.getElementById(id).textContent=label;
+  // visit -> tap -> order: bars share one scale (the visits)
+  const V=sum(cur,'visits'),f=[['เข้าเว็บ',V],['กดสั่งทาง LINE',sum(cur,'taps')],['สั่งจริง (บันทึก)',sum(cur,'orders')]];
+  document.getElementById('funnel').innerHTML=f.map(([k,n])=>`<div class="frow"><span>${k}</span><div class="track"><span style="width:${n/V*100}%"></span></div><b>${n.toLocaleString()}</b></div>`).join('');
+  const S=Object.entries(cur[0].src).map(([k,p])=>[k,Math.round(V*p)]).sort((a,b)=>b[1]-a[1]);
+  document.getElementById('sources').innerHTML=S.map(([k,n])=>`<div class="frow"><span>${k}</span><div class="track"><span style="width:${n/S[0][1]*100}%"></span></div><b>${n}</b></div>`).join('');
+  document.querySelectorAll('#range button').forEach(b=>b.classList.toggle('on',+b.dataset.r===range));
+}
+document.getElementById('range').addEventListener('click',e=>{const b=e.target.closest('button');if(b){range=+b.dataset.r;render()}});
+
+/* ---------- charts: one measure each, thin bars rounded at the data end, recessive grid, hover/tap tooltip ---------- */
+function bars(svgId,tipId,key,fmt,color,H){
+  const svg=document.getElementById(svgId),tip=document.getElementById(tipId),W=360,L=40,B=H-22,T=10,max=Math.max(...days.map(d=>d[key]));
+  const nice=Math.ceil(max/(key==='sales'?1000:50))*(key==='sales'?1000:50),bw=(W-L-6)/days.length;
+  let g='';for(let k=0;k<=2;k++){const v=nice*k/2,y=B-(B-T)*k/2;g+=`<line x1="${L}" x2="${W}" y1="${y}" y2="${y}" stroke="var(--grid)"/><text x="${L-6}" y="${y+4}" text-anchor="end">${key==='sales'?(v/1000)+'k':v}</text>`}
+  days.forEach((d,i)=>{const h=(B-T)*d[key]/nice,x=L+i*bw+1,w=bw-2,y=B-h,r=Math.min(4,w/2);
+    g+=`<path d="M${x},${B}V${y+r}Q${x},${y} ${x+r},${y}H${x+w-r}Q${x+w},${y} ${x+w},${y+r}V${B}Z" fill="${color}" opacity="${i===days.length-1?1:.8}"/>`;
+    g+=`<rect x="${L+i*bw}" y="${T}" width="${bw}" height="${B-T}" fill="transparent" data-i="${i}"/>`});
+  [0,14,29].forEach(i=>g+=`<text x="${i===29?W:L+i*bw+bw/2}" y="${H-6}" text-anchor="${i===29?'end':'middle'}">${days[i].d.getDate()}/${days[i].d.getMonth()+1}</text>`);
+  svg.innerHTML=g;
+  const show=e=>{const r=e.target.closest('[data-i]');if(!r){tip.style.opacity=0;return}const d=days[+r.dataset.i],box=svg.getBoundingClientRect(),cb=svg.parentElement.getBoundingClientRect();
+    const rb=r.getBoundingClientRect();tip.innerHTML=`${d.d.getDate()}/${d.d.getMonth()+1} · <b>${fmt(d[key])}</b>`;tip.style.left=(rb.left-cb.left+rb.width/2)+'px';tip.style.top=(box.top-cb.top+10)+'px';tip.style.opacity=1};
+  svg.addEventListener('pointermove',show);svg.addEventListener('pointerdown',show);svg.addEventListener('pointerleave',()=>tip.style.opacity=0);
+}
+bars('cSales','tSales','sales',baht,'var(--bar)',170);
+bars('cVisits','tVisits','visits',n=>n+' คน','var(--bar2)',150);
+
+function renderRecent(){document.getElementById('recent').innerHTML=recent.map(r=>r.k==='o'
+  ?`<div class="row"><div><div class="t">ออเดอร์ ${r.t}<span class="tag">${r.s}</span></div><div class="s">${r.ago}</div></div><div class="m">+${baht(r.amt)}</div></div>`
+  :`<div class="row"><div><div class="t">${r.t}${r.m?` · ${r.m}`:''}</div><div class="s">${r.ago}</div></div><div class="m out">−${baht(r.amt)}</div></div>`).join('')}
+
+/* ---------- bottom sheets ---------- */
+const veil=document.getElementById('veil');let open=null;
+const close=()=>{open?.classList.remove('on');veil.classList.remove('on');open=null};
+function openSheet(id){open=document.getElementById(id);open.classList.add('on');veil.classList.add('on')}
+function openOrder(pre,date){const sh=document.getElementById('order');open=sh;sh.classList.add('on');veil.classList.add('on');
+  const ks=[...document.querySelectorAll('#kind button')];ks.forEach((x,i)=>x.classList.toggle('on',i===(pre?1:0)));sh.classList.toggle('pre',!!pre);
+  document.getElementById('pDate').value=date||addDays(TODAY,1)}
+document.getElementById('kind').addEventListener('click',()=>setTimeout(()=>document.getElementById('order').classList.toggle('pre',document.querySelector('#kind button.on')!==document.querySelector('#kind button'))));
+veil.onclick=close;
+document.querySelectorAll('[data-x]').forEach(b=>b.onclick=close);
+addEventListener('keydown',e=>{if(e.key==='Escape')close()});
+document.querySelectorAll('.chips').forEach(c=>c.onclick=e=>{const b=e.target.closest('button');if(!b)return;c.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))});
+let qty=1;const q=document.getElementById('qty'),ot=document.getElementById('oTotal');
+document.querySelectorAll('[data-q]').forEach(b=>b.onclick=()=>{qty=Math.max(1,qty+ +b.dataset.q);q.textContent=qty;ot.textContent=baht(qty*PRICE)});
+const toast=t=>{const el=document.getElementById('toast');el.textContent=t;el.classList.add('on');setTimeout(()=>el.classList.remove('on'),1800)};
+document.querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>{
+  if(b.dataset.save==='order'&&document.getElementById('order').classList.contains('pre')){
+    const who=document.getElementById('pWho').value.trim();if(!who){toast('ใส่ชื่องานหรือลูกค้าก่อน');return}
+    const date=document.getElementById('pDate').value;if(closed.has(date)){toast('วันนั้นร้านหยุด');return}
+    pickups.push({date,time:document.getElementById('pTime').value,who,qty,note:document.getElementById('pNote').value});
+    toast('บันทึกนัดรับแล้ว');qty=1;q.textContent=1;ot.textContent=baht(PRICE);document.getElementById('pWho').value='';document.getElementById('pNote').value='';
+    close();renderPick();sel=date;month=new Date(date+'T00:00');month.setDate(1);renderCal();return}
+  if(b.dataset.save==='order'){const via=document.querySelector('[data-g=via] .on').textContent,pay=document.querySelector('[data-g=pay] .on').textContent;
+    recent.unshift({k:'o',t:qty+' ชิ้น',s:`${via} · ${pay}`,amt:qty*PRICE,ago:'เมื่อกี้'});days[29].orders++;days[29].pcs+=qty;days[29].sales+=qty*PRICE;toast('บันทึกออเดอร์แล้ว');qty=1;q.textContent=1;ot.textContent=baht(PRICE)}
+  else{const amt=+document.getElementById('amt').value||0;if(!amt){toast('ใส่จำนวนเงินก่อน');return}
+    recent.unshift({k:'e',t:document.querySelector('[data-g=cat] .on').textContent,m:document.getElementById('memo').value,amt,ago:'เมื่อกี้'});toast('บันทึกรายจ่ายแล้ว');document.getElementById('amt').value='';document.getElementById('memo').value=''}
+  close();render();renderRecent();bars('cSales','tSales','sales',baht,'var(--bar)',170)});
+render();renderRecent();renderPick();renderCal();
+
+/* side menu: switch views by #hash; on phones it is a drawer */
+const side=document.getElementById('side'),sveil=document.getElementById('sveil');
+const drawer=on=>{side.classList.toggle('on',on);sveil.classList.toggle('on',on)};
+document.getElementById('burger').onclick=()=>drawer(true);sveil.onclick=()=>drawer(false);
+function route(){
+  const v=(location.hash||'#summary').slice(1),a=document.querySelector(`#snav a[href="#${v}"]`);if(!a)return;
+  document.querySelectorAll('.view').forEach(s=>s.hidden=s.dataset.view!==v);
+  document.querySelectorAll('#snav a').forEach(x=>x.classList.toggle('on',x===a));
+  document.getElementById('vtitle').textContent=a.childNodes[1].textContent.trim();
+  const ACT={orders:['บันทึกออเดอร์',()=>openOrder(false)],expenses:['บันทึกรายจ่าย',()=>openSheet('expense')],calendar:['เพิ่มนัดรับ',()=>openOrder(true,sel)]}[v];
+  const act=document.getElementById('act');act.hidden=!ACT;if(ACT){act.querySelector('span').textContent=ACT[0];act.onclick=ACT[1]}
+  drawer(false);scrollTo(0,0);
+}
+addEventListener('hashchange',route);route();
+/* sample orders for the orders page (made up) */
+const ORD=[];{let sd=11;const r=()=>(sd=(sd*16807)%2147483647)/2147483647;const VIA=['LINE','LINE','หน้าร้าน','หน้าร้าน','อื่น ๆ'],PAY=['โอน','เงินสด'];
+  for(let k=0;k<30;k++){const day=addDays(TODAY,-k),n=2+Math.floor(r()*5);for(let j=0;j<n;j++){const h=9+Math.floor(r()*8),m=Math.floor(r()*60);
+    ORD.push({date:day,time:`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`,qty:1+Math.floor(r()*6),via:VIA[Math.floor(r()*5)],pay:PAY[Math.floor(r()*2)],kind:'now'})}}
+  pickups.forEach(p=>ORD.push({date:addDays(TODAY,-2),time:'11:00',qty:p.qty,via:'LINE',pay:'โอน',kind:'pre',who:p.who,pickup:p.date+' '+p.time}));}
+const OF={range:1,kind:'all',via:'all',q:''};
+function renderOrders(){
+  const from=addDays(TODAY,-(OF.range-1)),q=OF.q.trim().toLowerCase();
+  const rows=ORD.filter(o=>o.date>=from&&o.date<=TODAY&&(OF.kind==='all'||o.kind===OF.kind)&&(OF.via==='all'||o.via===OF.via)&&(!q||(o.who||'').toLowerCase().includes(q)))
+    .sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  const pcs=rows.reduce((a,o)=>a+o.qty,0);
+  document.getElementById('osum').innerHTML=rows.length?`<b>${rows.length}</b> ออเดอร์ · <b>${pcs}</b> ชิ้น · รวม <b>${baht(pcs*PRICE)}</b>`:'ไม่มีออเดอร์ตามที่เลือก';
+  const when=o=>(OF.range>1?thDate(o.date)+' ':'')+o.time;
+  const what=o=>`ชิฟฟ่อน ${o.qty} ชิ้น${o.kind==='pre'?`<span class="kb">สั่งล่วงหน้า · รับ ${thDate(o.pickup.slice(0,10))} ${o.pickup.slice(11)}</span>`:''}${o.who?`<div class="s">${o.who}</div>`:''}`;
+  const el=document.getElementById('olist');
+  if(!rows.length){el.innerHTML='';return}
+  el.innerHTML=innerWidth<640
+    ?`<div class="ocards">${rows.map(o=>`<div class="ocard"><div class="t">${what(o)}</div><div class="m">${baht(o.qty*PRICE)}</div><div class="s">${when(o)} · ${o.via} · ${o.pay}</div></div>`).join('')}</div>`
+    :`<table class="tbl"><thead><tr><th>เวลา</th><th>รายการ</th><th>ช่องทาง</th><th>จ่าย</th><th class="r">ยอด</th></tr></thead><tbody>${rows.map(o=>`<tr><td>${when(o)}</td><td>${what(o)}</td><td>${o.via}</td><td>${o.pay}</td><td class="r">${baht(o.qty*PRICE)}</td></tr>`).join('')}</tbody></table>`;
+}
+document.getElementById('ofilters').addEventListener('click',e=>{const b=e.target.closest('.fgrp button');if(!b)return;const g=b.parentElement;g.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b));OF[g.dataset.f]=g.dataset.f==='range'?+b.dataset.v:b.dataset.v;renderOrders()});
+document.getElementById('oq').addEventListener('input',e=>{OF.q=e.target.value;renderOrders()});
+/* phone filter sheet: works on a draft, applied with "ดูผล"; active filters show as chips with x */
+const LABEL={kind:{now:'ขายเลย',pre:'สั่งล่วงหน้า'},via:{LINE:'LINE','หน้าร้าน':'หน้าร้าน','อื่น ๆ':'อื่น ๆ'}};
+let draft={};
+const syncChips=(root,state)=>root.querySelectorAll('[data-of]').forEach(g=>g.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v===state[g.dataset.of])));
+function setFilter(k,v){OF[k]=v;document.querySelectorAll(`.filters [data-f=${k}] button`).forEach(b=>b.classList.toggle('on',b.dataset.v===v));renderOrders();renderActive()}
+function renderActive(){
+  const act=['kind','via'].filter(k=>OF[k]!=='all');
+  document.getElementById('fcount').textContent=act.length||'';
+  document.getElementById('achips').innerHTML=act.map(k=>`<button data-clear="${k}">${LABEL[k][OF[k]]}<span aria-hidden="true">×</span></button>`).join('');
+}
+document.getElementById('achips').onclick=e=>{const b=e.target.closest('[data-clear]');if(b)setFilter(b.dataset.clear,'all')};
+document.getElementById('fbtn').onclick=()=>{draft={kind:OF.kind,via:OF.via};const sh=document.getElementById('fsheet');syncChips(sh,draft);openSheet('fsheet')};
+document.getElementById('fsheet').addEventListener('click',e=>{const b=e.target.closest('[data-of] button');if(!b)return;draft[b.parentElement.dataset.of]=b.dataset.v;syncChips(document.getElementById('fsheet'),draft)});
+document.getElementById('fclear').onclick=()=>{draft={kind:'all',via:'all'};syncChips(document.getElementById('fsheet'),draft)};
+document.getElementById('fdone').onclick=()=>{setFilter('kind',draft.kind);setFilter('via',draft.via);close()};
+document.getElementById('ofilters').addEventListener('click',()=>setTimeout(renderActive));
+renderActive();
+addEventListener('resize',renderOrders);renderOrders();
+document.getElementById('etable').innerHTML=expenses.map(e=>`<tr><td>${e.ago}</td><td>${e.t}</td><td>${e.m||'-'}</td><td class="r">${baht(e.amt)}</td></tr>`).join('');
+</script>
+</body>
+</html>
