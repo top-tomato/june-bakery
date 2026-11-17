@@ -114,17 +114,6 @@
   position: relative;
   width: min(46vw, 260px);
 }
-.intro-count .load .logo-mask {
-  position: absolute;
-  inset: 0;
-}
-.intro-count .load .ghost {
-  position: static;
-  opacity: 0.16;
-}
-.intro-count .load .fill {
-  clip-path: inset(100% 0 0 0);
-}
 
 /* fixed 3D layer, sized to the tallest viewport so it never resizes while toolbars slide */
 .cake-layer {
@@ -154,6 +143,7 @@
 }
 .hero .logo {
   position: absolute;
+  width: auto;
   left: 50%;
   top: calc(var(--vh) * 3);
   height: calc(var(--vh) * 15);
