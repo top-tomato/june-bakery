@@ -342,7 +342,9 @@
   position: absolute;
   left: -10%;
   right: -10%;
-  bottom: calc(var(--vh) * 1);
+  /* rotated -3deg across 120% of the width, its left end drops ~3.2% of the width below its centre; lift it by that
+     much so the pin's overflow:hidden never slices the end off flat (very visible on wide screens) */
+  bottom: calc(var(--vh) * 1 + 3.4vw);
   transform: rotate(-3deg);
   background: var(--fink);
   color: var(--fl);
@@ -391,7 +393,7 @@
   margin-top: 18px;
 }
 .contact {
-  margin-top: 26px;
+  margin-top: 28px;
 }
 .contact h3 {
   font: 500 1rem var(--display);
@@ -401,6 +403,7 @@
 .social {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 10px;
 }
 .social a {
@@ -409,8 +412,8 @@
   gap: 8px;
   padding: 9px 16px;
   border-radius: 999px;
-  border: 2px solid rgba(255, 246, 230, 0.55);
-  color: var(--cream);
+  border: 2px solid rgba(36, 59, 55, 0.45);
+  color: var(--ink);
   text-decoration: none;
   font: 500 0.95rem var(--display);
 }

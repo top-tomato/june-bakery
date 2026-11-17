@@ -35,6 +35,8 @@ def menu_data() -> dict[str, object]:
             "addUrl": line_add_url,
             "qrSvg": line_qr_svg(line_add_url),
         },
+        # only links the shop has set; the page shows a button for each one
+        "social": {k: v for k, v in {"instagram": settings.SHOP_INSTAGRAM_URL, "facebook": settings.SHOP_FACEBOOK_URL}.items() if v},
         "shop": {
             **SHOP,
             "mapsUrl": f"https://www.google.com/maps/search/?api=1&query={SHOP['lat']},{SHOP['lng']}",

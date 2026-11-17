@@ -17,6 +17,8 @@ export interface Product {
 export interface MenuData {
   products: Product[]
   line: { oaId: string; addUrl: string; qrSvg: string }
+  /** links the shop has set (missing = no button) */
+  social: { instagram?: string; facebook?: string }
   shop: { name: string; address: string; hours: string; lat: number; lng: number; mapsUrl: string }
 }
 

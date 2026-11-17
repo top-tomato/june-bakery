@@ -9,6 +9,25 @@ export function MapPinIcon() {
   )
 }
 
+export function InstagramIcon() {
+  return (
+    <svg className="ic" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.2" cy="6.8" r="0.6" fill="currentColor" />
+    </svg>
+  )
+}
+
+export function FacebookIcon() {
+  return (
+    <svg className="ic" viewBox="0 0 24 24" aria-hidden="true">
+      <rect x="3.5" y="3.5" width="17" height="17" rx="4" />
+      <path d="M15.5 8h-1.6c-1.2 0-1.9.8-1.9 2v10M10 13h5" />
+    </svg>
+  )
+}
+
 export function ChatIcon() {
   return (
     <svg className="ic" viewBox="0 0 24 24" aria-hidden="true">

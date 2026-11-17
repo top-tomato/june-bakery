@@ -66,8 +66,8 @@ export function HomePage({ data }: { data: MenuData }) {
       <main>
         <Hero products={products} active={active} onPick={pick} onOpen={openStory} spotRef={heroSpot} photo={photo} motion={motion} />
         <Story product={product} lineOaId={line.oaId} stageRef={stage} photo={photo} motion={motion} />
-        <Where shop={shop} line={line} above={product.accent} />
-        <End line={line} />
+        <Where shop={shop} above={product.accent} />
+        <End line={line} social={data.social} />
       </main>
     </>
   )

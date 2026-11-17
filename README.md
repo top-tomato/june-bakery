@@ -95,6 +95,8 @@ cd frontend && npm run build && npm run test:e2e   # Playwright (ใช้ Chrom
 | `DJANGO_ALLOWED_HOSTS` | ว่าง | โดเมนที่อนุญาต คั่นด้วยจุลภาค |
 | `DATA_DIR` | โฟลเดอร์โปรเจกต์ | ที่เก็บ `db.sqlite3` และ `media/` ตอนใช้งานจริงชี้ไปที่ดิสก์ถาวร |
 | `LINE_OA_ID` | `@561hgrea` | ID ของ LINE Official Account รวม `@` |
+| `SHOP_INSTAGRAM_URL` | ว่าง | ลิงก์ Instagram ของร้าน ว่าง = ไม่แสดงปุ่ม |
+| `SHOP_FACEBOOK_URL` | ว่าง | ลิงก์เพจ Facebook ของร้าน ว่าง = ไม่แสดงปุ่ม |
 | `VITE_DEV_SERVER` | ว่าง | ตอนพัฒนาหน้าบ้าน ตั้งเป็น `http://localhost:5173` เพื่อโหลดโค้ดจาก Vite แทนไฟล์ที่ build แล้ว |
 
 ## Deploy ขึ้น Fly.io

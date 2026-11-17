@@ -64,6 +64,12 @@ class MenuApiTests(MediaTestCase):
         self.assertTrue(data["line"]["qrSvg"].startswith("<svg"))
         self.assertIn("13.767586,100.539543", data["shop"]["mapsUrl"])
 
+    def test_social_links_only_when_set(self) -> None:
+        self.assertEqual(self.client.get(reverse("menu:api-menu")).json()["social"], {})
+        with override_settings(SHOP_INSTAGRAM_URL="https://www.instagram.com/june", SHOP_FACEBOOK_URL=""):
+            social = self.client.get(reverse("menu:api-menu")).json()["social"]
+        self.assertEqual(social, {"instagram": "https://www.instagram.com/june"})
+
     def test_only_get(self) -> None:
         self.assertEqual(self.client.post(reverse("menu:api-menu")).status_code, 405)
 
