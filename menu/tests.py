@@ -164,6 +164,18 @@ class MediaServeTests(MediaTestCase):
         self.assertEqual(self.get("gallery/v.mp4", Range="bytes=-24")["Content-Range"], "bytes 1000-1023/1024")
         self.assertEqual(self.get("gallery/v.mp4", Range="bytes=2000-").status_code, 416)
 
+    def test_cached_for_a_year_and_revalidates(self) -> None:
+        r = self.get("gallery/v.mp4")
+        self.assertIn("max-age=31536000", r["Cache-Control"])
+        self.assertEqual(self.get("gallery/v.mp4", **{"If-Modified-Since": r["Last-Modified"]}).status_code, 304)
+
+    def test_uploads_get_unique_names(self) -> None:
+        a = GalleryPhoto.objects.create(image=SimpleUploadedFile("same.gif", TINY_GIF, "image/gif"))
+        b = GalleryPhoto.objects.create(image=SimpleUploadedFile("same.gif", TINY_GIF, "image/gif"))
+        self.assertNotEqual(a.image.name, b.image.name)
+        self.assertNotIn("same", a.image.name)
+        self.assertTrue(a.image.name.startswith("gallery/") and a.image.name.endswith(".gif"))
+
     def test_no_escaping_the_media_folder(self) -> None:
         self.assertEqual(self.get("../config/settings.py").status_code, 404)
         self.assertEqual(self.get("gallery").status_code, 404)
