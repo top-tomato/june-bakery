@@ -6,6 +6,7 @@
    ?fps      on-screen frame meter        ?no3d    skip the 3D scene (photos instead)
    ?lowres   3D at 1x, no antialias       ?nodrips hide the cream drips between sections
    ?nomap    hide the store map           ?noshadow drop CSS filters/shadows on moving parts
+   ?log      with ?fps: send each second's numbers to the server log (local testing only)
    Combine with &, e.g. ?fps&no3d */
 window.DBG=Object.fromEntries([...new URLSearchParams(location.search).keys()].map(k=>[k,true]));
 document.documentElement.classList.add(...Object.keys(window.DBG).map(k=>'dbg-'+k));
@@ -118,37 +119,7 @@ section{position:relative}
 .band{position:absolute;left:-10%;right:-10%;bottom:1vh;transform:rotate(-3deg);background:var(--fink);color:var(--fl);font-family:var(--display);font-weight:600;font-size:clamp(1.4rem,3vw,2.6rem);white-space:nowrap;padding:6px 0;overflow:hidden;z-index:4;transition:background .5s,color .5s}
 .band div{display:inline-block;will-change:transform}
 
-/* box */
-.box{background:var(--cream);color:var(--ink);padding:clamp(240px,34vh,340px) clamp(16px,5vw,80px) 120px;--from:var(--fl);display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,5vw,80px);align-items:center}
-.box h2{font-size:clamp(2.4rem,6vw,5.2rem)}
-.crate{background:var(--indigo);border-radius:28px;padding:18px;display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:520px;justify-self:center;width:100%;box-shadow:0 18px 0 var(--indigo-2),0 40px 50px rgba(34,17,74,.35);transform:rotate(-3deg)}
-.slot{aspect-ratio:1;background:var(--cream);border-radius:16px;display:grid;place-items:center;padding:10px;box-shadow:inset 0 6px 0 rgba(34,17,74,.14)}
-.slot .pic{height:100%;border:0;border-radius:50%;-webkit-mask:none;mask:none;background:var(--indigo);animation:popin .35s cubic-bezier(.2,1.6,.4,1)}
-@keyframes popin{from{transform:scale(.4) rotate(-20deg)}}
-.rows{list-style:none;padding:0;margin:22px 0;display:grid;gap:8px}
-.rows li{display:flex;align-items:center;gap:14px;padding:8px 0;border-bottom:2px solid rgba(28,15,58,.12)}
-.rows .sw{width:44px;height:44px;flex:none}
-.rows .sw .pic{border:0;border-radius:50%;-webkit-mask:none;mask:none}
-.rows .nm{flex:1;font-weight:600}
-.rows button{width:36px;height:36px;border-radius:50%;border:2px solid var(--ink);font-weight:600;line-height:1}
-.rows button:disabled{opacity:.25;cursor:default}
-.rows .n{width:1.4em;text-align:center;font-family:var(--display);font-weight:600}
-.total{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap}
-.total strong{font-family:var(--display);font-size:3rem;line-height:1}
-.box .btn{background:var(--ink);color:var(--cream);margin:0}
-.box .btn:disabled{opacity:.35;cursor:default;transform:none}
-.fly{position:fixed;z-index:60;width:80px;height:80px;pointer-events:none;margin:-40px 0 0 -40px}
-.fly .pic{border-width:3px;border-radius:50%;-webkit-mask:none;mask:none}
 
-/* made */
-.made{background:var(--pink);color:var(--ink);padding:clamp(240px,34vh,340px) clamp(16px,5vw,80px) 140px;--from:var(--cream)}
-.made h2{font-size:clamp(2.4rem,6vw,5.2rem);max-width:12em}
-.made>p{max-width:34rem;margin:14px 0 64px;font-size:1.1rem}
-.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(10px,2vw,28px)}
-.card{background:#fff;border-radius:18px;padding:10px 10px 14px;transform:translateY(var(--y,0)) rotate(var(--r));box-shadow:0 14px 0 rgba(28,15,58,.18)}
-.card .ph{aspect-ratio:1;border-radius:12px;overflow:hidden}
-.card .ph .pic{border:0;border-radius:0;-webkit-mask:none;mask:none}
-.card p{font-size:.85rem;margin-top:8px;line-height:1.35}
 
 /* map */
 .where{background:var(--indigo);padding:clamp(240px,34vh,340px) clamp(16px,5vw,80px) 140px;--from:var(--pink);display:grid;grid-template-columns:minmax(260px,1fr) 1.5fr;gap:clamp(24px,4vw,64px);align-items:start}
@@ -206,12 +177,7 @@ section{position:relative}
   .call i{display:none}
   .call:nth-of-type(1){bottom:-2.4em}.call:nth-of-type(2){bottom:-4.2em}.call:nth-of-type(3){bottom:-6em}
   .band{font-size:1.2rem}
-  .box,.where{grid-template-columns:1fr}
-  .box,.made,.where{padding-top:200px;padding-bottom:80px}
-  .crate{max-width:340px;padding:12px;gap:8px;border-radius:20px}
-  .total strong{font-size:2.4rem}
-  .cards{grid-template-columns:repeat(2,1fr);gap:14px}
-  .card.soon{min-height:120px}
+  .where{grid-template-columns:1fr;padding-top:200px;padding-bottom:80px}
   .map{height:46vh}
   .stores button{flex-direction:column;gap:2px}.stores button span{text-align:left}
   .end{padding-top:220px}
@@ -246,7 +212,6 @@ section{position:relative}
 <header class="nav top" id="nav">
   <a href="#flavors">เมนู</a>
   <span class="brand logo-mask" role="img" aria-label="June"></span>
-  <a href="#box">กล่อง (<span id="cart">0</span>)</a>
 </header>
 
 <main>
@@ -271,7 +236,7 @@ section{position:relative}
     <div>
       <h2><span class="ln"><b id="sName1"></b></span><span class="ln"><b id="sName2"></b></span></h2>
       <p class="desc" id="sDesc"></p>
-      <div class="buy"><strong id="sPrice"></strong><button class="btn" id="sAdd">ใส่กล่อง</button></div>
+      <div class="buy"><strong id="sPrice"></strong><a class="btn" id="sAdd" target="_blank" rel="noopener">สั่งทาง LINE</a></div>
     </div>
     <div class="stagewrap">
       
@@ -284,27 +249,6 @@ section{position:relative}
     </div>
     <div class="band" aria-hidden="true"><div id="band"></div></div>
   </div>
-</section>
-
-<section class="box" id="box" data-nav="dark">
-  <div class="drips" data-n="24" id="boxDrips"></div>
-  <div class="crate" id="crate" aria-label="กล่องของคุณ"></div>
-  <div>
-    <h2>หกชิ้น เลือกเองทุกช่อง</h2>
-    <ul class="rows" id="rows"></ul>
-    <div class="total">
-      <strong id="price">฿0</strong>
-      <span id="fill">เลือกแล้ว 0 จาก 6 ชิ้น</span>
-      <button class="btn" id="order" disabled>ส่งกล่องนี้ไปที่ LINE</button>
-    </div>
-  </div>
-</section>
-
-<section class="made" id="made" data-nav="dark">
-  <div class="drips" data-n="24"></div>
-  <h2>อบมาใหม่ทุกวัน หมดทุกวัน</h2>
-  <p>{{ product_names|join:" · " }} เมนูใหม่กำลังตามมา</p>
-  <div class="cards" id="cards"></div>
 </section>
 
 <section class="where" id="where" data-nav="light">
@@ -428,7 +372,8 @@ const story=$('#story'),stage=$('#stage');
 function setFeatured(i){
   featured=i;const f=F[i];
   story.style.cssText=`${vars(f)};--fink:${f.ink}`;
-  $('#boxDrips').style.setProperty('--from',f.fl);$('#boxDrips')._rgb=null;lastY=-1; // redraw the drips in the new colour
+  const wd=$('#where .drips');$('#where').style.setProperty('--from',f.fl);wd._rgb=null;lastY=-1; // the drips under the story take this cake's colour
+  $('#sAdd').href=`https://line.me/R/oaMessage/${encodeURIComponent(LINE_ID)}/?${encodeURIComponent('สนใจสั่ง '+f.n.join(''))}`;
   $('#sName1').textContent=f.n[0];$('#sName2').textContent=f.n[1];$('#sDesc').textContent=f.d;$('#sPrice').textContent='฿'+f.price;
   
   f.L.forEach((t,j)=>$('#c'+j).textContent=t);
@@ -436,43 +381,11 @@ function setFeatured(i){
   story.dataset.nav=f.ink===DK?'dark':'light';
 }
 function openStory(i){setFeatured(i);scrollTo({top:story.offsetTop+innerHeight*.9,behavior:calm?'auto':'smooth'})}
-$('#sAdd').onclick=e=>add(featured,e.currentTarget);
 
-/* box builder */
-const crate=$('#crate'),rows=$('#rows');let picks=[];
-crate.innerHTML='<div class="slot"></div>'.repeat(6);const slots=$$('.slot');
-rows.innerHTML=F.map((f,i)=>`<li><span class="sw">${pop(f)}</span><span class="nm">${f.n.join('')}</span><button data-rm="${i}" aria-label="เอา${f.n.join('')}ออก" disabled>−</button><span class="n" data-n="${i}">0</span><button data-add="${i}" aria-label="เพิ่ม${f.n.join('')}">+</button></li>`).join('');
-rows.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;b.dataset.add!==undefined?add(+b.dataset.add,b):remove(+b.dataset.rm)});
-let shown=0;
-function tween(el,to){const from=shown,t0=performance.now();shown=to;(function step(t){const p=calm?1:clamp((t-t0)/450);el.textContent='฿'+Math.round(from+(to-from)*ease(p));if(p<1)requestAnimationFrame(step)})(t0)}
-function sync(){
-  slots.forEach((s,j)=>{const want=picks[j]??'';if(s.dataset.f!==String(want)){s.dataset.f=want;s.innerHTML=want===''?'':pop(F[want])}});
-  F.forEach((_,i)=>{const n=picks.filter(x=>x===i).length;$(`[data-n="${i}"]`).textContent=n;$(`[data-rm="${i}"]`).disabled=!n;$(`[data-add="${i}"]`).disabled=picks.length>=6});
-  const full=picks.length===6;tween($('#price'),picks.reduce((sum,i)=>sum+F[i].price,0));
-  $('#fill').textContent=full?'ครบ 6 ชิ้น ทักไปสั่งได้เลย':`เลือกแล้ว ${picks.length} จาก 6 ชิ้น`;
-  $('#order').disabled=!full;$('#cart').textContent=picks.length;
-}
-let flying=0;
-function add(i,from){
-  if(picks.length+flying>=6)return;
-  const slot=slots[picks.length+flying],a=from.getBoundingClientRect(),b=slot.getBoundingClientRect();
-  const done=()=>{flying--;picks.push(i);sync()};
-  flying++;
-  if(calm||b.bottom<0||b.top>innerHeight){done();return}
-  const el=document.createElement('div');el.className='fly';el.innerHTML=pop(F[i]);
-  el.style.left=a.left+a.width/2+'px';el.style.top=a.top+a.height/2+'px';document.body.append(el);
-  const dx=b.left+b.width/2-(a.left+a.width/2),dy=b.top+b.height/2-(a.top+a.height/2);
-  el.animate([{transform:'translate(0,0) rotate(0) scale(.5)'},{transform:`translate(${dx*.5}px,${dy*.5-140}px) rotate(200deg) scale(1.3)`,offset:.5},{transform:`translate(${dx}px,${dy}px) rotate(360deg) scale(1)`}],{duration:650,easing:'cubic-bezier(.4,0,.3,1)'}).onfinish=()=>{el.remove();done()};
-}
-function remove(i){const k=picks.lastIndexOf(i);if(k>-1){picks.splice(k,1);sync()}}
-$('#order').onclick=()=>{const lines=F.map((f,i)=>[f.n.join(''),picks.filter(x=>x===i).length]).filter(([,n])=>n).map(([nm,n])=>`- ${nm} x${n}`);const text=['สนใจสั่งขนม 1 กล่อง (6 ชิ้น)',...lines].join('\n');open(`https://line.me/R/oaMessage/${encodeURIComponent(LINE_ID)}/?${encodeURIComponent(text)}`,'_blank','noopener')};
 
-/* stats + cards */
+/* stats */
 const io=new IntersectionObserver((es,o)=>es.forEach(e=>{if(!e.isIntersecting)return;o.unobserve(e.target);const el=e.target,to=+el.dataset.to,from=+(el.dataset.from||0),t0=performance.now();(function s(t){const p=calm?1:clamp((t-t0)/1100);el.textContent=Math.round(from+(to-from)*ease(p));if(p<1)requestAnimationFrame(s)})(t0)}),{threshold:.6});
 
-const caps=['ขนมปังกระเทียม อุ่น ๆ จากเตา','ชิฟฟ่อนมะพร้าวใบเตย','โลฟหน้าไหม้ ตัดชิ้นหนา','ขนมปังช็อกโกแลต ไส้ทะลัก'];
-$('#cards').innerHTML=F.map((f,i)=>[i,[.9,.35,.6,.5][i%4],[-5,3,-3,5][i%4],f.n.join('')]).map(([i,sp,rr,c])=>`<div class="card" data-sp="${sp}" style="--r:${rr}deg"><div class="ph">${pop(F[i])}</div><p>${c}</p></div>`).join('')+[[.7,-2],[.2,6]].map(([sp,rr])=>`<div class="card soon" data-sp="${sp}" style="--r:${rr}deg">เมนูใหม่<br>เร็ว ๆ นี้</div>`).join('');
-const cards=$$('.card');
 
 /* map */
 const plane=$('#plane');
@@ -524,7 +437,6 @@ function frame(){
       return{W:d.clientWidth,H:d.clientHeight,rgb:d._rgb}});
     let navHit=null;for(const s of navSecs){const r=s.getBoundingClientRect();if(r.top<=40&&r.bottom>40){navHit=s;break}}
     const sTop=story.offsetTop,sH=story.offsetHeight;
-    const cardTops=cards.map(c=>c.parentElement.getBoundingClientRect().top);
     const mr=mark.getBoundingClientRect();
     // --- writes ---
     dripEls.forEach((d,i)=>{if(!dripOn[i])return;const g=.2+.8*ease(clamp((vh-dripTops[i])/(vh*.85)));
@@ -541,7 +453,6 @@ function frame(){
     calls.forEach((c,k)=>c.style.setProperty('--c',ease(clamp((p-.46-k*.08)/.12)).toFixed(3)));
     pin.style.setProperty('--e',ease(clamp((p-.74)/.14)).toFixed(3));
     band.style.transform=`translateX(${-5-p*28}%)`;
-    cards.forEach((c,i)=>c.style.setProperty('--y',((cardTops[i]-vh*.5)*c.dataset.sp*.35).toFixed(1)+'px'));
     mark.style.setProperty('--m',ease(clamp((vh-mr.top+mr.height*.45)/(vh*.6))).toFixed(3));
   }
   // one layout read per frame for the 3D layer (it runs right after this in the same frame)
@@ -623,12 +534,13 @@ function intro(){
   setTimeout(()=>{cur.remove();cnt.remove()},4700);
 }
 
-setActive(0);sync();fly(0);
+setActive(0);fly(0);
 window.T0=performance.now();requestAnimationFrame(()=>{intro();frame()});
 if(window.DBG.fps){const el=document.createElement('div');el.id='dbgfps';document.body.append(el);
   let n=0,worst=0,slow=0,last=performance.now(),t0=last;
   (function f(t){const d=t-last;last=t;n++;worst=Math.max(worst,d);if(d>25)slow++;
-    if(t-t0>=1000){el.textContent=`${Math.round(n*1000/(t-t0))} fps\nช้าสุด ${Math.round(worst)} ms\nสะดุด ${slow} ครั้ง\n${Object.keys(window.DBG).filter(k=>k!=='fps').join(' ')||'ทุกอย่างเปิด'}`;n=0;worst=0;slow=0;t0=t}
+    if(t-t0>=1000){if(window.DBG.log)fetch(`/__dbg?fps=${Math.round(n*1000/(t-t0))}&worst=${Math.round(worst)}&slow=${slow}&y=${Math.round(scrollY)}&sec=${(document.elementFromPoint(innerWidth/2,innerHeight/2)?.closest('section,header,footer')?.id||document.elementFromPoint(innerWidth/2,innerHeight/2)?.closest('section')?.className||'-').split(' ')[0]}&flags=${Object.keys(window.DBG).join('+')}`,{keepalive:true}).catch(()=>{});   // ?log: report to the dev server log
+      el.textContent=`${Math.round(n*1000/(t-t0))} fps\nช้าสุด ${Math.round(worst)} ms\nสะดุด ${slow} ครั้ง\n${Object.keys(window.DBG).filter(k=>k!=='fps').join(' ')||'ทุกอย่างเปิด'}`;n=0;worst=0;slow=0;t0=t}
     requestAnimationFrame(f)})(last)}
 </script>
 <script type="module">
