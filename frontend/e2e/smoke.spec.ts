@@ -1,5 +1,11 @@
 import { expect, test, type Page } from '@playwright/test'
 
+// always on the page; reviews / about / gallery only appear once filled in via Django admin
+const REQUIRED_SECTIONS = ['flavors', 'story', 'how', 'where', 'end']
+async function expectRequiredSections(page: Page) {
+  for (const id of REQUIRED_SECTIONS) await expect(page.locator(`section#${id}`)).toHaveCount(1)
+}
+
 function collectErrors(page: Page) {
   const errors: string[] = []
   page.on('pageerror', (e) => errors.push(e.message))
@@ -9,10 +15,10 @@ function collectErrors(page: Page) {
   return errors
 }
 
-test('home: intro finishes, every section renders, scrolling the whole page throws nothing', async ({ page }) => {
+test('home: intro finishes, the required sections render, scrolling the whole page throws nothing', async ({ page }) => {
   const errors = collectErrors(page)
   await page.goto('/')
-  await expect(page.locator('section')).toHaveCount(4)
+  await expectRequiredSections(page)
   await expect(page.locator('.curtain')).toHaveCount(0, { timeout: 8000 }) // removes itself after the intro
   await expect(page.locator('.hero h1')).toContainText('อบใหม่ หอม')
 
@@ -52,6 +58,6 @@ test('book: opens, flips, and links back home without a reload', async ({ page }
   await expect(page.locator('.stf__block > .book-rings')).toHaveCount(1)
   await page.locator('.book-back').click()
   await expect(page).toHaveURL(/\/$/)
-  await expect(page.locator('section')).toHaveCount(4)
+  await expectRequiredSections(page)
   expect(errors.filter((e) => !/favicon/.test(e))).toEqual([])
 })
