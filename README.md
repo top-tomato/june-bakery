@@ -90,7 +90,8 @@ fly ssh console -C "python manage.py createsuperuser"
 
 ถ้าชื่อ app ซ้ำกับคนอื่น ให้เปลี่ยนทั้ง `app` และ `DJANGO_ALLOWED_HOSTS` ใน `fly.toml` ให้ตรงกัน
 
-> สถานะ ณ 17 พ.ย. 2026: เตรียมไฟล์ครบและทดสอบโหมดใช้งานจริงในเครื่องแล้ว แต่ยังไม่เคย deploy จริง
+> สถานะ ณ 17 พ.ย. 2026: deploy แล้วที่ https://june-bakery.fly.dev/ (เครื่องเดียวที่สิงคโปร์ ดิสก์ `june_data` 1GB)
+> ถ้าใช้ flyctl ที่ติดตั้งผ่าน `curl -L https://fly.io/install.sh | sh` ตัวโปรแกรมอยู่ที่ `~/.fly/bin/flyctl`
 
 ## LINE Official Account
 
@@ -98,7 +99,7 @@ fly ssh console -C "python manage.py createsuperuser"
 
 - เปิดแชต ร้านตอบลูกค้าเอง
 - ข้อความทักทายตอนเพิ่มเพื่อน
-- Rich menu 3 ปุ่ม: ดูเมนู, เว็บไซต์, คุยกับแอดมิน (ตอนนี้ทุกปุ่มส่งข้อความเข้าแชต ปุ่มเว็บไซต์จะเปลี่ยนเป็นลิงก์เมื่อเว็บขึ้นจริง)
+- Rich menu 3 ปุ่ม: ดูเมนู, เว็บไซต์, คุยกับแอดมิน (ปุ่มเว็บไซต์เปิด https://june-bakery.fly.dev/ ปุ่มอื่นส่งข้อความเข้าแชต)
 
 แผนถัดไปคือบอตตอบเมนูและจำโปรไฟล์ลูกค้าจาก LINE (ลูกค้าสมัครผ่าน LINE เท่านั้น ไม่มีการสมัครบนเว็บ) ดูหน้าตัวอย่างที่ `mock/line-chat.html`
 

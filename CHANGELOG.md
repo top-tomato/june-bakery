@@ -10,6 +10,10 @@
 - CHANGELOG ไฟล์นี้
 - CLAUDE.md กำหนดวิธีทำงานกับ repo: ทำงานบน branch และมี changelog ก่อนเข้า `main`
 
+### Changed
+- README บันทึกว่าเว็บ deploy ขึ้น Fly.io แล้วที่ https://june-bakery.fly.dev/
+- README บันทึกว่าปุ่มกลางของ rich menu ใน LINE เปิดเว็บแล้ว
+
 ## [0.1.0] - 2026-11-17
 
 ### Added
