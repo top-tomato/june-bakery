@@ -131,8 +131,6 @@ fly ssh console -C "python manage.py createsuperuser"
 
 ## LINE Official Account
 
-ลิงก์ปุ่มใน rich menu ที่เปิดหน้าข้างในเว็บ ให้ต่อท้าย `?from=richmenu` เช่น `https://june-bakery.fly.dev/gallery/?from=richmenu` กดย้อนกลับแล้วจะไปหน้าแรกของร้าน แทนการปิดเบราว์เซอร์ของ LINE
-
 ตั้งค่าใน [LINE Official Account Manager](https://manager.line.biz) ไม่ได้อยู่ในโค้ด
 
 - เปิดแชต ร้านตอบลูกค้าเอง
