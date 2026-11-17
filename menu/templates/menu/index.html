@@ -150,13 +150,16 @@ section{position:relative}
 .stores button span{opacity:.7;text-align:right;font-size:.9rem}
 .stores button[aria-pressed=true]{color:var(--tea);padding-left:16px}
 .map{position:relative;height:min(64vh,560px);border-radius:28px;overflow:hidden;background:#1F322E;perspective:900px}
-.plane{position:absolute;left:50%;top:50%;width:1200px;height:1200px;margin:-600px;transition:transform 1.5s cubic-bezier(.6,0,.2,1);transform-style:preserve-3d}
+.plane{position:absolute;left:50%;top:50%;width:1200px;height:1200px;margin:-600px;transition:transform 1.5s cubic-bezier(.6,0,.2,1)}
+.plane canvas{position:absolute;left:0;top:0;width:1200px;height:1200px}
 .plane i{position:absolute;display:block;background:#6E918A;border-radius:3px;box-shadow:1px -1px 0 #4A6A64,2px -2px 0 #4A6A64,3px -3px 0 #4A6A64,4px -4px 0 #4A6A64,5px -5px 0 #4A6A64}
 .plane i.park{background:#DCEBB5;box-shadow:none}
 .plane .river{position:absolute;left:-200px;top:520px;width:1700px;height:90px;background:#9CC4D6;transform:rotate(-24deg);border-radius:60px}
 .plane .dot{position:absolute;width:22px;height:22px;margin:-11px;border-radius:50%;background:var(--cream);box-shadow:none}
 .plane .dot.on{background:var(--tea)}
 .plane .dot.on::after{content:"";position:absolute;inset:-14px;border-radius:50%;border:3px solid var(--tea);animation:ping 1.4s ease-out infinite}
+/* pause the pulsing marker while the map is off screen */
+.map.off .plane .dot.on::after{animation-play-state:paused}
 @keyframes ping{from{transform:scale(.4);opacity:1}to{transform:scale(1.6);opacity:0}}
 .tag{position:absolute;left:50%;top:50%;transform:translate(-50%,-190%);background:var(--cream);color:var(--ink);padding:6px 14px;border-radius:999px;font-weight:600;white-space:nowrap;z-index:2}
 .tag::after{content:"";position:absolute;left:50%;top:100%;width:2px;height:34px;background:var(--cream)}
@@ -458,12 +461,27 @@ const cards=$$('.card');
 
 /* map */
 const plane=$('#plane');
-(()=>{let h='';for(let r=0;r<12;r++)for(let c=0;c<12;c++){
-  const x=c*100+8,y=r*100+8,riverY=520+45-(x-400)*.445;if(Math.abs(y+42-riverY)<95)continue;
-  if(Math.random()<.08){h+=`<i class="park" style="left:${x}px;top:${y}px;width:84px;height:84px"></i>`;continue}
-  if(Math.random()<.5)h+=`<i style="left:${x}px;top:${y}px;width:84px;height:84px"></i>`;
-  else h+=`<i style="left:${x}px;top:${y}px;width:38px;height:84px"></i><i style="left:${x+46}px;top:${y}px;width:38px;height:${rnd(40,84)|0}px"></i>`;
-}plane.insertAdjacentHTML('beforeend',h)})();
+/* city blocks: painted once into one canvas instead of ~200 divs with 5 stacked box-shadows each,
+   which phones had to re-rasterise as one huge tilted layer when the section scrolled into view */
+(()=>{
+  const k=Math.min(devicePixelRatio||1,1.5),cv=document.createElement('canvas');cv.width=cv.height=1200*k;cv.setAttribute('aria-hidden','true');
+  const c=cv.getContext('2d');c.scale(k,k);
+  const rr=(x,y,w,h,r)=>{c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath();c.fill()};
+  // river (was a 1700x90 div rotated -24deg around its centre)
+  c.save();c.translate(-200+850,520+45);c.rotate(-24*Math.PI/180);c.fillStyle='#9CC4D6';rr(-850,-45,1700,90,45);c.restore();
+  const block=(x,y,w,h,park)=>{
+    if(!park){c.fillStyle='#4A6A64';for(let s=5;s>=1;s--)rr(x+s,y-s,w,h,3)}   // the old 1..5px stacked shadow
+    c.fillStyle=park?'#DCEBB5':'#6E918A';rr(x,y,w,h,3);
+  };
+  for(let r=0;r<12;r++)for(let col=0;col<12;col++){
+    const x=col*100+8,y=r*100+8,riverY=520+45-(x-400)*.445;if(Math.abs(y+42-riverY)<95)continue;
+    if(Math.random()<.08){block(x,y,84,84,true);continue}
+    if(Math.random()<.5)block(x,y,84,84);
+    else{block(x,y,38,84);block(x+46,y,38,rnd(40,84)|0)}
+  }
+  plane.querySelector('.river')?.remove();plane.prepend(cv);
+  new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle('off',!e.isIntersecting))).observe(plane.parentElement);
+})();
 const S=[{n:'หน้าร้าน June',a:'จุดขายตัวอย่าง · ทุกวัน',x:650,y:250,r:-18},{n:'งานรักษ์บางสะแก',a:'ออกบูธ · ตามวันงาน',x:960,y:760,r:24},{n:'ตลาดนัดวันเสาร์',a:'จุดขายตัวอย่าง · เสาร์–อาทิตย์',x:330,y:820,r:-40},{n:'จุดรับหน้าสวน',a:'จุดขายตัวอย่าง · นัดรับล่วงหน้า',x:150,y:960,r:12}];
 $('#stores').innerHTML=S.map((s,i)=>`<li><button data-s="${i}" aria-pressed="false"><b>${s.n}</b><span>${s.a}</span></button></li>`).join('');
 S.forEach(s=>plane.insertAdjacentHTML('beforeend',`<div class="dot" style="left:${s.x}px;top:${s.y}px"></div>`));
