@@ -49,6 +49,13 @@ body{font-family:var(--display);color:var(--ink);background:#3E5D58 var(--grain)
 .under{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;
   background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,0) 70%)}
 
+.curl{position:absolute;inset:0;transform-style:preserve-3d;display:none}
+.seg{position:absolute;left:0;right:0;top:0;transform-origin:50% 0;transform-style:preserve-3d;will-change:transform}
+.seg .seg{top:100%}
+.slice{position:absolute;inset:0;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.slice.b{transform:rotateX(180deg)}
+.slice .face{bottom:auto}
+.slice .lit{position:absolute;inset:0;z-index:4;pointer-events:none;background:#000;opacity:0}
 .in{position:absolute;inset:34px 8cqw 5cqh;display:flex;flex-direction:column}
 .cover .in{align-items:center;justify-content:center;text-align:center}
 .plate{background:var(--paper);border-radius:10px;padding:7cqh 8cqw 6cqh;width:100%;box-shadow:0 3px 0 rgba(0,0,0,.08)}
@@ -80,7 +87,7 @@ body{font-family:var(--display);color:var(--ink);background:#3E5D58 var(--grain)
 </style>
 </head>
 <body>
-<div class="hint">สมุดรูปจากครัว June · ปัดขึ้นเพื่อพลิก</div>
+<div class="hint">สมุดรูปจากครัว June · ปัดขึ้นหรือปัดซ้ายเพื่อพลิก</div>
 <div class="pad" id="pad">
   <div class="rings" aria-hidden="true"></div>
   <div class="stack" id="stack"><div class="edges" id="edges"></div></div>
@@ -111,7 +118,7 @@ const snap=([img,cap],j,k)=>`<div class="snap" style="--r:${(j+k)%2?2:-2}deg"><s
 const L=[];
 L.push([`<div class="in">${svg('leaf','left:8%;top:12%;width:20cqw;transform:rotate(-10deg)')}${svg('whisk','right:8%;bottom:4%;width:13cqw;transform:rotate(16deg)')}
   <div class="plate"><div class="logo" role="img" aria-label="June"></div><div class="rule"></div><div class="kicker">สมุดรูปจากครัว</div></div>
-  <div class="cap">ปัดขึ้นเพื่อเปิด</div></div>`,'board cover','board']);
+  <div class="cap">ปัดขึ้นหรือปัดซ้ายเพื่อเปิด</div></div>`,'board cover','board']);
 L.push([`<div class="in"><div class="h-num">วิดีโอ</div><div class="h-name">Snack box</div>
   <div class="snaps one"><div class="snap" style="--r:-1.5deg"><span class="tape"></span>
   <video class="ph" src="img/snackbox.mp4" poster="img/snackbox-poster.jpg" autoplay muted loop playsinline preload="metadata"></video><p>ทำเสร็จ แพ็กใส่กล่อง</p></div></div></div>`,'paper','paper']);
@@ -137,15 +144,49 @@ const leaves=[...stack.querySelectorAll('.leaf')];
 const ang=new Float32Array(N);       // 0 = lying on the pad, 180 = turned over the top
 let cur=0;                           // index of the leaf on top
 
+/* Paper curl: while a leaf is turning it is drawn as SEG strips chained hinge to hinge (each strip a child of the one
+   above it), every strip bent a little further than the last, so the free edge curls up ahead of the hinge.
+   Built when a turn starts, dropped when the leaf lies flat again; the flat leaf is one plain sheet. */
+const SEG=6,BEND=60;
+function buildCurl(i){
+  const el=leaves[i];if(el._curl)return el._curl;
+  const W=stack.offsetWidth,H=stack.offsetHeight,h=H/SEG;
+  const fr=el.querySelector('.face.front'),bk=el.querySelector('.face.back');
+  // copies of the page for each strip; a playing video becomes its poster frame while the page turns
+  const html=fr.innerHTML.replace(/<video[^>]*poster="([^"]+)"[^>]*><\/video>/g,'<img class="ph" src="$1" alt="">').replace(/<div class="(under|shade)"><\/div>/g,'');
+  const root=document.createElement('div');root.className='curl';
+  let parent=root;const segs=[];
+  for(let k=0;k<SEG;k++){
+    const seg=document.createElement('div');seg.className='seg';seg.style.height=h+'px';
+    seg.innerHTML=`<div class="slice f"><div class="${fr.className}" style="top:${-k*h}px;height:${H}px;width:${W}px">${html}</div><div class="lit"></div></div>`+
+      `<div class="slice b"><div class="${bk.className}" style="top:${-(SEG-1-k)*h}px;height:${H}px;width:${W}px"></div><div class="lit"></div></div>`;
+    parent.appendChild(seg);segs.push(seg);parent=seg;
+  }
+  el.appendChild(root);el._curl={root,segs,lits:segs.map(s=>[...s.querySelectorAll(':scope > .slice > .lit')]),slices:segs.map(s=>[...s.querySelectorAll(':scope > .slice')])};
+  return el._curl;
+}
+function dropCurl(i){const el=leaves[i];if(el._curl){el._curl.root.remove();el._curl=null}}
 function paint(i){
-  const a=ang[i],el=leaves[i];
-  el.style.transform=`rotateX(${a}deg)`;
-  // past ~100deg the leaf is above the pad, off toward the top of the screen: fade it out, then hide it entirely
-  // opacity on the leaf itself would flatten its 3D (and show the front mirrored through the back), so fade the faces
-  const o=a<100?'':String(Math.max(0,1-(a-100)/60));for(const f of el.children)f.style.opacity=o;
-  el.style.visibility=a>=179.5?'hidden':'visible';
+  const a=ang[i],el=leaves[i],flat=a<=0.01||a>=179.99;
   el.style.zIndex=a>90?N+5:N-i;      // once past upright it is above everything still on the pad
-  el.querySelector('.shade').style.opacity=Math.min(1,a/90)*.9;
+  el.style.visibility=a>=179.99?'hidden':'visible';
+  for(const f of el.querySelectorAll(':scope > .face'))f.style.visibility=flat?'':'hidden';
+  if(flat)dropCurl(i);
+  else{
+    const c=buildCurl(i);c.root.style.display='block';
+    const B=BEND*Math.sin(a*Math.PI/180),step=B/(SEG-1);
+    // past ~100deg the leaf is above the pad, toward the top of the screen: fade it out
+    const o=a<100?'':String(Math.max(0,1-(a-100)/60));
+    let abs=a-B*.4;
+    c.segs.forEach((s,k)=>{
+      s.style.transform=`rotateX(${k===0?abs:step}deg)`;
+      const at=k===0?abs:(abs+=step);
+      // light: the front darkens as that strip tips away from the light, the back starts dark and brightens
+      c.lits[k][0].style.opacity=Math.min(.55,Math.max(0,at/90*.45));
+      c.lits[k][1].style.opacity=Math.min(.5,Math.max(0,(180-at)/90*.35));
+      c.slices[k].forEach(x=>x.style.opacity=o);
+    });
+  }
   const below=leaves[i+1];
   if(below)below.querySelector('.under').style.opacity=a>0&&a<180?Math.sin(a*Math.PI/180)*.8:0;
 }
@@ -175,31 +216,35 @@ function prev(){if(cur<=0)return;cur--;const i=cur;label();animate(i,0)}
 document.getElementById('next').onclick=next;document.getElementById('prev').onclick=prev;
 addEventListener('keydown',e=>{if(e.key==='ArrowUp'||e.key==='ArrowRight')next();if(e.key==='ArrowDown'||e.key==='ArrowLeft')prev()});
 
-/* drag: up turns the top leaf, down brings the last turned leaf back. The angle follows the finger. */
+/* drag: up or left turns the top leaf, down or right brings the last turned leaf back. The angle follows the finger.
+   The axis is picked from the first few pixels of movement. */
 let drag=null;
 pad.addEventListener('pointerdown',e=>{
   if(e.target.closest('a,button')||anim)return;
-  drag={y:e.clientY,t:performance.now(),i:null,v:0,ly:e.clientY,lt:performance.now()};
+  drag={x:e.clientX,y:e.clientY,i:null,v:0,lp:0,lt:performance.now()};
   pad.setPointerCapture(e.pointerId);
 });
 pad.addEventListener('pointermove',e=>{
   if(!drag)return;
-  const dy=e.clientY-drag.y,H=stack.offsetHeight;
+  const dx=e.clientX-drag.x,dy=e.clientY-drag.y;
   if(drag.i===null){
-    if(Math.abs(dy)<6)return;
-    if(dy<0&&cur<LAST)drag.i=cur,drag.dir='up';
-    else if(dy>0&&cur>0)drag.i=cur-1,drag.dir='down';
-    else return;
+    if(Math.hypot(dx,dy)<8)return;
+    drag.axis=Math.abs(dx)>Math.abs(dy)?'x':'y';
+    const d=drag.axis==='x'?dx:dy;                       // negative = up / left = forward
+    if(d<0&&cur<LAST)drag.i=cur,drag.dir='fwd';
+    else if(d>0&&cur>0)drag.i=cur-1,drag.dir='back';
+    else{drag=null;return}
   }
-  const f=Math.min(1,Math.abs(dy)/(H*.75));
-  ang[drag.i]=drag.dir==='up'?f*180:180-f*180;paint(drag.i);
-  const now=performance.now();drag.v=(e.clientY-drag.ly)/Math.max(1,now-drag.lt);drag.ly=e.clientY;drag.lt=now;
+  const d=drag.axis==='x'?dx:dy,span=drag.axis==='x'?stack.offsetWidth*.8:stack.offsetHeight*.75;
+  const f=Math.min(1,Math.abs(d)/span);
+  ang[drag.i]=drag.dir==='fwd'?f*180:180-f*180;paint(drag.i);
+  const now=performance.now();drag.v=(d-drag.lp)/Math.max(1,now-drag.lt);drag.lp=d;drag.lt=now;
 });
 function end(){
-  if(!drag)return;const d=drag;drag=null;if(d.i===null)return;
-  const a=ang[d.i],flick=Math.abs(d.v)>.5;
-  if(d.dir==='up'){ if(a>70||(flick&&d.v<0)){cur=d.i+1;label();animate(d.i,180,380)} else animate(d.i,0,300) }
-  else { if(a<110||(flick&&d.v>0)){cur=d.i;label();animate(d.i,0,380)} else animate(d.i,180,300) }
+  if(!drag)return;const g=drag;drag=null;if(g.i===null)return;
+  const a=ang[g.i],flick=Math.abs(g.v)>.5;
+  if(g.dir==='fwd'){ if(a>70||(flick&&g.v<0)){cur=g.i+1;label();animate(g.i,180,380)} else animate(g.i,0,300) }
+  else { if(a<110||(flick&&g.v>0)){cur=g.i;label();animate(g.i,0,380)} else animate(g.i,180,300) }
 }
 pad.addEventListener('pointerup',end);pad.addEventListener('pointercancel',end);
 </script>
