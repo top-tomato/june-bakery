@@ -69,3 +69,28 @@ test('book: opens, flips, and links back home without a reload', async ({ page }
   await expectRequiredSections(page)
   expect(errors.filter((e) => !/favicon/.test(e))).toEqual([])
 })
+
+test('photo book: opens on /gallery, turns forward and back, links back to the photo section', async ({ page }) => {
+  const errors = collectErrors(page)
+  await page.goto('/gallery/')
+  const count = page.locator('.book-nav .count')
+  const hasPhotos = await count.count()
+  test.skip(!hasPhotos, 'no gallery photos in this database (filled in via Django admin)')
+  await expect(count).toHaveText('ปกหน้า')
+  // phones get the top-bound notepad, wide screens the side-bound book
+  await expect(page.locator(page.viewportSize()!.width < 700 ? '.notepad .np' : '.book-stage')).toHaveCount(1)
+  await page.getByRole('button', { name: 'หน้าถัดไป' }).click()
+  await expect(count).not.toHaveText('ปกหน้า', { timeout: 3000 })
+  await page.getByRole('button', { name: 'หน้าถัดไป' }).click()
+  await page.waitForTimeout(1200)
+  const before = await count.textContent()
+  await page.getByRole('button', { name: 'หน้าก่อน' }).click()
+  await expect(count).not.toHaveText(before ?? '', { timeout: 3000 })
+  // quick taps never leave a notepad page half-turned
+  for (let i = 0; i < 6; i++) await page.getByRole('button', { name: 'หน้าถัดไป' }).click({ force: true })
+  await page.waitForTimeout(1500)
+  await expect(page.locator('.np-curl')).toHaveCount(0)
+  await page.locator('.book-back').click()
+  await expect(page).toHaveURL(/\/#gallery$/)
+  expect(errors.filter((e) => !/favicon/.test(e))).toEqual([])
+})

@@ -78,7 +78,8 @@
   border-radius: 6px;
   background: repeating-linear-gradient(180deg, #eadcc6 0 1px, #fffaf1 1px 3px) 0 100% / 100% var(--t) no-repeat, #fffaf1;
   box-shadow: 0 16px 28px -10px rgba(0, 0, 0, 0.45);
-  transition: transform 0.6s, opacity 0.3s;
+  /* opacity switches instantly: a fading stack showed as a grey sheet while flipping onto a cover */
+  transition: transform 0.6s;
 }
 .book-edges .l {
   left: 0;
@@ -111,20 +112,25 @@
 .book-page .pg.right .in {
   box-shadow: inset 22px 0 22px -18px rgba(0, 0, 0, 0.28);
 }
-.book-page .pg.left .in::after,
-.book-page .pg.right .in::after {
+/* punched holes on the spine side of every sheet and cover; same spacing as the rings (rings.css) */
+.book-page .pg .in::after {
   content: '';
   position: absolute;
-  top: 0;
-  bottom: 0;
+  top: 10px;
+  bottom: 10px;
   width: 16px;
-  background: radial-gradient(circle, #3e5d58 4.2px, transparent 4.8px) 50% 14px / 16px 28px repeat-y;
+  background: radial-gradient(circle, #2b3a37 3.6px, #4a5f5b 4.4px, transparent 4.9px) 50% 0 / 16px 28px no-repeat space;
 }
 .book-page .pg.left .in::after {
   right: 4px;
 }
-.book-page .pg.right .in::after {
+.book-page .pg.right .in::after,
+.book-page .pg.cover .in::after {
   left: 4px;
+}
+.book-stage:not(.single) .pg.cover.back .in::after {
+  left: auto;
+  right: 4px;
 }
 .book-page .pad {
   position: absolute;
@@ -138,8 +144,13 @@
 .book-page .pg.left .pad {
   right: 13cqw;
 }
-.book-page .cover .in {
+.book-page .cover .in,
+.book-page .pg.inside .in {
   background: var(--grain), radial-gradient(rgba(255, 255, 255, 0.18) 1px, transparent 1.3px) 0 0 / 8px 8px, var(--board);
+}
+/* inside of a cover (wide screens): bare board, a touch darker than the outside */
+.book-page .pg.inside .in {
+  filter: brightness(0.96);
 }
 .book-page .cover .pad {
   align-items: center;
@@ -384,22 +395,32 @@
   font: 600 4.6cqw var(--display);
 }
 
-/* spiral rings down the spine, lined up with the holes (14px offset, 28px step). Moved inside page-flip's layer at
-   runtime: pages rest at startZIndex+3/+4 and the turning page is +5, so with startZIndex 10 the rings (15, placed
-   before the pages) sit above resting pages and under the one turning. */
+/* wire rings down the spine (artwork in styles/rings.css). Moved inside page-flip's layer at runtime: pages rest at
+   startZIndex+3/+4 and the turning page is +5, so with startZIndex 10 the rings (15, placed before the pages) sit above
+   resting pages and under the one turning. */
 .book-rings {
   position: absolute;
   left: 50%;
-  top: 0;
-  bottom: 0;
-  width: 30px;
-  margin-left: -15px;
+  top: 10px;
+  bottom: 10px;
+  width: 44px;
+  margin-left: -22px;
   z-index: 15;
   pointer-events: none;
-  background: linear-gradient(180deg, transparent 0 11px, #7f8d8a 11px, #f1f4f3 14px, #9aa8a5 16px, #6f7c79 17px, transparent 17px)
-    0 0 / 30px 28px repeat-y;
-  border-radius: 8px;
-  filter: drop-shadow(0 2px 1px rgba(0, 0, 0, 0.35));
+  background: var(--ring-spread) 0 0 / 44px 28px no-repeat space;
+}
+/* one page showing (phones, or a closed book): the wire wraps round that page's edge */
+.book-stage.single .book-rings,
+.book-stage:not(.single) .book-shift.closed-front .book-rings {
+  width: 34px;
+  margin-left: -16px;
+  background: var(--ring-side) 0 0 / 34px 28px no-repeat space;
+}
+.book-stage:not(.single) .book-shift.closed-back .book-rings {
+  width: 34px;
+  margin-left: -18px;
+  transform: scaleX(-1);
+  background: var(--ring-side) 0 0 / 34px 28px no-repeat space;
 }
 
 /* single page (phones): holes, rings and gutter on the left of every page */
@@ -416,6 +437,7 @@
 }
 .book-stage.single .book-rings {
   left: 0;
+  transform: none;
 }
 .book-stage.single .book-edges .l {
   display: none;
@@ -489,4 +511,28 @@
   font: 1rem var(--hand);
   min-width: 76px;
   text-align: center;
+}
+
+/* photo book (/gallery) bits on top of the menu book's paper */
+.book-page .logo {
+  width: 62cqw;
+  aspect-ratio: 1000 / 660;
+  margin: 0 auto;
+  /* the real logo is a white PNG: use its shape, ink it in the book's colour */
+  background: var(--bink);
+  -webkit-mask: var(--logo) center / contain no-repeat;
+  mask: var(--logo) center / contain no-repeat;
+}
+.book-page .centered {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+.book-page .snaps.one {
+  grid-template-rows: 1fr;
+}
+.book-page .snap video.ph {
+  width: 100%;
+  object-fit: cover;
+  display: block;
 }

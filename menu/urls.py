@@ -10,6 +10,7 @@ urlpatterns = [
     # หน้าของแอป React (TanStack Router จัดการเส้นทางต่อในเบราว์เซอร์) เพิ่มที่นี่เมื่อมีหน้าใหม่
     path("", views.app, name="index"),
     path("book/", views.app, name="book"),
+    path("gallery/", views.app, name="gallery"),
 ]
 
 if settings.DEBUG:

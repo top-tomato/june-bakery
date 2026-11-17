@@ -41,5 +41,10 @@ class ReviewAdmin(admin.ModelAdmin):
 
 @admin.register(GalleryPhoto)
 class GalleryPhotoAdmin(admin.ModelAdmin):
-    list_display = ("__str__", "sort_order", "is_active")
+    list_display = ("__str__", "has_video", "sort_order", "is_active")
+    fields = ("image", "video", "caption", "sort_order", "is_active")
+
+    @admin.display(boolean=True, description="วิดีโอ")
+    def has_video(self, obj: GalleryPhoto) -> bool:
+        return bool(obj.video)
     list_editable = ("sort_order", "is_active")

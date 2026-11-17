@@ -14,6 +14,14 @@ export interface Product {
   highlights: string[]
 }
 
+export interface GalleryItem {
+  id: number
+  image: string
+  caption: string
+  /** URL of a short .mp4, or "" for a plain photo */
+  video: string
+}
+
 export interface MenuData {
   products: Product[]
   line: { oaId: string; addUrl: string; qrSvg: string }
@@ -25,8 +33,8 @@ export interface MenuData {
   /** the shop's story; null until the shop writes it (section hidden) */
   about: { title: string; text: string; photo: string } | null
   reviews: { id: number; text: string; author: string }[]
-  /** photos for the gallery section (#gallery) */
-  gallery: { id: number; image: string; caption: string }[]
+  /** photos (and short silent videos, image = poster) for the gallery section (#gallery) and the photo book (/gallery) */
+  gallery: GalleryItem[]
 }
 
 export const menuKeys = {

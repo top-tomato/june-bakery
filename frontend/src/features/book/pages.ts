@@ -4,7 +4,7 @@ import { fullName, lineChatUrl, type MenuData } from '@/api/menu'
  * The menu book's pages as HTML (mock/menu-book-v2.html). page-flip takes over and moves these elements itself, so they
  * are built outside React and every piece of data is escaped here.
  */
-const esc = (s: string | number) =>
+export const esc = (s: string | number) =>
   String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c] ?? c)
 
 // hand-drawn line art in one stroke style (the shop wants SVG, never emoji)
@@ -16,14 +16,14 @@ const DOODLES = {
   sparkle: '<path class="dd peach" d="M50 10l5 35 35 5-35 5-5 35-5-35-35-5 35-5Z"/>',
   whisk: '<path class="dd" d="M50 96V58"/><path class="dd" d="M50 58C26 40 30 6 50 6s24 34 0 52Z"/><path class="dd" d="M50 58C40 40 42 10 50 6M50 58c10-18 8-48 0-52"/>',
 } as const
-type Doodle = keyof typeof DOODLES
-const doodle = (k: Doodle, css: string) => `<svg class="d" viewBox="0 0 100 100" style="${css}" aria-hidden="true">${DOODLES[k]}</svg>`
+export type Doodle = keyof typeof DOODLES
+export const doodle = (k: Doodle, css: string) => `<svg class="d" viewBox="0 0 100 100" style="${css}" aria-hidden="true">${DOODLES[k]}</svg>`
 const RING =
   '<svg viewBox="0 0 100 60" preserveAspectRatio="none" aria-hidden="true"><path class="dd peach" style="stroke-width:2.6" d="M10 34C8 12 90 6 94 28 98 52 12 58 6 34 4 20 30 10 62 9"/></svg>'
 const CAKE_DOODLES: Doodle[] = ['leaf', 'garlic', 'coconut', 'cake']
 
 
-const page = (cls: string, body: string, hard = false) =>
+export const page = (cls: string, body: string, hard = false) =>
   `<div class="pg ${cls}"${hard ? ' data-density="hard"' : ''}><div class="in"><div class="pad"${cls.includes('center') ? ' style="justify-content:center"' : ''}>${body}</div></div></div>`
 
 export function buildPages({ products, line }: MenuData): string[] {

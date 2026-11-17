@@ -1,3 +1,5 @@
+from django.core.exceptions import ValidationError
+from django.core.validators import FileExtensionValidator
 from django.db import models
 
 
@@ -108,9 +110,16 @@ class Review(models.Model):
 
 
 class GalleryPhoto(models.Model):
-    """รูปในส่วนรูปขนม (ลิงก์ตรงได้ที่ /#gallery)"""
+    """รูปหรือวิดีโอในส่วนรูปขนมบนหน้าแรก และในสมุดรูป /gallery/"""
 
-    image = models.ImageField("รูป", upload_to="gallery/")
+    image = models.ImageField("รูป", upload_to="gallery/", help_text="ถ้าใส่วิดีโอด้วย รูปนี้ใช้เป็นภาพปกของวิดีโอ")
+    video = models.FileField(
+        "วิดีโอ (ไม่ใส่ก็ได้)",
+        upload_to="gallery/video/",
+        blank=True,
+        validators=[FileExtensionValidator(["mp4", "webm"])],
+        help_text="ไฟล์ .mp4 สั้น ๆ ไม่เกิน 20 MB เล่นเองแบบไม่มีเสียง",
+    )
     caption = models.CharField("คำบรรยาย", max_length=80, blank=True)
     sort_order = models.PositiveIntegerField("ลำดับ", default=0)
     is_active = models.BooleanField("แสดงบนเว็บ", default=True)
@@ -124,4 +133,8 @@ class GalleryPhoto(models.Model):
         return self.caption or self.image.name
 
     def as_payload(self) -> dict[str, object]:
-        return {"id": self.pk, "image": self.image.url, "caption": self.caption}
+        return {"id": self.pk, "image": self.image.url, "caption": self.caption, "video": self.video.url if self.video else ""}
+
+    def clean(self) -> None:
+        if self.video and self.video.size > 20 * 1024 * 1024:
+            raise ValidationError({"video": "วิดีโอใหญ่เกิน 20 MB ลองย่อไฟล์ก่อน"})
