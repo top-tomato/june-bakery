@@ -13,14 +13,12 @@ interface Props {
   closedDays?: string[]
   /** colour of the story section above (the drips hang from it) */
   above: string
-  /** same colour as the section above: no drips, so no room kept for them */
-  flush?: boolean
 }
 
-export function Where({ shop, above, flush }: Props) {
+export function Where({ shop, above }: Props) {
   return (
-    <section className={flush ? 'where flush' : 'where'} id="where" data-nav="light">
-      {!flush && <Drips count={24} color={above} />}
+    <section className="where" id="where" data-nav="dark">
+      <Drips count={24} color={above} />
       <div>
         <h2 className="reveal">
           แวะหยิบได้

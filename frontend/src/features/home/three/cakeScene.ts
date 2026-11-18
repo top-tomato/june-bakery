@@ -162,7 +162,9 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
     boxCam.position.copy(dir.multiplyScalar(d))
     boxCam.lookAt(0, lerp(0.35, 0.2, look) + lift * 0.75, lerp(0, -0.7, look) - lift * 0.4)
     boxCam.aspect = cw / ch
-    return { ox: cw / 2 - (r.left + r.width / 2), oy: ch / 2 - (r.top + r.height / 2) }
+    // at the end (lid lying back, seen from above) sit the box low in its stage, right above the price, instead of
+    // centred with empty space under it
+    return { ox: cw / 2 - (r.left + r.width / 2), oy: ch / 2 - (r.top + r.height / 2) - look * r.height * 0.08 }
   }
 
   /**

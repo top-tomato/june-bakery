@@ -98,7 +98,7 @@ export function HomePage({ data }: { data: MenuData }) {
         {data.gallery.length > 0 && <Gallery photos={data.gallery} above={above('gallery')} flush={flush('gallery')} />}
         <Hero products={products} active={active} onPick={pick} spotRef={heroSpot} photo={photo} motion={motion} />
         <Box product={product} lineOaId={line.oaId} stageRef={boxStage} photo={photo} motion={motion} above={above('box')} flush={flush('box')} />
-        <Where shop={shop} closedDays={data.closedDays} above={lastBg} flush={lastBg === BG.indigo} />
+        <Where shop={shop} closedDays={data.closedDays} above={lastBg} />
         <End line={line} social={data.social} />
       </main>
     </>

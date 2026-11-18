@@ -383,16 +383,14 @@ main .buy strong.ask {
   font-weight: 600;
 }
 .where {
-  background: var(--indigo);
+  /* cream, so the box section's dark green drips mark where it starts (and its own cream drips into the end) */
+  background: var(--cream);
+  color: var(--ink);
   padding: clamp(240px, calc(var(--vh) * 34), 340px) clamp(16px, 5vw, 80px) 140px;
   display: grid;
   grid-template-columns: minmax(260px, 1fr) 1.5fr;
   gap: clamp(24px, 4vw, 64px);
   align-items: start;
-}
-/* right after the box section (same dark green): no drips, so no tall gap for them */
-.where.flush {
-  padding-top: 48px !important;
 }
 .where h2 {
   font-size: clamp(2.2rem, 5vw, 4.4rem);
@@ -427,6 +425,8 @@ main .buy strong.ask {
 }
 .where .btn.go {
   margin-top: 18px;
+  background: var(--ink);
+  color: var(--cream);
 }
 .contact {
   margin-top: 28px;
@@ -530,7 +530,7 @@ main .buy strong.ask {
   color: var(--ink);
   padding: clamp(260px, calc(var(--vh) * 38), 360px) 16px 0;
   text-align: center;
-  --from: var(--indigo);
+  --from: var(--cream);
   overflow: hidden;
 }
 .end h2 {
