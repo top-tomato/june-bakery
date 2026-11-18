@@ -5,7 +5,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500&display=block" rel="stylesheet">
 <style>
 /* Rich menu v3, large (2500x1686): 1 wide on top + 3 below. Background drawn with AI (rich-menu-background-v3.png),
-   labels set here so the Thai text is crisp. The top is covered by a dark green panel (cream June logo, like the /box header). Areas: top = เว็บไซต์ -> /, bottom left to right: Gallery -> /gallery/,
+   labels set here so the Thai text is crisp. Full bleed (no outer frame). The top is covered by a dark green panel (cream June logo, like the /box header). Areas: top = เว็บไซต์ -> /, bottom left to right: Gallery -> /gallery/,
    โปรเดือนนี้ -> /promo, คุยกับแอดมิน -> chat. */
 *{margin:0;box-sizing:border-box}
 html,body{width:2500px;height:1686px;overflow:hidden;background:#FFF6E6}
@@ -14,16 +14,23 @@ body{background:url(rich-menu-background-v3.png) 0 0/100% 100% no-repeat;positio
 .top b{font:500 190px/1 Mitr,sans-serif}
 .top span{font:400 76px/1.2 Mitr,sans-serif;margin-top:34px;color:#5d7a73}
 /* dark green top like the /box header: cream June logo + cream label (covers the drawn shop) */
-.hero{position:absolute;left:12px;top:12px;width:2476px;height:829px;border-radius:34px 34px 0 0;background:#3E5D58;display:flex;align-items:center;justify-content:center;gap:150px}
+.hero{position:absolute;left:0;top:0;width:2500px;height:841px;background:#3E5D58;display:flex;align-items:center;justify-content:center;gap:150px}
 .hero img{width:760px}
 .hero div{display:flex;flex-direction:column;align-items:flex-start;color:#FFF6E6}
 .hero b{font:500 200px/1 Mitr,sans-serif}
 .hero span{font:400 80px/1.2 Mitr,sans-serif;margin-top:36px;color:#C9DE98}
+/* full bleed: paint over the drawn outer border and its white corners, so LINE shows no frame in light or dark mode */
+.edge{position:absolute;background:#FEF4E4}
 .bot{position:absolute;top:1425px;width:833px;text-align:center;font:500 104px/1 Mitr,sans-serif}
 </style>
 </head>
 <body>
   <div class="hero"><img src="june-mark-cream.svg" alt=""><div><b>เว็บไซต์</b><span>ดูเมนู · สั่งทาง LINE</span></div></div>
+  <div class="edge" style="left:0;top:841px;width:20px;bottom:0"></div>
+  <div class="edge" style="right:0;top:841px;width:20px;bottom:0"></div>
+  <div class="edge" style="left:0;right:0;bottom:0;height:20px"></div>
+  <div class="edge" style="left:0;bottom:0;width:52px;height:52px"></div>
+  <div class="edge" style="right:0;bottom:0;width:52px;height:52px"></div>
   <div class="bot" style="left:0">Gallery</div>
   <div class="bot" style="left:833px">โปรเดือนนี้</div>
   <div class="bot" style="left:1666px">คุยกับแอดมิน</div>
