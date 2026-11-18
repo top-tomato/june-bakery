@@ -84,10 +84,10 @@ for(const [w,d,x,z,h] of [[W,T,0,W/2,H],[W,T,0,-W/2,H],[T,W,W/2,0,H],[T,W,-W/2,0
 }
 s.add(box)
 // lid: hinge on the back top edge, plate hangs forward (+z) from it
-const hinge=new THREE.Group(); hinge.position.set(0,TOP+.004,-W/2-.01); s.add(hinge)
+const hinge=new THREE.Group(); hinge.position.set(0,TOP,-W/2); s.add(hinge) // exactly on the back wall top: the lid is the same sheet folded, no gap
 const lid=new THREE.Group(); hinge.add(lid)
 const L=W+.01, m=.42                                     // lid size, kraft border around the window
-const plate=rrect(new THREE.Shape(),-L/2,0,L,L,.02); plate.holes.push(rrect(new THREE.Path(),-L/2+m,m,L-2*m,L-2*m,.12))
+const plate=rrect(new THREE.Shape(),-L/2,-.012,L,L+.012,.006); plate.holes.push(rrect(new THREE.Path(),-L/2+m,m,L-2*m,L-2*m,.12))
 const pg=new THREE.ExtrudeGeometry(plate,{depth:T,bevelEnabled:false}); pg.rotateX(Math.PI/2); pg.translate(0,T,0)
 const lidPlate=new THREE.Mesh(pg,paper); lidPlate.castShadow=lidPlate.receiveShadow=true; lid.add(lidPlate)
 const win=new THREE.Mesh(new THREE.PlaneGeometry(L-2*m+.06,L-2*m+.06),film); win.rotation.x=-Math.PI/2; win.position.set(0,.002,L/2); lid.add(win)
