@@ -13,6 +13,11 @@
 .opt small{color:var(--muted);font-size:.8rem;line-height:1.4;display:block}
 .prev{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;text-align:center;position:sticky;top:76px}
 .prev img{display:block;width:220px;max-width:100%;margin:0 auto;border-radius:10px;background:#fff}
+/* nothing typed yet: a dashed box with a faint QR mark, not a broken image */
+.prev img:not([src]){display:none}
+.prev .ph{display:none;width:220px;max-width:100%;aspect-ratio:1;margin:0 auto;border:2px dashed var(--line);border-radius:10px;place-items:center;color:var(--line)}
+.prev img:not([src])+.ph{display:grid}
+.prev .ph svg{width:72px;height:72px}
 .dest{font-size:.78rem;color:var(--muted);word-break:break-all;margin-top:10px;line-height:1.45}
 .dest code,.qrow code{color:var(--ink);font-size:.8rem}
 .saved{margin-top:22px;max-width:980px}
@@ -51,6 +56,7 @@
 
   <div class="prev">
     <img id="qImg" alt="ตัวอย่าง QR" width="220" height="220">
+    <div class="ph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h3M21 18v3h-1"/></svg></div>
     <p class="dest" id="dest">ใส่ลิงก์ หรือกดปุ่มลัดข้างซ้าย</p>
     <p class="muted" style="font-size:.78rem;margin-top:8px">บันทึกแล้วโหลด PNG / SVG หรือพิมพ์สติกเกอร์ได้ที่รายการด้านล่าง</p>
   </div>
