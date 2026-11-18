@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>June — วิธีสั่ง + ส่งถึงที่ (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&family=Itim&display=swap" rel="stylesheet">
+<style>
+/* The "how to order" section with delivery added: step 1 asks pickup or delivery, step 2 quotes the delivery fee,
+   step 3 offers both (shop icon + scooter icon). A new "ส่ง" fact sits with the others and comes from the back office;
+   it is hidden while blank. Same colours and card style as the live section. */
+:root{--tea:#f3a18f;--cream:#fff6e6;--ink:#243b37;--display:'Mitr','Anuphan',system-ui,sans-serif;--hand:'Itim','Mitr',cursive}
+*{box-sizing:border-box;margin:0}
+body{font-family:Anuphan,system-ui,sans-serif;color:var(--ink);background:#2b3a37}
+.note{position:sticky;top:0;z-index:5;background:#1c2b28;color:var(--cream);padding:10px 16px;font-size:.85rem;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center}
+.note button{border:1px solid var(--cream);background:none;color:var(--cream);border-radius:99px;padding:4px 12px;font:inherit;cursor:pointer}
+.note button[aria-pressed=true]{background:var(--cream);color:#1c2b28}
+.how{background:#dcebb5;padding:72px clamp(16px,6vw,96px) 88px}
+.wrap{max-width:1080px;margin:0 auto}
+.kicker{font:400 1.05rem var(--hand);opacity:.8}
+.sec-title{font:600 clamp(2rem,6vw,3.6rem)/1.15 var(--display);margin:6px 0 28px}
+.steps{list-style:none;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:16px;counter-reset:s}
+.steps li{position:relative;background:var(--cream);border-radius:22px;padding:26px 22px 22px;counter-increment:s;line-height:1.55}
+.steps li::before{content:counter(s);position:absolute;top:-16px;left:18px;width:36px;height:36px;border-radius:50%;background:var(--tea);display:grid;place-items:center;font:600 1.1rem var(--display)}
+.steps b{display:block;font:600 1.15rem var(--display);margin-bottom:4px}
+.steps em{font-style:normal;font-weight:600;background:linear-gradient(transparent 60%,rgba(243,161,143,.45) 60%)}
+.ways{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.ways span{display:inline-flex;align-items:center;gap:6px;padding:5px 12px 5px 8px;border-radius:99px;background:#dcebb5;font-size:.92rem}
+.ways svg{width:22px;height:22px;fill:none;stroke:var(--ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin-top:26px}
+.facts div{background:rgba(255,246,230,.7);border-radius:16px;padding:14px 16px}
+.facts dt{font:600 1rem var(--display)}
+.facts dd{margin:0}
+.facts .new{outline:2px dashed var(--tea);outline-offset:2px}
+.old .v-new,.new-v .v-old{display:none}
+.nofacts .facts{display:none}
+@media (max-width:820px){.steps{grid-template-columns:1fr;gap:26px}}
+</style>
+</head>
+<body class="new-v">
+<p class="note">mock: ส่วน "วิธีสั่ง" เพิ่มส่งถึงที่ ·
+  <button type="button" data-v="old" aria-pressed="false">แบบเดิม</button>
+  <button type="button" data-v="new-v" aria-pressed="true">แบบใหม่</button>
+  <button type="button" id="facts" aria-pressed="true">มีข้อมูลร้านกรอกแล้ว</button></p>
+<section class="how"><div class="wrap">
+  <p class="kicker">วิธีสั่ง</p>
+  <h2 class="sec-title">ง่าย ๆ 3 ขั้น</h2>
+  <ol class="steps">
+    <li><b>ทัก LINE</b><span class="v-old">บอกจำนวน และวันที่อยากรับ</span><span class="v-new">บอกจำนวน วันที่ และ<em>รับเองหรือให้ส่ง</em></span></li>
+    <li><b>ร้านตอบกลับ</b><span class="v-old">ยืนยันออเดอร์ให้ในแชต</span><span class="v-new">ยืนยันออเดอร์ และ<em>แจ้งค่าส่ง</em>ในแชต</span></li>
+    <li class="v-old"><b>รับที่หน้าร้าน</b>หน้าร้าน June</li>
+    <li class="v-new"><b>รับที่ร้าน หรือส่งถึงที่</b>
+      <div class="ways">
+        <span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10 6 4h12l2 6M4 10h16v10H4ZM9 20v-5h6v5"/></svg>แวะหยิบที่หน้าร้าน June</span>
+        <span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="17" r="2.6"/><circle cx="18" cy="17" r="2.6"/><path d="M8.6 17h6.8M15 17l-2.5-7H9M12.5 10h3.5l2 7M3 11h5"/><rect x="2.5" y="6" width="5" height="4" rx="1"/></svg>ไรเดอร์ส่งถึงมือ</span>
+      </div></li>
+  </ol>
+  <dl class="facts">
+    <div><dt>สั่งล่วงหน้า</dt><dd>อย่างน้อย 1 วัน</dd></div>
+    <div><dt>เก็บได้</dt><dd>2 วันในตู้เย็น</dd></div>
+    <div><dt>จ่ายเงิน</dt><dd>โอน / เงินสด</dd></div>
+    <div class="v-new new"><dt>ส่ง</dt><dd>Grab / Lineman ค่าส่งตามระยะทาง</dd></div>
+  </dl>
+</div></section>
+<p style="color:var(--cream);opacity:.7;font-size:.85rem;padding:14px 16px;text-align:center">ข้อความในช่องข้อมูล (สั่งล่วงหน้า / เก็บได้ / จ่ายเงิน / ส่ง) เป็นตัวอย่าง ร้านกรอกเองที่หลังร้าน → ข้อมูลร้าน · ช่องไหนว่างจะไม่ขึ้น · กรอบประคือช่องใหม่</p>
+<script>
+document.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{document.body.classList.remove('old','new-v');document.body.classList.add(b.dataset.v);document.querySelectorAll('[data-v]').forEach(x=>x.setAttribute('aria-pressed',x===b))})
+document.getElementById('facts').onclick=e=>{const off=document.body.classList.toggle('nofacts');e.target.setAttribute('aria-pressed',!off)}
+</script>
+</body>
+</html>
