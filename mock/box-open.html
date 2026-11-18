@@ -54,13 +54,19 @@ const ground=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.ShadowMater
 // Box modelled on the shop's real box (photo ref): kraft brown inside and out, square, shallow (cake tops level with
 // the rim), 4 pieces packed tight 2x2. Lid hinged at the back with a big clear window (rounded corners), a front
 // tuck flap and two side flaps; opened, it lies back almost flat.
-function kraft(base){const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');g.fillStyle=base;g.fillRect(0,0,256,256)
-  for(let i=0;i<3000;i++){g.fillStyle=`rgba(${Math.random()<.5?'70,45,20':'215,175,125'},${Math.random()*.13})`;g.fillRect(Math.random()*256,Math.random()*256,Math.random()*16,1)}
-  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;return t}
-const paper=new THREE.MeshStandardMaterial({map:kraft('#a8773f'),roughness:.9,side:THREE.DoubleSide})
-const inner=new THREE.MeshStandardMaterial({map:kraft('#b8874f'),roughness:.95})
+// kraft paper, not wood: even, muted brown with tiny fibre specks in every direction (no long streaks)
+function kraft(base){const c=document.createElement('canvas');c.width=c.height=512;const g=c.getContext('2d');g.fillStyle=base;g.fillRect(0,0,512,512)
+  for(let i=0;i<9000;i++){const x=Math.random()*512,y=Math.random()*512,a=Math.random()*Math.PI,l=1+Math.random()*4
+    g.strokeStyle=`rgba(${Math.random()<.55?'60,40,20':'225,195,150'},${.05+Math.random()*.12})`;g.lineWidth=.6+Math.random()*.6
+    g.beginPath();g.moveTo(x,y);g.lineTo(x+Math.cos(a)*l,y+Math.sin(a)*l);g.stroke()}
+  for(let i=0;i<30;i++){const x=Math.random()*512,y=Math.random()*512,r=40+Math.random()*80,rg=g.createRadialGradient(x,y,0,x,y,r);rg.addColorStop(0,`rgba(80,55,30,${Math.random()*.035})`);rg.addColorStop(1,'rgba(80,55,30,0)');g.fillStyle=rg;g.fillRect(x-r,y-r,2*r,2*r)} // faint, soft-edged tone changes
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t}
+const paper=new THREE.MeshStandardMaterial({map:kraft('#a37c55'),roughness:1,envMapIntensity:.6,side:THREE.DoubleSide})
+const inner=new THREE.MeshStandardMaterial({map:kraft('#ad8660'),roughness:1,envMapIntensity:.6})
 const film=new THREE.MeshPhysicalMaterial({color:0xffffff,transparent:true,opacity:.14,roughness:.04,metalness:0,clearcoat:1,clearcoatRoughness:.05,side:THREE.DoubleSide,depthWrite:false})
-const part=(w,h,d,m,x,y,z)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;return o}
+const part=(w,h,d,m,x,y,z)=>{const geo=new THREE.BoxGeometry(w,h,d), uv=geo.attributes.uv
+  ;[[d,h],[d,h],[w,d],[w,d],[w,h],[w,h]].forEach(([su,sv],f)=>{for(let i=f*4;i<f*4+4;i++)uv.setXY(i,uv.getX(i)*su*.8,uv.getY(i)*sv*.8)})
+  const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;return o}
 const rrect=(sh,x,y,w,h,r)=>{sh.moveTo(x+r,y);sh.lineTo(x+w-r,y);sh.quadraticCurveTo(x+w,y,x+w,y+r);sh.lineTo(x+w,y+h-r);sh.quadraticCurveTo(x+w,y+h,x+w-r,y+h);sh.lineTo(x+r,y+h);sh.quadraticCurveTo(x,y+h,x,y+h-r);sh.lineTo(x,y+r);sh.quadraticCurveTo(x,y,x+r,y);return sh}
 
 const W=2.08, H=.64, T=.008, box=new THREE.Group()
