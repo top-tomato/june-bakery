@@ -2,7 +2,6 @@ import { useEffect, type CSSProperties, type ReactNode } from 'react'
 import { fullName, lineChatUrl, priceLabel, type CareTip, type MenuData } from '@/api/menu'
 import boxPhoto from '@/assets/box-4.jpg'
 import { JuneLogo } from '@/components/JuneLogo'
-import { Drips } from '../home/Drips'
 import '../home/home.css'
 import './box.css'
 
@@ -34,9 +33,9 @@ const chevron = (
 )
 
 /**
- * The page the QR sticker on the box opens (mock/box-qr.html): thanks, "order again" on LINE, how to keep the cake
- * soft, add friend / send a photo. Same motion as the landing page: the June logo's palm opens and sways, the green
- * header drips into the cream, and each card fades up as it scrolls in.
+ * The page the QR sticker on the box opens (mock/box-green.html, option D of mock/box-card.html): thanks, "order again"
+ * on LINE, how to keep the cake soft, add friend / send a photo. All green, cream cards (a cream card on cream drips
+ * blended in). Opening: the June logo's palm opens and sways, the heading floats up, the cards rise one after another.
  */
 export function BoxThanks({ data }: { data: MenuData }) {
   const { products, line, shop, care } = data
@@ -45,16 +44,6 @@ export function BoxThanks({ data }: { data: MenuData }) {
 
   useEffect(() => {
     document.title = 'ขอบคุณที่อุดหนุน · June'
-    const io = new IntersectionObserver(
-      (entries) =>
-        entries.forEach((e) => {
-          if (e.isIntersecting) e.target.classList.add('in')
-          else if (e.boundingClientRect.top > innerHeight) e.target.classList.remove('in')
-        }),
-      { rootMargin: '0px 0px -8% 0px' },
-    )
-    document.querySelectorAll('.bx .reveal').forEach((el) => io.observe(el))
-    return () => io.disconnect()
   }, [])
 
   const i = (n: number) => ({ '--i': n }) as CSSProperties
@@ -63,12 +52,10 @@ export function BoxThanks({ data }: { data: MenuData }) {
       <header className="bx-head">
         <JuneLogo className="logo go" role="img" aria-label="June" aria-hidden={false} />
         <h1>ขอบคุณที่อุดหนุนนะคะ</h1>
-        <p className="sub">หวังว่าจะอร่อย ทานให้สนุก</p>
       </header>
 
       <div className="bx-body">
-        <Drips count={12} color="#3e5d58" />
-        <section className="bx-card again reveal">
+        <section className="bx-card again" style={i(0)}>
           <img src={boxPhoto} alt="ชิฟฟ่อน 4 ชิ้นในกล่อง" width={449} height={494} />
           <div>
             <h2>{name}</h2>
@@ -88,11 +75,11 @@ export function BoxThanks({ data }: { data: MenuData }) {
         </section>
 
         {care.length > 0 && (
-          <section className="bx-card tips">
-            <h3 className="reveal">เก็บยังไงให้นุ่ม</h3>
+          <section className="bx-card tips" style={i(1)}>
+            <h3>เก็บยังไงให้นุ่ม</h3>
             <ul>
               {care.map((t, k) => (
-                <li key={k} className="reveal" style={i(k + 1)}>
+                <li key={k} style={i(k)}>
                   <span className="ic" aria-hidden="true">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       {ICONS[t.icon]}
@@ -108,7 +95,7 @@ export function BoxThanks({ data }: { data: MenuData }) {
           </section>
         )}
 
-        <section className="bx-card links reveal">
+        <section className="bx-card links" style={i(care.length > 0 ? 2 : 1)}>
           <a href={line.addUrl}>
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="9" cy="8" r="4" />
@@ -135,7 +122,7 @@ export function BoxThanks({ data }: { data: MenuData }) {
           </a>
         </section>
 
-        <p className="bx-foot reveal">
+        <p className="bx-foot">
           หน้าร้าน June · {shop.address}
           {shop.hours && (
             <>
