@@ -286,8 +286,8 @@ class Order(models.Model):
     who = models.CharField("ชื่องาน / ลูกค้า", max_length=120, blank=True)
     product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="ขนม")
     product_name = models.CharField("ชื่อขนม", max_length=120)  # kept if the product is renamed or removed
-    qty = models.PositiveIntegerField("จำนวนชิ้น", default=1)
-    unit_price = models.PositiveIntegerField("ราคาต่อชิ้น")
+    qty = models.PositiveIntegerField("จำนวนกล่อง", default=1)
+    unit_price = models.PositiveIntegerField("ราคาต่อกล่อง")
     channel = models.CharField("สั่งทาง", max_length=10, choices=CHANNELS, default="line")
     payment = models.CharField("จ่ายด้วย", max_length=10, choices=PAYMENTS, default="transfer")
     note = models.CharField("จด", max_length=160, blank=True)

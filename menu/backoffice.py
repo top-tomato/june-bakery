@@ -251,7 +251,7 @@ def order_add(request: HttpRequest) -> HttpResponse:
     except ValueError:
         o.unit_price = product.price if product and product.price is not None else -1
     if o.unit_price < 0:
-        messages.error(request, "ใส่ราคาต่อชิ้นก่อน")
+        messages.error(request, "ใส่ราคาต่อกล่องก่อน")
         return back(request, "backoffice:orders")
     if o.kind == "pre":
         try:

@@ -57,9 +57,9 @@
     <label for="pNote">จด (ไม่ใส่ก็ได้)</label><input id="pNote" name="note" maxlength="160" placeholder="เช่น 50 ที่ แยกกล่อง ส่งชั้น 3">
   </div>
   {% if products|length > 1 %}<label for="oProduct">ขนม</label><select id="oProduct" name="product" class="sel">{% for p in products %}<option value="{{ p.pk }}" data-price="{{ p.price|default_if_none:'' }}">{{ p.full_name }}</option>{% endfor %}</select>{% elif products %}<input type="hidden" name="product" value="{{ products.0.pk }}" data-price="{{ products.0.price|default_if_none:'' }}" id="oProduct">{% endif %}
-  <div class="row2"><div><label>จำนวนชิ้น{% if products|length == 1 %} · {{ products.0.full_name }}{% endif %}</label>
+  <div class="row2"><div><label>จำนวนกล่อง{% if products|length == 1 %} · {{ products.0.full_name }}{% endif %}</label>
   <div class="step"><button type="button" data-q="-1">−</button><output id="qty">1</output><button type="button" data-q="1">+</button><input type="hidden" name="qty" id="qtyIn" value="1"></div></div>
-  <div><label for="oPrice">ราคาต่อชิ้น (บาท)</label><input id="oPrice" name="unit_price" inputmode="numeric" required value="{{ products.0.price|default_if_none:'' }}" placeholder="ใส่ราคา"></div></div>
+  <div><label for="oPrice">ราคาต่อกล่อง (บาท)</label><input id="oPrice" name="unit_price" inputmode="numeric" required value="{{ products.0.price|default_if_none:'' }}" placeholder="ใส่ราคา"></div></div>
   <label>สั่งทาง</label>
   <div class="chips"><label><input type="radio" name="channel" value="line" checked>LINE</label><label><input type="radio" name="channel" value="store">หน้าร้าน</label><label><input type="radio" name="channel" value="other">อื่น ๆ</label></div>
   <label>จ่ายด้วย</label>
