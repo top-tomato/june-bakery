@@ -1,8 +1,9 @@
 /* Taped polaroid snapshots on dot paper (mock/gallery-scrapbook.html, mock/gallery-all.html): the homepage's photo
    section and the /gallery page. */
 /* the homepage's photo section */
+/* light lime (not cream like the story above it) so the cream drips mark where it starts */
 .gallery {
-  background: radial-gradient(circle, rgba(47, 74, 69, 0.2) 0.9px, transparent 1.3px) 0 0 / 18px 18px, #fffbf3;
+  background: radial-gradient(circle, rgba(47, 74, 69, 0.16) 0.9px, transparent 1.3px) 0 0 / 18px 18px, #dcebb5;
 }
 .gal-sub {
   font: 1.05rem var(--hand);

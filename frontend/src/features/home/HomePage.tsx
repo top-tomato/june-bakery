@@ -80,7 +80,7 @@ export function HomePage({ data }: { data: MenuData }) {
   // how-to.
   const sections: { key: string; bg: string }[] = [{ key: 'opening', bg: BG.indigo }]
   if (data.about) sections.push({ key: 'about', bg: BG.cream })
-  if (data.gallery.length) sections.push({ key: 'gallery', bg: BG.cream })
+  if (data.gallery.length) sections.push({ key: 'gallery', bg: BG.pink })
   sections.push({ key: 'hero', bg: BG.indigo }, { key: 'box', bg: BG.indigo })
   const above = (key: string) => sections[sections.findIndex((s) => s.key === key) - 1]?.bg ?? BG.indigo
   const flush = (key: string) => above(key) === sections.find((s) => s.key === key)?.bg
