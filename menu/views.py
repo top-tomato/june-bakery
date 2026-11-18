@@ -6,7 +6,7 @@ from django.conf import settings
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.utils import timezone
-from django.views.decorators.cache import cache_control
+from django.views.decorators.cache import cache_control, never_cache
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.http import require_GET
 
@@ -64,6 +64,7 @@ def api_menu(request: HttpRequest) -> JsonResponse:
 
 
 @xframe_options_sameorigin  # ให้หน้า phone-preview ของเว็บเราเองฝังหน้านี้ในกรอบได้
+@never_cache  # หน้าเว็บต้องถามเซิร์ฟเวอร์ทุกครั้ง ไม่งั้น LINE/มือถือเปิดหน้าเก่าที่ชี้ไปโค้ดเก่าหลัง deploy
 def app(request: HttpRequest) -> HttpResponse:
     """หน้าเปล่าของแอป React ทุกหน้า ฝังข้อมูลเมนูไว้ให้เลย หน้าแรกจะได้ไม่ต้องรอเรียก API อีกรอบ"""
     data = menu_data()

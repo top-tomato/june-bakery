@@ -48,6 +48,10 @@ class MediaTestCase(TestCase):
 
 
 class MenuApiTests(MediaTestCase):
+    def test_page_is_never_cached(self) -> None:
+        # after a deploy, phones (LINE's browser) must not keep showing the old page that points at old code
+        self.assertIn("no-cache", self.client.get(reverse("menu:index"))["Cache-Control"])
+
     def test_lists_active_products_in_sort_order(self) -> None:
         make_product(name_line1="สอง", name_line2="", sort_order=2, price=60, price_unit="กล่อง 4 ชิ้น", highlight_1="กรอบ")
         make_product(name_line1="หนึ่ง", name_line2="", sort_order=1)

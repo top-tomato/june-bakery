@@ -5,6 +5,9 @@
 
 ## [Unreleased]
 
+### Fixed
+- หน้าเว็บส่ง `Cache-Control: no-cache` (never_cache) ให้ LINE/มือถือถามเซิร์ฟเวอร์ทุกครั้ง ไม่เปิดหน้าเก่าค้างหลัง deploy
+
 ## [0.12.2] - 2026-11-18
 
 ### Fixed
