@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>June — กล่องเปิดฝา (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@400;500;600&family=Itim&display=swap" rel="stylesheet">
+<style>
+/* Scroll-driven 3D box: lid opens, 4 chiffon pieces inside, price appears. The box and lid here are drawn in code as
+   stand-ins; the real ones would be the two Meshy .glb files. The chiffon is the real pandan.glb from the site (x4). */
+:root{--ink:#243b37;--cream:#fff6e6;--tea:#f3a18f;--fl:#C9DE98}
+*{box-sizing:border-box;margin:0}
+body{font-family:Anuphan,system-ui,sans-serif;background:var(--fl);color:var(--ink)}
+.intro,.outro{min-height:70vh;display:grid;place-items:center;text-align:center;padding:40px 16px}
+.intro h1{font:600 clamp(1.6rem,5vw,2.6rem) Mitr}
+.intro p,.outro p{opacity:.7;margin-top:6px}
+.scene{height:320vh;position:relative}
+.pin{position:sticky;top:0;height:100vh;overflow:hidden}
+canvas{display:block;width:100%;height:100%}
+.cap{position:absolute;left:0;right:0;bottom:7vh;text-align:center;pointer-events:none}
+.cap .k{font:26px Itim,cursive;opacity:calc(1 - var(--p,0)*3)}
+.buy{display:inline-flex;align-items:center;gap:18px;opacity:var(--b,0);transform:translateY(calc((1 - var(--b,0))*20px))}
+.buy strong{font:500 2.2rem/1 Mitr;text-align:left}
+.buy strong small{display:block;font:500 1rem Anuphan;opacity:.75;margin-top:4px}
+.btn{font:500 1rem Mitr;background:var(--ink);color:var(--cream);padding:12px 22px;border-radius:999px;text-decoration:none;pointer-events:auto}
+.note{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:rgba(36,59,55,.88);color:var(--cream);font-size:.8rem;padding:6px 14px;border-radius:14px;z-index:9;width:max-content;max-width:calc(100% - 32px);text-align:center}
+</style>
+</head>
+<body>
+<p class="note">mock · กล่องกับฝาเป็นตัวแทน (ของจริงใช้ไฟล์จาก Meshy) · ชิฟฟ่อนเป็นไฟล์จริง</p>
+<section class="intro"><div><h1>ชิฟฟ่อน มะพร้าวใบเตย</h1><p>เลื่อนลงเพื่อเปิดกล่อง</p></div></section>
+<section class="scene" id="scene"><div class="pin">
+  <canvas id="c"></canvas>
+  <div class="cap"><p class="k">เปิดกล่องดูข้างใน</p>
+    <div class="buy"><strong>฿120<small>กล่อง 4 ชิ้น</small></strong><a class="btn" href="#">สั่งทาง LINE</a></div></div>
+</div></section>
+<section class="outro"><div><p>(ส่วนถัดไปของหน้าเว็บ)</p></div></section>
+
+<script type="module">
+import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/+esm';
+import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js/+esm';
+import {RoomEnvironment} from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/environments/RoomEnvironment.js/+esm';
+import {MeshoptDecoder} from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/libs/meshopt_decoder.module.js/+esm';
+
+const canvas=document.getElementById('c'), scene=document.getElementById('scene'), pin=scene.firstElementChild
+const r=new THREE.WebGLRenderer({canvas,antialias:true,alpha:true}); r.setPixelRatio(Math.min(devicePixelRatio,2))
+r.toneMapping=THREE.ACESFilmicToneMapping; r.shadowMap.enabled=true; r.shadowMap.type=THREE.PCFSoftShadowMap
+const s=new THREE.Scene(), pm=new THREE.PMREMGenerator(r); s.environment=pm.fromScene(new RoomEnvironment(),.04).texture
+const cam=new THREE.PerspectiveCamera(32,1,.1,100)
+const sun=new THREE.DirectionalLight(0xfff1dc,2.2); sun.position.set(3,6,4); sun.castShadow=true; sun.shadow.mapSize.set(1024,1024)
+Object.assign(sun.shadow.camera,{left:-4,right:4,top:4,bottom:-4}); s.add(sun)
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(30,30),new THREE.ShadowMaterial({opacity:.18})); ground.rotation.x=-Math.PI/2; ground.receiveShadow=true; s.add(ground)
+
+// kraft paper texture: brown with fibres
+function kraft(){const c=document.createElement('canvas');c.width=c.height=256;const g=c.getContext('2d');g.fillStyle='#b98a57';g.fillRect(0,0,256,256)
+  for(let i=0;i<2600;i++){g.fillStyle=`rgba(${Math.random()<.5?'90,60,30':'230,200,160'},${Math.random()*.12})`;g.fillRect(Math.random()*256,Math.random()*256,Math.random()*14,1)}
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;return t}
+const paper=new THREE.MeshStandardMaterial({map:kraft(),roughness:.92}), inner=new THREE.MeshStandardMaterial({map:kraft(),color:0xe9d6bd,roughness:.95})
+const part=(w,h,d,m,x,y,z)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;return o}
+
+// box: 2.2 x 2.2 floor, walls 0.74 high, above the piece tops (fits 2x2 pieces of ~1 unit)
+const W=2.2, H=.74, T=.03, box=new THREE.Group()
+box.add(part(W,T,W,inner,0,T/2,0))
+box.add(part(W,H,T,paper,0,H/2,W/2),part(W,H,T,paper,0,H/2,-W/2),part(T,H,W,paper,W/2,H/2,0),part(T,H,W,paper,-W/2,H/2,0))
+s.add(box)
+// lid hinged on the back top edge: the group sits on the hinge, the plate hangs forward from it
+const hinge=new THREE.Group(); hinge.position.set(0,H,-W/2); s.add(hinge)
+const lid=new THREE.Group(); hinge.add(lid)
+lid.add(part(W+.04,T,W+.04,paper,0,T/2,W/2), part(W+.04,.22,T,paper,0,-.08,W+.02))
+// window on the lid like the real box: a lighter inset
+const win=new THREE.Mesh(new THREE.PlaneGeometry(1.1,.75),new THREE.MeshStandardMaterial({color:0xf7efe2,roughness:.3,metalness:0,transparent:true,opacity:.55}))
+win.rotation.x=-Math.PI/2; win.position.set(-.35,T+.002,.7); lid.add(win)
+
+// 4 chiffon pieces from the real model
+const pieces=new THREE.Group(); s.add(pieces)
+const loader=new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder)
+loader.load('img/pandan.glb',g=>{
+  const m=g.scene, b=new THREE.Box3().setFromObject(m), size=b.getSize(new THREE.Vector3()), c=b.getCenter(new THREE.Vector3())
+  const k=1.0/Math.max(size.x,size.z)
+  m.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true}})
+  ;[[-.53,-.53,0],[.53,-.53,1.6],[-.53,.53,3.1],[.53,.53,4.7]].forEach(([x,z,ry])=>{
+    const holder=new THREE.Group(), clone=m.clone(); clone.position.set(-c.x,-b.min.y,-c.z); holder.add(clone)
+    holder.scale.setScalar(k); holder.position.set(x,T,z); holder.rotation.y=ry; pieces.add(holder)})
+})
+
+const ease=t=>t<.5?2*t*t:1-(-2*t+2)**2/2, clamp=t=>Math.min(1,Math.max(0,t)), lerp=(a,b,t)=>a+(b-a)*t
+function size(){const w=pin.clientWidth,h=pin.clientHeight;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+addEventListener('resize',size);size()
+function frame(){
+  const rect=scene.getBoundingClientRect(), p=clamp(-rect.top/(rect.height-innerHeight))
+  const open=ease(clamp((p-.08)/.5)), look=ease(clamp((p-.45)/.4))
+  hinge.rotation.x=-open*1.95                      // ~112 degrees, lid leans back
+  s.rotation.y=lerp(-.55,-.15,p)                  // slow turn while scrolling
+  const narrow=innerWidth<700, dist=narrow?13:8
+  cam.position.set(0,lerp(3.2,5.6,look),lerp(dist,dist*.72,look)); cam.lookAt(0,lerp(.7,.35,look),0)
+  pin.style.setProperty('--p',p); pin.style.setProperty('--b',clamp((p-.72)/.2))
+  r.render(s,cam); requestAnimationFrame(frame)
+}
+frame()
+</script>
+</body>
+</html>
