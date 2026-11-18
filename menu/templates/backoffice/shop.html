@@ -1,11 +1,13 @@
 {% extends "backoffice/base.html" %}
 {% block content %}
 <form class="card-form" method="post" enctype="multipart/form-data">{% csrf_token %}
-  <b style="font:600 1rem Mitr,sans-serif">สั่งและรับ <small class="muted" style="font:400 .85rem Anuphan">ขึ้นใต้ "วิธีสั่ง" บนหน้าเว็บ ช่องที่ว่างจะไม่แสดง</small></b>
+  <b style="font:600 1rem Mitr,sans-serif">สั่งและรับ <small class="muted" style="font:400 .85rem Anuphan">เวลาเปิดขึ้นในส่วน "แวะหยิบได้ที่หน้าร้าน" ช่องที่ว่างจะไม่แสดง</small></b>
   <div class="row2"><div><label for="{{ form.preorder_days.id_for_label }}">สั่งล่วงหน้ากี่วัน</label>{{ form.preorder_days }}</div><div><label for="{{ form.hours.id_for_label }}">เวลาเปิด</label>{{ form.hours }}</div></div>
   <label for="{{ form.shelf_life.id_for_label }}">เก็บได้นานแค่ไหน</label>{{ form.shelf_life }}
   <label for="{{ form.payment.id_for_label }}">วิธีจ่ายเงิน</label>{{ form.payment }}
   <label for="{{ form.delivery.id_for_label }}">ส่งถึงที่</label>{{ form.delivery }}
+  <b style="font:600 1rem Mitr,sans-serif;margin-top:10px">วิธีเก็บขนม <small class="muted" style="font:400 .85rem Anuphan">ขึ้นในหน้าที่ลูกค้าเห็นหลังสแกน QR บนกล่อง (<a href="/box" target="_blank" rel="noopener">/box</a>) บรรทัดละข้อ เขียนแบบ หัวข้อ: รายละเอียด · ว่าง = ไม่แสดง</small></b>
+  <label for="{{ form.care.id_for_label }}">วิธีเก็บ (ตัวอย่างในช่องเป็นร่าง แก้จำนวนวันให้ตรงของจริง)</label>{{ form.care }}
   <b style="font:600 1rem Mitr,sans-serif;margin-top:10px">เรื่องของร้าน <small class="muted" style="font:400 .85rem Anuphan">ส่วน "เรื่องของ June" ขึ้นเมื่อมีข้อความ</small></b>
   <label for="{{ form.about_title.id_for_label }}">หัวข้อ</label>{{ form.about_title }}
   <label for="{{ form.about_text.id_for_label }}">ข้อความ 2–3 ประโยค</label>{{ form.about_text }}

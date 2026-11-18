@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>สติกเกอร์ {{ qr.name }} · หลังร้าน June</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500&display=swap" rel="stylesheet">
+<style>
+/* A4 ของสติกเกอร์ B (mock/box-qr.html): 6 × 4 ซม. 3 คอลัมน์ 7 แถว เส้นประจาง ๆ ไว้ตัด แก้ข้อความบนป้ายได้ก่อนพิมพ์ */
+@page{size:A4;margin:0}
+*{box-sizing:border-box;margin:0}
+body{font-family:Anuphan,system-ui,sans-serif;color:#243b37;background:#e9e4da}
+.bar{position:sticky;top:0;z-index:2;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;padding:10px 16px;background:#243b37;color:#fff6e6;font-size:.9rem}
+.bar button{font:500 .95rem Mitr,sans-serif;border:0;border-radius:999px;padding:8px 18px;background:#fff6e6;color:#243b37;cursor:pointer}
+.bar label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.page{width:210mm;height:297mm;margin:16px auto;background:#fff;padding:8.5mm 15mm;display:grid;grid-template-columns:repeat(3,60mm);grid-auto-rows:40mm;align-content:start;box-shadow:0 4px 18px rgba(0,0,0,.15)}
+.lab{border:.2mm dashed #d8d2c6;display:flex;gap:3mm;align-items:center;padding:3mm;overflow:hidden}
+.cream .lab{background:#fff6e6;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.lab .q{flex:0 0 27mm;height:27mm;background:#fff;padding:1mm;border-radius:1.5mm}
+.lab .q svg{display:block;width:100%;height:100%}
+.lab b{display:block;font:500 13pt/1.12 Mitr,sans-serif}
+.lab p{font-size:7.5pt;line-height:1.35;opacity:.8;margin-top:1mm}
+[contenteditable]{outline:none}
+[contenteditable]:focus{background:#fff3b0}
+@media print{body{background:#fff}.bar{display:none}.page{margin:0;box-shadow:none}}
+</style>
+</head>
+<body>
+<div class="bar">
+  <span>{{ qr.name }} · 21 ดวง ขนาด 6 × 4 ซม. · คลิกข้อความบนป้ายดวงไหนก็ได้เพื่อแก้ (แก้ทุกดวงพร้อมกัน)</span>
+  <label><input type="checkbox" id="cream"> พื้นครีม</label>
+  <button type="button" onclick="print()">พิมพ์</button>
+</div>
+<div class="page" id="page">
+  {% for _ in cells %}<div class="lab"><div class="q">{{ svg|safe }}</div><div><b contenteditable="true" data-k="head">{{ head }}</b><p contenteditable="true" data-k="sub">{{ sub }}</p></div></div>{% endfor %}
+</div>
+<script>
+document.getElementById('cream').addEventListener('change', (e) => document.body.classList.toggle('cream', e.target.checked))
+// typing on one label updates the same line on every label
+document.getElementById('page').addEventListener('input', (e) => {
+  const k = e.target.dataset.k
+  if (!k) return
+  for (const el of document.querySelectorAll(`[data-k="${k}"]`)) if (el !== e.target) el.textContent = e.target.textContent
+})
+</script>
+</body>
+</html>

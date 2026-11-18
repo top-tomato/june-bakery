@@ -26,6 +26,7 @@
     <a href="{% url 'backoffice:menu' %}"{% if active == 'menu' %} class="on"{% endif %}><svg viewBox="0 0 24 24"><path d="M4 20h16M5 20v-7h14v7M5 13c2 0 2-2 3.5-2S10 13 12 13s2-2 3.5-2 1.5 2 3.5 2M12 7v4"/></svg>เมนูขนม</a>
     <a href="{% url 'backoffice:reviews' %}"{% if active == 'reviews' %} class="on"{% endif %}><svg viewBox="0 0 24 24"><path d="M12 4C7 4 3 7.2 3 11.2c0 3.6 3.2 6.6 7.5 7.1l-.4 2.2 3.8-2.4C18.4 17.8 21 14.8 21 11.2 21 7.2 17 4 12 4Z"/></svg>รีวิว</a>
     <a href="{% url 'backoffice:shop' %}"{% if active == 'shop' %} class="on"{% endif %}><svg viewBox="0 0 24 24"><path d="M4 10 6 4h12l2 6M4 10h16v10H4ZM9 20v-5h6v5"/></svg>ข้อมูลร้าน</a>
+    <a href="{% url 'backoffice:qr' %}"{% if active == 'qr' %} class="on"{% endif %}><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3M21 14v.01M14 21h3M21 18v3h-1"/></svg>QR code</a>
     {% if is_owner %}
     <div class="grp">ตั้งค่า</div>
     <a href="{% url 'backoffice:staff' %}"{% if active == 'staff' %} class="on"{% endif %}><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.8-3.6 3.2-5.4 6-5.4s5.2 1.8 6 5.4M16 4.6a3.2 3.2 0 0 1 0 6.3M18 14.8c1.6.6 2.6 2.4 3 5.2"/></svg>บัญชี staff</a>

@@ -1,0 +1,114 @@
+{% extends "backoffice/base.html" %}
+{% block head %}
+<style>
+/* หน้า QR code (mock/admin-qr.html) */
+.qwrap{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start;max-width:980px}
+@media (max-width:820px){.qwrap{grid-template-columns:1fr}}
+.quick{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 6px}
+.quick button{font:400 .82rem Anuphan,sans-serif;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:999px;padding:5px 12px;cursor:pointer}
+.quick button.on{background:var(--ink);color:var(--cream);border-color:var(--ink)}
+.card-form .opt{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-top:1px solid var(--line);cursor:pointer;font-weight:400}
+.card-form .opt input{margin-top:4px;width:18px;height:18px;flex:0 0 18px;accent-color:var(--ink)}
+.opt b{font-weight:600;display:block}
+.opt small{color:var(--muted);font-size:.8rem;line-height:1.4;display:block}
+.prev{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px;text-align:center;position:sticky;top:76px}
+.prev img{display:block;width:220px;max-width:100%;margin:0 auto;border-radius:10px;background:#fff}
+.dest{font-size:.78rem;color:var(--muted);word-break:break-all;margin-top:10px;line-height:1.45}
+.dest code,.qrow code{color:var(--ink);font-size:.8rem}
+.saved{margin-top:22px;max-width:980px}
+.qrow{background:var(--paper);border:1px solid var(--line);border-radius:12px;margin-bottom:8px;padding:10px 12px}
+.qrow .top{display:grid;grid-template-columns:52px 1fr auto;gap:12px;align-items:center}
+.qrow .top img{width:52px;height:52px;border-radius:6px;background:#fff}
+.qrow b{font-weight:600}
+.qrow small{display:block;color:var(--muted);font-size:.78rem;word-break:break-all}
+.qrow .n{font:600 1.1rem Mitr,sans-serif;text-align:right;white-space:nowrap}
+.qrow .n small{font:400 .7rem Anuphan,sans-serif}
+.qrow .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.qrow .acts a,.qrow .acts button,.qrow summary{border:1px solid var(--line);background:#fff;border-radius:8px;padding:6px 10px;cursor:pointer;font:400 .8rem Anuphan,sans-serif;color:var(--ink);text-decoration:none;list-style:none}
+.qrow summary::-webkit-details-marker{display:none}
+.qrow details{display:contents}
+.qrow details[open] summary{background:var(--ink);color:var(--cream)}
+.qrow .edit{display:flex;gap:6px;width:100%;margin-top:4px}
+.qrow .edit input{flex:1;min-width:0;border:1px solid var(--line);border-radius:8px;padding:7px 10px;font:inherit;background:#fff}
+.qrow .edit button{background:var(--ink);color:var(--cream);border:0}
+</style>
+{% endblock %}
+{% block content %}
+<div class="qwrap">
+  <form class="card-form" method="post" id="qform">{% csrf_token %}
+    <input type="hidden" name="action" value="add"><input type="hidden" name="slug" value="{{ slug }}">
+    <b style="font:600 1rem Mitr,sans-serif">ทำ QR ใหม่</b>
+    <label for="qName">ชื่อ (ไว้จำ)</label>
+    <input id="qName" name="name" maxlength="60" required placeholder="เช่น ป้ายหน้าร้าน, ใบปลิว">
+    <label for="qUrl">ลิงก์</label>
+    <input id="qUrl" name="target" maxlength="500" required placeholder="วางลิงก์ที่นี่ เช่น https://…" autocomplete="off">
+    <div class="quick" id="quick">{% for label, url in shortcuts %}<button type="button" data-u="{{ url }}">{{ label }}</button>{% endfor %}</div>
+    <label class="opt"><input type="checkbox" name="logo" value="1" id="oLogo" checked><span><b>ใส่โลโก้ June ตรงกลาง</b><small>QR ทนรอยบังได้ 30% โลโก้บังแค่ราว 7% สแกนได้ปกติ แต่ควรพิมพ์กว้างอย่างน้อย 2.5 ซม.</small></span></label>
+    <label class="opt"><input type="checkbox" name="tracked" value="1" id="oTrack" checked><span><b>นับยอดสแกน + แก้ปลายทางทีหลังได้</b><small>QR พาไปลิงก์สั้นของเรา (<code>/q/{{ slug }}</code>) แล้วส่งต่อไปลิงก์ข้างบน รู้ว่ามีคนสแกนกี่ครั้ง และพิมพ์ไปแล้วก็ยังเปลี่ยนปลายทางได้ · ข้อเสีย: ถ้าเว็บ June ล่ม QR นี้ก็ใช้ไม่ได้</small></span></label>
+    <label class="opt"><input type="checkbox" name="black" value="1" id="oInk"><span><b>สีดำ (แทนเขียวเข้ม)</b><small>ใช้ถ้าร้านพิมพ์ขาวดำ</small></span></label>
+    <button class="btn2" type="submit">บันทึก QR นี้</button>
+  </form>
+
+  <div class="prev">
+    <img id="qImg" alt="ตัวอย่าง QR" width="220" height="220">
+    <p class="dest" id="dest">ใส่ลิงก์ หรือกดปุ่มลัดข้างซ้าย</p>
+    <p class="muted" style="font-size:.78rem;margin-top:8px">บันทึกแล้วโหลด PNG / SVG หรือพิมพ์สติกเกอร์ได้ที่รายการด้านล่าง</p>
+  </div>
+</div>
+
+<section class="saved">
+  <h2>QR ที่ทำไว้</h2>
+  {% for r in rows %}
+  <div class="qrow">
+    <div class="top">
+      <img src="{% url 'backoffice:qr-image' r.qr.pk 'svg' %}" alt="" loading="lazy">
+      <div><b>{{ r.qr.name }}</b><small>→ {{ r.show }}</small>{% if r.qr.tracked %}<small>QR นี้คือ <code>{{ r.code }}</code></small>{% endif %}</div>
+      <div class="n">{% if r.qr.tracked %}{{ r.week }}<small> สแกน · 7 วัน</small><small>รวม {{ r.total }}</small>{% else %}<small>ไม่นับยอด</small>{% endif %}</div>
+    </div>
+    <div class="acts">
+      <a href="{% url 'backoffice:qr-image' r.qr.pk 'png' %}?dl=1">โหลด PNG</a>
+      <a href="{% url 'backoffice:qr-image' r.qr.pk 'svg' %}?dl=1">SVG (ส่งร้านพิมพ์)</a>
+      <a href="{% url 'backoffice:qr-sheet' r.qr.pk %}" target="_blank" rel="noopener">พิมพ์สติกเกอร์ A4</a>
+      <details><summary>แก้ปลายทาง</summary>
+        <form method="post" class="edit">{% csrf_token %}<input type="hidden" name="action" value="target"><input type="hidden" name="id" value="{{ r.qr.pk }}">
+          <input name="target" value="{{ r.qr.target }}" maxlength="500" required aria-label="ลิงก์ปลายทางใหม่"><button type="submit">บันทึก</button></form>
+      </details>
+      <form method="post" class="inline" onsubmit="return confirm('ลบ QR “{{ r.qr.name|escapejs }}”? ที่พิมพ์ไปแล้วจะสแกนไม่ได้')">{% csrf_token %}<input type="hidden" name="action" value="delete"><input type="hidden" name="id" value="{{ r.qr.pk }}"><button type="submit">ลบ</button></form>
+    </div>
+  </div>
+  {% empty %}<p class="empty-note">ยังไม่มี QR</p>{% endfor %}
+</section>
+
+<script>
+(() => {
+  const $ = (id) => document.getElementById(id)
+  const site = "{{ site|escapejs }}", slug = "{{ slug }}", previewUrl = "{% url 'backoffice:qr-preview' %}"
+  const abs = (u) => (u.startsWith('/') && !u.startsWith('//') ? site + u : u)
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
+  let t
+  function draw() {
+    const url = $('qUrl').value.trim()
+    for (const b of $('quick').children) b.classList.toggle('on', b.dataset.u === url)
+    if (!url) { $('qImg').removeAttribute('src'); $('dest').textContent = 'ใส่ลิงก์ หรือกดปุ่มลัดข้างซ้าย'; return }
+    const track = $('oTrack').checked
+    const code = track ? site + '/q/' + slug : abs(url)
+    $('dest').innerHTML = track
+      ? `QR นี้คือ <code>${esc(code)}</code><br>สแกนแล้วพาไป <code>${esc(abs(url))}</code>`
+      : `สแกนแล้วไปที่ <code>${esc(code)}</code>`
+    clearTimeout(t)
+    t = setTimeout(() => {
+      $('qImg').src = `${previewUrl}?u=${encodeURIComponent(code)}&logo=${$('oLogo').checked ? 1 : 0}&black=${$('oInk').checked ? 1 : 0}`
+    }, 150)
+  }
+  $('quick').addEventListener('click', (e) => {
+    const b = e.target.closest('button')
+    if (!b) return
+    $('qUrl').value = b.dataset.u
+    if (!$('qName').value.trim()) $('qName').value = b.textContent
+    draw()
+  })
+  for (const id of ['qUrl', 'oLogo', 'oTrack', 'oInk']) $(id).addEventListener('input', draw)
+  draw()
+})()
+</script>
+{% endblock %}

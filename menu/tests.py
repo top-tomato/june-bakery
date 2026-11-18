@@ -538,3 +538,95 @@ class ViteAssetsTagTests(SimpleTestCase):
     @override_settings(VITE_DEV_SERVER="", VITE_MANIFEST=Path("/nonexistent/manifest.json"), DEBUG=True)
     def test_missing_build_in_debug_is_a_comment_not_a_crash(self) -> None:
         self.assertIn("frontend not built", self.render())
+
+
+class BoxQrTests(MediaTestCase):
+    """QR on the box (menu/qr.py): /q/<slug> counts and forwards, /box page, back office QR code page."""
+
+    def setUp(self) -> None:
+        from django.contrib.auth import get_user_model
+
+        self.staff = get_user_model().objects.create_user("staff", password="x", is_staff=True)
+
+    def test_box_sticker_qr_is_seeded(self) -> None:
+        from menu.models import QrCode
+
+        qr = QrCode.objects.get(slug="box")
+        self.assertEqual((qr.target, qr.tracked, qr.logo), ("/box", True, True))
+
+    def test_scan_counts_and_forwards(self) -> None:
+        from menu.models import QrScan
+
+        r = self.client.get("/q/box", HTTP_USER_AGENT="Mozilla/5.0 (iPhone) Line/14.0")
+        self.assertRedirects(r, "/box", fetch_redirect_response=False)
+        self.assertIn("no-cache", r["Cache-Control"])
+        self.client.get("/q/box", HTTP_USER_AGENT="Mozilla/5.0 (iPhone)")
+        self.client.get("/q/box", HTTP_USER_AGENT="facebookexternalhit/1.1")  # link preview: not a person
+        self.assertEqual(QrScan.objects.get(qr__slug="box", date=timezone.localdate()).count, 2)
+
+    def test_unknown_code_goes_home(self) -> None:
+        self.assertRedirects(self.client.get("/q/nope"), "/", fetch_redirect_response=False)
+
+    def test_box_page_is_the_app_with_care_tips(self) -> None:
+        make_product(price=120, price_unit="กล่อง 4 ชิ้น")
+        info = ShopInfo.load()
+        info.care = "วันนี้–พรุ่งนี้: วางไว้ในกล่อง\nเก็บนานกว่านั้น เข้าตู้เย็น: อยู่ได้ 3 วัน\n\nก่อนทาน: พักไว้ 15 นาที\nจำไว้นะ"
+        info.save()
+        r = self.client.get("/box")
+        self.assertContains(r, "ขอบคุณที่อุดหนุน")
+        care = bootstrap(r.content.decode())["care"]
+        self.assertEqual([t["icon"] for t in care], ["clock", "fridge", "warm", "clock"])
+        self.assertEqual(care[1], {"head": "เก็บนานกว่านั้น เข้าตู้เย็น", "body": "อยู่ได้ 3 วัน", "icon": "fridge"})
+        self.assertEqual(care[3]["head"], "")  # a line without "หัวข้อ:" is just text
+
+    def test_targets_must_be_web_links_or_our_pages(self) -> None:
+        from menu.models import valid_target
+
+        for ok in ("/box", "https://line.me/R/ti/p/%40x", "http://example.com/a"):
+            self.assertTrue(valid_target(ok), ok)
+        for bad in ("//evil.com", "javascript:alert(1)", "ftp://x", "example.com", "/\\evil.com"):
+            self.assertFalse(valid_target(bad), bad)
+
+    def test_back_office_page_is_staff_only(self) -> None:
+        url = reverse("backoffice:qr")
+        self.assertEqual(self.client.get(url).status_code, 302)
+        self.client.force_login(self.staff)
+        self.assertContains(self.client.get(url), "สติกเกอร์กล่อง")
+
+    def test_make_edit_download_print_delete(self) -> None:
+        from menu.models import QrCode
+
+        self.client.force_login(self.staff)
+        url = reverse("backoffice:qr")
+        self.client.post(url, {"action": "add", "name": "ป้ายหน้าร้าน", "target": "https://line.me/R/ti/p/%40561hgrea", "slug": "abcd", "logo": "1", "tracked": "1"})
+        qr = QrCode.objects.get(name="ป้ายหน้าร้าน")
+        self.assertEqual(qr.slug, "abcd")
+        self.client.post(url, {"action": "add", "name": "แย่", "target": "javascript:alert(1)"})
+        self.assertFalse(QrCode.objects.filter(name="แย่").exists())
+
+        self.client.post(url, {"action": "target", "id": qr.pk, "target": "/"})
+        qr.refresh_from_db()
+        self.assertEqual(qr.target, "/")
+
+        png = self.client.get(reverse("backoffice:qr-image", args=[qr.pk, "png"]) + "?dl=1")
+        self.assertEqual(png["Content-Type"], "image/png")
+        self.assertIn("attachment", png["Content-Disposition"])
+        svg = self.client.get(reverse("backoffice:qr-image", args=[qr.pk, "svg"]))
+        self.assertContains(svg, "<image")  # the logo plate
+        self.assertContains(svg, 'xmlns="http://www.w3.org/2000/svg"')  # needed to show in an <img>
+        self.assertEqual(self.client.get(reverse("backoffice:qr-image", args=[qr.pk, "gif"])).status_code, 404)
+        sheet = self.client.get(reverse("backoffice:qr-sheet", args=[qr.pk]))
+        self.assertEqual(sheet.content.decode().count('class="lab"'), 21)
+        self.assertContains(self.client.get(reverse("backoffice:qr-preview") + "?u=https://x.test/&logo=0"), "<svg")
+
+        self.client.post(url, {"action": "delete", "id": qr.pk})
+        self.assertFalse(QrCode.objects.filter(pk=qr.pk).exists())
+
+    def test_logo_qr_still_decodes_to_the_short_link(self) -> None:
+        # the printed code holds our short link when counting, so the target can change after printing
+        from menu.qr import encoded_url
+        from menu.models import QrCode
+        from django.test import RequestFactory
+
+        req = RequestFactory().get("/", HTTP_HOST="testserver")
+        self.assertEqual(encoded_url(req, QrCode.objects.get(slug="box")), "http://testserver/q/box")

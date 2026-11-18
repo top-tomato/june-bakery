@@ -1,0 +1,162 @@
+/* /box: the page the QR sticker on the box opens (mock/box-qr.html). Motion as on the landing page: the logo's palm
+   (base.css .june-logo.go), op-up for the heading, dark green drips into the cream, .reveal cards (home.css). */
+.bx {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: calc(var(--vh) * 100);
+  background: var(--cream);
+  color: var(--ink);
+  overflow: hidden;
+}
+.bx-head {
+  background: var(--indigo);
+  color: var(--cream);
+  text-align: center;
+  padding: calc(26px + env(safe-area-inset-top)) 20px 30px;
+}
+.bx-head .logo {
+  display: block;
+  margin: 0 auto;
+  width: min(48vw, 190px);
+  height: auto;
+  color: var(--cream);
+}
+.bx-head h1 {
+  font: 500 clamp(1.5rem, 6.4vw, 1.9rem) var(--display);
+  margin-top: 8px;
+  animation: op-up 0.8s both 0.35s;
+}
+.bx-head .sub {
+  margin-top: 2px;
+  font: 1.25rem var(--hand);
+  color: #c9de98;
+  animation: op-up 0.8s both 0.55s;
+}
+.bx-body {
+  position: relative;
+  padding: 64px 16px 0;
+}
+/* the drips hang behind the cards */
+.bx-body .drips {
+  z-index: 0;
+}
+.bx-card {
+  position: relative;
+  z-index: 1;
+  background: var(--paper, #fffbf3);
+  border-radius: 18px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06), 0 8px 24px rgba(36, 59, 55, 0.08);
+  margin-top: 14px;
+}
+.bx-card:first-of-type {
+  margin-top: 0;
+}
+.again {
+  overflow: hidden;
+}
+.again img {
+  display: block;
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+.again > div {
+  padding: 12px 14px 14px;
+}
+.again h2 {
+  font: 500 1.12rem var(--display);
+}
+.again .pr {
+  font-size: 0.92rem;
+  opacity: 0.75;
+  margin-top: 1px;
+}
+.bx-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 14px 16px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--cream);
+  font: 500 1.02rem var(--display);
+  text-decoration: none;
+}
+.bx-btn svg {
+  width: 20px;
+  height: 20px;
+}
+.tips {
+  padding: 14px;
+}
+.tips h3 {
+  font: 500 1.02rem var(--display);
+  margin-bottom: 10px;
+}
+.tips ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+.tips li {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  font-size: 0.93rem;
+  line-height: 1.45;
+}
+.tips .ic {
+  flex: 0 0 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #dcebb5;
+  display: grid;
+  place-items: center;
+}
+.tips .ic svg {
+  width: 19px;
+  height: 19px;
+}
+.tips b {
+  display: block;
+  font-weight: 600;
+}
+.links {
+  padding: 4px 14px;
+}
+.links a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 2px;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 0.95rem;
+  border-top: 1px solid rgba(36, 59, 55, 0.1);
+}
+.links a:first-child {
+  border-top: 0;
+}
+.links svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+}
+.links span {
+  flex: 1;
+}
+.bx-foot {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  padding: 20px 16px calc(28px + env(safe-area-inset-bottom));
+}
+.bx-foot.reveal.in {
+  opacity: 0.7;
+}

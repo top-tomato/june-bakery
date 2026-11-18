@@ -1,4 +1,4 @@
-"""หลังร้าน /admin/shop/ (mock/admin.html): สรุปร้าน ออเดอร์ รายจ่าย ปฏิทิน เมนูขนม รีวิว ข้อมูลร้าน บัญชี staff
+"""หลังร้าน /admin/shop/ (mock/admin.html): สรุปร้าน ออเดอร์ รายจ่าย ปฏิทิน เมนูขนม รีวิว ข้อมูลร้าน บัญชี staff (QR code อยู่ใน menu/qr.py)
 
 ทุกหน้าใช้ได้กับบัญชี staff (ไม่ต้องตั้งสิทธิ์รายตาราง) ยกเว้นบัญชี staff ที่ให้เฉพาะเจ้าของ (superuser)
 ฟอร์มเป็น POST ธรรมดาแล้วกลับหน้าเดิม ตัวกรองเป็นลิงก์ GET ใช้ได้แม้ JavaScript ไม่ทำงาน
@@ -448,8 +448,11 @@ def reviews(request: HttpRequest) -> HttpResponse:
 class ShopForm(forms.ModelForm):
     class Meta:
         model = ShopInfo
-        fields = ["preorder_days", "shelf_life", "payment", "delivery", "hours", "about_title", "about_text", "about_photo", "share_photo", "instagram_url", "facebook_url"]
-        widgets = {"about_text": forms.Textarea(attrs={"rows": 4})}
+        fields = ["preorder_days", "shelf_life", "payment", "delivery", "hours", "care", "about_title", "about_text", "about_photo", "share_photo", "instagram_url", "facebook_url"]
+        widgets = {
+            "about_text": forms.Textarea(attrs={"rows": 4}),
+            "care": forms.Textarea(attrs={"rows": 4, "placeholder": "วันนี้–พรุ่งนี้: วางไว้ในกล่อง ปิดฝาให้สนิท ไม่โดนแดด\nเก็บนานกว่านั้น เข้าตู้เย็น: ใส่กล่องหรือถุงปิดสนิท อยู่ได้ 3 วัน\nก่อนทาน: เอาออกจากตู้เย็นพักไว้ราว 15–20 นาที ให้กลับมานุ่ม"}),
+        }
 
 
 @staff_member_required

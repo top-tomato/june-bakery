@@ -1,6 +1,6 @@
 from django.urls import path
 
-from menu import backoffice
+from menu import backoffice, qr
 
 app_name = "backoffice"
 
@@ -18,4 +18,8 @@ urlpatterns = [
     path("reviews/", backoffice.reviews, name="reviews"),
     path("shop/", backoffice.shop, name="shop"),
     path("staff/", backoffice.staff, name="staff"),
+    path("qr/", qr.codes, name="qr"),
+    path("qr/preview.svg", qr.preview, name="qr-preview"),
+    path("qr/<int:pk>.<str:fmt>", qr.image, name="qr-image"),
+    path("qr/<int:pk>/sheet/", qr.sticker_sheet, name="qr-sheet"),
 ]

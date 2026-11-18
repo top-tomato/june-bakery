@@ -106,6 +106,10 @@ class ShopInfo(models.Model):
         "รูปปกตอนแปะลิงก์", upload_to=UniqueName("shop/"), blank=True,
         help_text="รูปขนมที่ขึ้นเวลาแปะลิงก์เว็บใน LINE / Facebook (ใส่โลโก้กับคำโปรยให้เอง) ว่าง = ใช้รูปขนมชิ้นแรกในเมนู",
     )
+    care = models.TextField(
+        "วิธีเก็บขนม", blank=True,
+        help_text="ขึ้นในหน้าที่ลูกค้าเห็นหลังสแกน QR บนกล่อง (/box) บรรทัดละข้อ เขียนแบบ หัวข้อ: รายละเอียด (ว่าง = ไม่แสดง)",
+    )
     instagram_url = models.URLField("ลิงก์ Instagram", blank=True, help_text="เช่น https://www.instagram.com/ชื่อร้าน/ (ว่าง = ไม่แสดงปุ่ม)")
     facebook_url = models.URLField("ลิงก์เพจ Facebook", blank=True, help_text="ว่าง = ไม่แสดงปุ่ม")
     updated_at = models.DateTimeField(auto_now=True)
@@ -146,6 +150,21 @@ class ShopInfo(models.Model):
             for g in GalleryPhoto.objects.exclude(original="", image=""):
                 g.apply_watermark(handle)
                 g.save()
+
+    def care_tips(self) -> list[dict[str, str]]:
+        """"วิธีเก็บขนม" for the /box page: one tip per line, "หัวข้อ: รายละเอียด" (no colon = just the text)"""
+        tips = []
+        for line in self.care.splitlines():
+            line = line.strip().lstrip("-•· ").strip()
+            if not line:
+                continue
+            head, sep, body = line.partition(":")
+            tip = {"head": head.strip(), "body": body.strip()} if sep and body.strip() else {"head": "", "body": line}
+            # the icon follows what the line is about: fridge, warming up before eating, else a clock
+            h = tip["head"] or tip["body"]
+            tip["icon"] = "fridge" if "ตู้เย็น" in h or "แช่" in h else "warm" if "ก่อนทาน" in h or "อุ่น" in h else "clock"
+            tips.append(tip)
+        return tips[:6]
 
     @property
     def social(self) -> dict[str, str]:
@@ -367,3 +386,47 @@ class DailyStat(models.Model):
 
     class Meta:
         constraints = [models.UniqueConstraint(fields=["date", "kind", "source"], name="one_stat_row")]
+
+
+class QrCode(models.Model):
+    """QR ที่ทำในหลังร้าน (หน้า QR code) ถ้านับยอด QR จะพาไป /q/<slug> ก่อน แล้วส่งต่อไปปลายทาง (แก้ปลายทางทีหลังได้)"""
+
+    name = models.CharField("ชื่อ (ไว้จำ)", max_length=60)
+    target = models.CharField("ลิงก์ปลายทาง", max_length=500, help_text="https://… หรือหน้าในเว็บเรา เช่น /box")
+    slug = models.SlugField("รหัสลิงก์สั้น", max_length=16, unique=True)
+    tracked = models.BooleanField("นับยอดสแกน", default=True)
+    logo = models.BooleanField("โลโก้ตรงกลาง", default=True)
+    black = models.BooleanField("สีดำ", default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+        verbose_name = "QR code"
+        verbose_name_plural = "QR code"
+
+    def __str__(self) -> str:
+        return self.name
+
+    def clean(self) -> None:
+        if not valid_target(self.target):
+            raise ValidationError({"target": "ลิงก์ต้องขึ้นต้นด้วย https:// หรือ / (หน้าในเว็บเรา)"})
+
+
+def valid_target(url: str) -> bool:
+    """https://… / http://… or a path on this site ("/box"); never "//host" or javascript: and the like"""
+    url = url.strip()
+    if url.startswith("/"):
+        return not url.startswith("//") and "\\" not in url
+    parts = urlsplit(url)
+    return parts.scheme in ("http", "https") and bool(parts.netloc)
+
+
+class QrScan(models.Model):
+    """ยอดสแกนต่อวันของ QR แต่ละอัน (ไม่เก็บ IP หรือข้อมูลคนสแกน)"""
+
+    qr = models.ForeignKey(QrCode, on_delete=models.CASCADE, related_name="scans")
+    date = models.DateField(db_index=True)
+    count = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["qr", "date"], name="one_scan_row_per_day")]

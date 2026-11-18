@@ -43,6 +43,14 @@ export interface MenuData {
   gallery: GalleryItem[]
   /** days the shop is closed in the next 30 days (ISO yyyy-mm-dd), set in the back office calendar */
   closedDays: string[]
+  /** "วิธีเก็บขนม" tips for /box (back office → ข้อมูลร้าน); [] = card hidden */
+  care: CareTip[]
+}
+
+export interface CareTip {
+  head: string
+  body: string
+  icon: 'clock' | 'fridge' | 'warm'
 }
 
 export const menuKeys = {
