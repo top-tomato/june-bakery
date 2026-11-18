@@ -5,8 +5,10 @@ export interface Product {
   id: number
   name: [string, string]
   description: string
-  /** baht per piece; null = not published yet (the site shows "สอบถามราคา") */
+  /** baht; null = not published yet (the site shows "สอบถามราคา") */
   price: number | null
+  /** what the price buys, shown next to it, e.g. "กล่อง 4 ชิ้น"; "" = just the price */
+  priceUnit: string
   image: string
   /** URL of a .glb model, or "" when the cake has only a photo */
   model: string

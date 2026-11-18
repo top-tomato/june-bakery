@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 // always on the page; reviews / about / gallery only appear once filled in via Django admin
-const REQUIRED_SECTIONS = ['flavors', 'story', 'how', 'where', 'end']
+const REQUIRED_SECTIONS = ['flavors', 'story', 'box', 'how', 'where', 'end']
 async function expectRequiredSections(page: Page) {
   for (const id of REQUIRED_SECTIONS) await expect(page.locator(`section#${id}`)).toHaveCount(1)
 }
@@ -22,8 +22,8 @@ test('home: intro finishes, the required sections render, scrolling the whole pa
   await expect(page.locator('.curtain')).toHaveCount(0, { timeout: 8000 }) // removes itself after the intro
   await expect(page.locator('.hero h1')).toContainText('อบใหม่ หอม')
 
-  // the order button in the story section points at LINE with the cake's name
-  await expect(page.locator('#story .buy a')).toHaveAttribute('href', /line\.me\/R\/oaMessage\//)
+  // the order button (box section, under the price) points at LINE with the cake's name
+  await expect(page.locator('#box .buy a')).toHaveAttribute('href', /line\.me\/R\/oaMessage\//)
 
   // scroll down and back up in steps, like a fast thumb
   await page.evaluate(async () => {

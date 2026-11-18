@@ -403,7 +403,8 @@ def closed_toggle(request: HttpRequest) -> HttpResponse:
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ["name_line1", "name_line2", "price", "description", "highlight_1", "highlight_2", "highlight_3", "is_active"]
+        fields = ["name_line1", "name_line2", "price", "price_unit", "description", "highlight_1", "highlight_2", "highlight_3", "is_active"]
+        widgets = {"price_unit": forms.TextInput(attrs={"placeholder": "เช่น กล่อง 4 ชิ้น"})}
 
 
 @staff_member_required

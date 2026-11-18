@@ -7,6 +7,8 @@ import { cakeIntroDelayMs } from './intro'
  */
 export interface HomeMotion {
   story: { a: number; p: number }
+  /** progress through the box section's pinned part (0–1) */
+  box: { p: number }
   active: number
   dragX: number
   /** when the cake's drop-in starts (performance.now() time) */
@@ -15,6 +17,7 @@ export interface HomeMotion {
 
 export const createMotion = (): HomeMotion => ({
   story: { a: 0, p: 0 },
+  box: { p: 0 },
   active: 0,
   dragX: 0,
   introAt: performance.now() + cakeIntroDelayMs(),

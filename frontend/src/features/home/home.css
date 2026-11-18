@@ -727,6 +727,72 @@ main .kicker {
   font-size: 0.75em;
   vertical-align: middle;
 }
+/* what the price buys ("กล่อง 4 ชิ้น"), smaller inside the same chip (mock/price-unit.html) */
+.price-chip small {
+  font: 400 0.72em var(--body);
+  margin-left: 5px;
+  opacity: 0.85;
+}
+
+/* box: lid opens as you scroll, then the price (mock/box-open.html); the box is drawn by the cake layer on .box-stage */
+.boxsec {
+  height: calc(var(--vh) * 300);
+  background: var(--cream);
+  color: var(--ink);
+  position: relative;
+}
+.boxsec .pin {
+  position: sticky;
+  top: 0;
+  height: calc(var(--vh) * 100);
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding: calc(var(--vh) * 9) 16px calc(var(--vh) * 6);
+}
+.box-stage {
+  min-height: 0;
+  display: grid;
+  place-items: center;
+}
+.box-stage img {
+  max-width: min(80%, 420px);
+  max-height: 100%;
+  border-radius: 18px;
+}
+.boxsec .cap {
+  display: grid;
+  justify-items: center;
+  min-height: 5.5rem;
+}
+.boxsec .cap > * {
+  grid-area: 1 / 1;
+}
+.boxsec .hint {
+  align-self: center;
+  font: 1.5rem var(--hand);
+  opacity: calc(1 - var(--p, 0) * 4);
+}
+.boxsec .buy {
+  margin-top: 0;
+  opacity: var(--b, 0);
+  transform: translateY(calc((1 - var(--b, 0)) * 20px));
+}
+.boxsec .buy .btn {
+  margin-top: 0;
+  background: var(--ink);
+  color: var(--cream);
+}
+.boxsec .buy strong {
+  font-size: 2.2rem;
+  line-height: 1;
+}
+.boxsec .buy strong small {
+  display: block;
+  font: 500 1rem var(--body);
+  opacity: 0.75;
+  margin-top: 4px;
+}
 
 /* how to order */
 .how,

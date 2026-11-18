@@ -97,7 +97,10 @@ export function Hero({ products, active, onPick, onOpen, spotRef, photo, motion,
       )}
       <div className="pick">
         <h2>
-          {fullName(product)} <span className="price-chip">{priceLabel(product)}</span>
+          {fullName(product)} <span className="price-chip">
+            {priceLabel(product)}
+            {product.price != null && product.priceUnit && <small>{product.priceUnit}</small>}
+          </span>
         </h2>
         <p>{product.description}</p>
         <p className="hint">{products.length > 1 ? 'ลากเพื่อหมุนดู กดลูกศรเพื่อเปลี่ยนเมนู' : 'ลากเพื่อหมุนดูรอบชิ้น'}</p>

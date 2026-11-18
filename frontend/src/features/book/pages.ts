@@ -77,7 +77,7 @@ export function buildPages({ products, line }: MenuData): string[] {
         <div class="h-name">${esc(p.name[0])}<br>${esc(p.name[1])}</div>
         <div class="h-desc">${esc(p.description)}</div>
         <ul class="notes">${p.highlights.map((h) => `<li>${esc(h)}</li>`).join('')}</ul>
-        <div class="buy"><span class="price${p.price == null ? ' ask' : ''}">${esc(priceLabel(p))}${RING}</span><a class="order" href="${chat(`สนใจสั่ง ${fullName(p)}`)}" target="_blank" rel="noopener">สั่งทาง LINE</a></div>`,
+        <div class="buy"><span class="price${p.price == null ? ' ask' : ''}">${esc(priceLabel(p))}${p.price != null && p.priceUnit ? `<small>${esc(p.priceUnit)}</small>` : ''}${RING}</span><a class="order" href="${chat(`สนใจสั่ง ${fullName(p)}`)}" target="_blank" rel="noopener">สั่งทาง LINE</a></div>`,
       ),
     )
   })

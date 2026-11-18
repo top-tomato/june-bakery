@@ -247,6 +247,12 @@
   font: 600 11cqw/1 var(--display);
   padding: 2cqw 4cqw;
 }
+.book-page .price small {
+  display: block;
+  font: 500 4.2cqw var(--body);
+  text-align: center;
+  margin-top: 1cqw;
+}
 .book-page .price.ask {
   font-size: 6.5cqw;
 }

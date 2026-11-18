@@ -7,6 +7,7 @@ import {
   PMREMGenerator,
   Scene,
   Texture,
+  Vector3,
   WebGLRenderer,
   type BufferGeometry,
   type Material,
@@ -17,6 +18,7 @@ import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.j
 import { calm, debug, viewportHeight } from '@/lib/env'
 import { onFrame } from '@/lib/frame'
 import { clamp, ease, lerp } from '@/lib/math'
+import { createBox } from './box'
 
 /**
  * The cakes on a fixed full-screen canvas, moved every frame to sit on the hero spot, then fly to the story stage.
@@ -27,6 +29,10 @@ import { clamp, ease, lerp } from '@/lib/math'
  * - the cake shrinks away before the story section un-pins: after that the page scrolls natively and a JS-positioned
  *   object can only trail it, which looked like stutter
  * - once the stage has scrolled away the canvas is hidden instead of being cleared every frame
+ *
+ * The same canvas then draws the box section (lid opens as you scroll, four pieces inside): a second scene on the
+ * same renderer, not a second WebGL context. Same lesson: the box only shows while its section is pinned, growing in
+ * after the pin starts and shrinking away before it ends.
  */
 export interface CakeSceneOptions {
   canvas: HTMLCanvasElement
@@ -35,6 +41,9 @@ export interface CakeSceneOptions {
   stage: HTMLElement
   /** story progress written by the story section each frame: a = entering (0–1), p = through the pinned part (0–1) */
   story: { a: number; p: number }
+  /** the box section's stage, and its progress through the pinned part (0–1), written by that section */
+  boxStage: HTMLElement
+  box: { p: number }
   /** index of the cake picked in the hero */
   active: () => number
   /** extra rotation from dragging in the hero */
@@ -78,7 +87,7 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
   size()
   addEventListener('resize', size)
 
-  const items = o.models.map(() => ({ group: new Group(), loaded: false }))
+  const items = o.models.map(() => ({ group: new Group(), loaded: false, mesh: null as Mesh | null }))
   const owned: { geometry: BufferGeometry; material: Material | Material[] }[] = []
   const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder)
   items.forEach((it, i) => {
@@ -99,6 +108,7 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
         const m = new Mesh(mesh.geometry, mesh.material)
         m.applyMatrix4(mesh.matrixWorld)
         it.group.add(m)
+        it.mesh = m
         owned.push({ geometry: mesh.geometry, material: mesh.material })
         it.loaded = true
       },
@@ -107,19 +117,60 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
     )
   })
 
+  const boxScene = new Scene()
+  boxScene.environment = env.texture
+  const boxSun = new DirectionalLight(0xfff1dc, 1.6)
+  boxSun.position.set(3, 6, 4)
+  boxScene.add(boxSun)
+  const box = createBox()
+  boxScene.add(box.group)
+  const boxCam = new PerspectiveCamera(32, 1, 0.1, 100)
+  let boxFilled = -1
+
+  /** pose the box for this frame; true when it should be drawn */
+  const updateBox = () => {
+    const p = o.box.p
+    const show = calm ? (p > 0 && p < 1 ? 1 : 0) : ease(clamp(p / 0.06)) * (1 - ease(clamp((p - 0.94) / 0.06)))
+    if (show < 0.01) return false
+    const r = o.boxStage.getBoundingClientRect()
+    if (r.bottom < 0 || r.top > ch || !r.width) return false
+    const i = Math.round(o.active()), it = items[i]
+    if (it?.mesh && boxFilled !== i) {
+      box.fill(it.mesh.geometry, it.mesh.material, it.mesh.matrix)
+      boxFilled = i
+    }
+    const open = calm ? clamp((p - 0.08) / 0.5) : ease(clamp((p - 0.08) / 0.5))
+    const look = calm ? clamp((p - 0.45) / 0.4) : ease(clamp((p - 0.45) / 0.4))
+    box.pose(open)
+    box.group.rotation.y = lerp(-0.55, -0.15, p)
+    box.group.scale.setScalar(lerp(0.6, 1, show))
+    // fit ~2 box widths (box + the lid lying back) into the stage, centred on it
+    const span = 5.2, fit = Math.min(r.width, r.height)
+    const d = (ch * span) / fit / (2 * Math.tan((boxCam.fov * Math.PI) / 360))
+    boxCam.aspect = cw / ch
+    boxCam.setViewOffset(cw, ch, cw / 2 - (r.left + r.width / 2), ch / 2 - (r.top + r.height / 2), cw, ch)
+    const dir = new Vector3(0, lerp(3.2, 9.6, look), lerp(8, 3.2, look)).normalize()
+    boxCam.position.copy(dir.multiplyScalar(d))
+    boxCam.lookAt(0, lerp(0.35, 0.2, look), lerp(0, -0.7, look))
+    boxCam.updateProjectionMatrix()
+    return true
+  }
+
   let smooth = 0, away = false
   const off = onFrame({
     after: ({ t, y }) => {
       const VH = viewportHeight()
       const S = o.story
       const st = o.stage.getBoundingClientRect()
-      const nowAway = st.bottom < -300
+      const boxOn = updateBox()
+      const nowAway = st.bottom < -300 && !boxOn
       if (nowAway !== away) {
         away = nowAway
         o.canvas.style.visibility = away ? 'hidden' : ''
         if (away) renderer.clear()
       }
       if (away) return
+      if (boxOn) return renderer.render(boxScene, boxCam)
       const h = o.heroSpot.getBoundingClientRect()
       const outro = calm ? (S.p >= 0.999 ? 1 : 0) : ease(clamp((S.p - 0.9) / 0.09))
       smooth += (o.active() - smooth) * (calm ? 1 : 0.12)
@@ -153,6 +204,7 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
   // three.js skill: memory-dispose-on-unmount / memory-renderer-dispose
   return () => {
     off()
+    box.dispose()
     removeEventListener('resize', size)
     for (const { geometry, material } of owned) {
       geometry.dispose()

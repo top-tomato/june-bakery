@@ -1,5 +1,5 @@
 import { useEffect, useRef, type CSSProperties, type RefObject } from 'react'
-import { fullName, lineChatUrl, priceLabel, type Product } from '@/api/menu'
+import { fullName, type Product } from '@/api/menu'
 import { calm } from '@/lib/env'
 import { onFrame } from '@/lib/frame'
 import { clamp, ease } from '@/lib/math'
@@ -15,7 +15,6 @@ const CALLOUT_POS = [
 
 interface Props {
   product: Product
-  lineOaId: string
   stageRef: RefObject<HTMLDivElement | null>
   photo: string | null
   motion: RefObject<HomeMotion>
@@ -23,9 +22,10 @@ interface Props {
 
 /**
  * Pinned section: as you scroll through it the name slides up, the cake flies onto the plate and spins,
- * the highlights draw in, then price + order button. All driven from one frame job writing CSS variables.
+ * the highlights draw in. The price and order button come next, in the box section. All driven from one frame job
+ * writing CSS variables.
  */
-export function Story({ product, lineOaId, stageRef, photo, motion }: Props) {
+export function Story({ product, stageRef, photo, motion }: Props) {
   const sectionRef = useRef<HTMLElement>(null)
   const pinRef = useRef<HTMLDivElement>(null)
   const bandRef = useRef<HTMLDivElement>(null)
@@ -48,7 +48,6 @@ export function Story({ product, lineOaId, stageRef, photo, motion }: Props) {
         motion.current.story.a = a
         motion.current.story.p = p
         pin.style.setProperty('--a', a.toFixed(3))
-        pin.style.setProperty('--e', ease(clamp((p - 0.74) / 0.14)).toFixed(3))
         callRefs.current.forEach((c, k) => c?.style.setProperty('--c', ease(clamp((p - 0.46 - k * 0.08) / 0.12)).toFixed(3)))
         band.style.transform = `translateX(${-5 - p * 28}%)`
       },
@@ -71,12 +70,6 @@ export function Story({ product, lineOaId, stageRef, photo, motion }: Props) {
             </span>
           </h2>
           <p className="desc">{product.description}</p>
-          <div className="buy">
-            <strong className={product.price == null ? 'ask' : undefined}>{priceLabel(product)}</strong>
-            <a className="btn" href={lineChatUrl(lineOaId, `สนใจสั่ง ${fullName(product)}`)} target="_blank" rel="noopener">
-              สั่งทาง LINE
-            </a>
-          </div>
         </div>
         <div className="stagewrap">
           <div ref={stageRef} className="stage">

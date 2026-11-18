@@ -51,7 +51,8 @@ class Product(models.Model):
     name_line1 = models.CharField("ชื่อบรรทัดแรก", max_length=60)
     name_line2 = models.CharField("ชื่อบรรทัดสอง", max_length=60, blank=True)
     description = models.CharField("คำบรรยาย", max_length=200)
-    price = models.PositiveIntegerField("ราคาต่อชิ้น (บาท)", null=True, blank=True, help_text="เว้นว่าง = หน้าเว็บขึ้นว่า \"สอบถามราคา\"")
+    price = models.PositiveIntegerField("ราคา (บาท)", null=True, blank=True, help_text="เว้นว่าง = หน้าเว็บขึ้นว่า \"สอบถามราคา\"")
+    price_unit = models.CharField("ราคานี้ได้อะไร", max_length=40, blank=True, help_text="ขึ้นข้างราคา เช่น กล่อง 4 ชิ้น (ว่าง = ขึ้นแค่ราคา)")
     image = models.ImageField("รูปขนม", upload_to=UniqueName("products/img/"))
     model_3d = models.FileField("โมเดล 3D (.glb)", upload_to=UniqueName("products/model/"), blank=True)
     accent_color = models.CharField("สีพื้นหลังประจำเมนู", max_length=7, default="#C9DE98", help_text="รหัสสีแบบ #RRGGBB")
@@ -82,6 +83,7 @@ class Product(models.Model):
             "name": [self.name_line1, self.name_line2],
             "description": self.description,
             "price": self.price,
+            "priceUnit": self.price_unit,
             "image": self.image.url,
             "model": self.model_3d.url if self.model_3d else "",
             "accent": self.accent_color,

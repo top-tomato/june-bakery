@@ -6,6 +6,7 @@ interface Props {
   models: string[]
   heroSpot: RefObject<HTMLDivElement | null>
   stage: RefObject<HTMLDivElement | null>
+  boxStage: RefObject<HTMLDivElement | null>
   motion: RefObject<HomeMotion>
   /** 'all' = no 3D at all (show photos), a number = that cake's model failed */
   onFail: (what: 'all' | number) => void
@@ -15,7 +16,7 @@ interface Props {
  * Mounts the three.js scene. three.js is loaded as a separate chunk after the page is up
  * (react skill: bundle-conditional / bundle-dynamic-imports), so the first paint doesn't wait for it.
  */
-export function CakeLayer({ models, heroSpot, stage, motion, onFail }: Props) {
+export function CakeLayer({ models, heroSpot, stage, boxStage, motion, onFail }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   // keep the latest callback without restarting the scene (react skill: advanced-event-handler-refs)
   const onFailRef = useRef(onFail)
@@ -25,7 +26,7 @@ export function CakeLayer({ models, heroSpot, stage, motion, onFail }: Props) {
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas || !heroSpot.current || !stage.current) return
+    if (!canvas || !heroSpot.current || !stage.current || !boxStage.current) return
     if (debug.no3d || !hasWebGL) {
       onFailRef.current('all')
       return
@@ -36,7 +37,7 @@ export function CakeLayer({ models, heroSpot, stage, motion, onFail }: Props) {
     const giveUp = setTimeout(() => onFailRef.current('all'), 4500)
     import('./three/cakeScene')
       .then(({ createCakeScene }) => {
-        if (cancelled || !heroSpot.current || !stage.current) return
+        if (cancelled || !heroSpot.current || !stage.current || !boxStage.current) return
         clearTimeout(giveUp)
         dispose = createCakeScene({
           canvas,
@@ -44,6 +45,8 @@ export function CakeLayer({ models, heroSpot, stage, motion, onFail }: Props) {
           heroSpot: heroSpot.current,
           stage: stage.current,
           story: motion.current.story,
+          boxStage: boxStage.current,
+          box: motion.current.box,
           active: () => motion.current.active,
           dragX: () => motion.current.dragX,
           introAt: motion.current.introAt,
@@ -56,7 +59,7 @@ export function CakeLayer({ models, heroSpot, stage, motion, onFail }: Props) {
       clearTimeout(giveUp)
       dispose?.()
     }
-  }, [models, heroSpot, stage, motion])
+  }, [models, heroSpot, stage, boxStage, motion])
 
   return <canvas ref={canvasRef} className="cake-layer" aria-hidden="true" />
 }

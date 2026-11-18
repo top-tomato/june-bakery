@@ -49,7 +49,7 @@ class MediaTestCase(TestCase):
 
 class MenuApiTests(MediaTestCase):
     def test_lists_active_products_in_sort_order(self) -> None:
-        make_product(name_line1="สอง", name_line2="", sort_order=2, price=60, highlight_1="กรอบ")
+        make_product(name_line1="สอง", name_line2="", sort_order=2, price=60, price_unit="กล่อง 4 ชิ้น", highlight_1="กรอบ")
         make_product(name_line1="หนึ่ง", name_line2="", sort_order=1)
         make_product(name_line1="ซ่อน", name_line2="", is_active=False)
 
@@ -57,6 +57,8 @@ class MenuApiTests(MediaTestCase):
 
         self.assertEqual([p["name"][0] for p in data["products"]], ["หนึ่ง", "สอง"])
         self.assertEqual(data["products"][1]["price"], 60)
+        self.assertEqual(data["products"][1]["priceUnit"], "กล่อง 4 ชิ้น")
+        self.assertEqual(data["products"][0]["priceUnit"], "")  # no unit: just the price
         self.assertEqual(data["products"][1]["highlights"], ["กรอบ"])  # empty highlights are dropped
         self.assertEqual(data["products"][0]["model"], "")
 

@@ -8,6 +8,7 @@ import { CakeLayer } from './CakeLayer'
 import { Curtain } from './Curtain'
 import { GooFilter } from './Drips'
 import { End } from './End'
+import { Box } from './Box'
 import { About, Gallery, Reviews } from './Extras'
 import { HowToOrder } from './HowToOrder'
 import { Hero } from './Hero'
@@ -27,6 +28,7 @@ export function HomePage({ data }: { data: MenuData }) {
   const motion = useRef<HomeMotion>(createMotion())
   const heroSpot = useRef<HTMLDivElement>(null)
   const stage = useRef<HTMLDivElement>(null)
+  const boxStage = useRef<HTMLDivElement>(null)
 
   const pick = useCallback(
     (i: number) => {
@@ -78,7 +80,11 @@ export function HomePage({ data }: { data: MenuData }) {
 
   // Section backgrounds, top to bottom. Optional sections only appear once filled in (admin), and each section's
   // drips take the colour of whatever is visible right above it.
-  const sections: { key: string; bg: string }[] = [{ key: 'story', bg: product.accent }, { key: 'how', bg: BG.pink }]
+  const sections: { key: string; bg: string }[] = [
+    { key: 'story', bg: product.accent },
+    { key: 'box', bg: BG.cream },
+    { key: 'how', bg: BG.pink },
+  ]
   if (data.reviews.length) sections.push({ key: 'reviews', bg: BG.indigo })
   if (data.about) sections.push({ key: 'about', bg: BG.cream })
   if (data.gallery.length) sections.push({ key: 'gallery', bg: BG.cream })
@@ -88,12 +94,13 @@ export function HomePage({ data }: { data: MenuData }) {
   return (
     <>
       <GooFilter />
-      <CakeLayer models={models} heroSpot={heroSpot} stage={stage} motion={motion} onFail={onFail} />
+      <CakeLayer models={models} heroSpot={heroSpot} stage={stage} boxStage={boxStage} motion={motion} onFail={onFail} />
       <Curtain />
       <Nav />
       <main>
         <Hero products={products} active={active} onPick={pick} onOpen={openStory} spotRef={heroSpot} photo={photo} motion={motion} lineOaId={line.oaId} />
-        <Story product={product} lineOaId={line.oaId} stageRef={stage} photo={photo} motion={motion} />
+        <Story product={product} stageRef={stage} photo={photo} motion={motion} />
+        <Box product={product} lineOaId={line.oaId} stageRef={boxStage} photo={photo} motion={motion} above={above('box')} />
         <HowToOrder order={data.order} shopName={shop.name} above={above('how')} />
         {data.reviews.length > 0 && <Reviews reviews={data.reviews} above={above('reviews')} />}
         {data.about && <About about={data.about} above={above('about')} />}
