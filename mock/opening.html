@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>June — หน้าเปิด (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@400;500;600&family=Itim&display=swap" rel="stylesheet">
+<style>
+/* preview/jemmy-order: an opening screen before "เรื่องของ June", so the page doesn't start on plain text.
+   A = dark green cover, big logo like the old hero, cream drips into the story.
+   B = cream cover, big logo with three snapshots from the gallery fanned behind it. */
+:root{--ink:#243b37;--cream:#fff6e6;--indigo:#3e5d58;--pandan:#c9de98;--tea:#f3a18f}
+*{box-sizing:border-box;margin:0}
+body{font-family:Anuphan,system-ui,sans-serif;background:#ccc}
+.tabs{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:9;display:flex;gap:6px}
+.tabs button{white-space:nowrap;font:500 .8rem Mitr;border:0;border-radius:99px;padding:6px 14px;background:#fff;color:var(--ink);cursor:pointer}
+.tabs button.on{background:var(--ink);color:var(--cream)}
+.v{display:none}.v.on{display:block}
+.cover{position:relative;height:100svh;min-height:560px;overflow:hidden;display:grid;place-items:center;text-align:center}
+.logo{width:min(62vw,340px);animation:pop 1s cubic-bezier(.2,.8,.2,1.2) both}
+@keyframes pop{from{opacity:0;transform:translateY(24px) scale(.85)}}
+.tag{font:600 clamp(1.7rem,6vw,3rem)/1.2 Mitr;margin-top:18px;animation:up .8s .35s both}
+.sub{font:22px Itim,cursive;opacity:.85;margin-top:8px;animation:up .8s .55s both}
+@keyframes up{from{opacity:0;transform:translateY(14px)}}
+.scroll{position:absolute;bottom:5svh;left:50%;transform:translateX(-50%);font-size:.85rem;opacity:.75;display:grid;justify-items:center;gap:6px;animation:up .8s .9s both}
+.scroll i{width:2px;height:28px;background:currentColor;border-radius:2px;animation:drip 1.6s ease-in-out infinite}
+@keyframes drip{0%{transform:scaleY(.2);transform-origin:top}50%{transform:scaleY(1);transform-origin:top}51%{transform-origin:bottom}100%{transform:scaleY(.2);transform-origin:bottom}}
+/* A */
+.A{background:var(--indigo);color:var(--cream)}
+.A .logo{filter:brightness(0) invert(.96) sepia(.25)}
+.A .sub{color:var(--pandan)}
+.dr{position:absolute;left:0;right:0;bottom:-1px;height:70px}
+/* B */
+.B{background:var(--cream);color:var(--ink)}
+.B .logo{filter:brightness(0) invert(19%) sepia(12%) saturate(1500%) hue-rotate(118deg) brightness(92%);position:relative;z-index:2}
+.B .sub{color:var(--indigo)}
+.pol{position:absolute;background:#fff;padding:8px 8px 30px;box-shadow:0 10px 30px rgba(0,0,0,.18);width:min(34vw,190px);animation:fan 1s both}
+.pol img{display:block;width:100%;aspect-ratio:1;object-fit:cover}
+.p1{left:6%;top:12%;--r:-9deg}.p2{right:5%;top:20%;--r:7deg;animation-delay:.12s}.p3{left:14%;bottom:12%;--r:5deg;animation-delay:.24s}.p4{right:10%;bottom:9%;--r:-6deg;animation-delay:.36s}
+.pol{transform:rotate(var(--r))}
+@keyframes fan{from{opacity:0;transform:rotate(0) scale(.8)}}
+.mid{position:relative;z-index:2;background:radial-gradient(closest-side,var(--cream) 70%,transparent);padding:40px 30px}
+/* the story below, as it is now */
+.about{background:var(--cream);color:var(--ink);padding:40px 20px 80px}
+.about small{font:500 1rem Mitr;opacity:.8}
+.about h2{font:600 clamp(1.7rem,6vw,3rem)/1.25 Mitr;margin:6px 0 16px}
+.about p{font-size:1.05rem;line-height:1.75;max-width:40rem}
+</style>
+</head>
+<body>
+<div class="tabs"><button class="on" data-v="A">A · เขียวเข้ม</button><button data-v="B">B · ครีม + รูป</button></div>
+
+<div class="v on" id="A">
+<section class="cover A"><div>
+  <img class="logo" src="img/logo.png" alt="June">
+  <p class="tag">อบใหม่ หอม<br>นุ่มนาน</p>
+  <p class="sub">ชิฟฟ่อนมะพร้าวใบเตย ทำเองทุกชิ้น</p>
+</div>
+<div class="scroll">เลื่อนลง<i></i></div>
+<svg class="dr" viewBox="0 0 400 70" preserveAspectRatio="none"><path fill="#fff6e6" d="M0 70V38c18 0 22 22 40 22s20-34 44-34 24 40 50 40 22-28 46-28 26 18 48 18 22-30 46-30 24 22 46 22 22-10 40-10 20 6 40 6v26z"/></svg>
+</section>
+</div>
+
+<div class="v" id="B">
+<section class="cover B">
+  <div class="pol p1"><img src="img/shop-12.jpg" alt=""></div>
+  <div class="pol p2"><img src="img/shop-08.jpg" alt=""></div>
+  <div class="pol p3"><img src="img/shop-13.jpg" alt=""></div>
+  <div class="pol p4"><img src="img/shop-07.jpg" alt=""></div>
+  <div class="mid"><img class="logo" src="img/logo.png" alt="June">
+    <p class="tag">อบใหม่ หอม<br>นุ่มนาน</p>
+    <p class="sub">ชิฟฟ่อนมะพร้าวใบเตย ทำเองทุกชิ้น</p></div>
+  <div class="scroll">เลื่อนลง<i></i></div>
+</section>
+</div>
+
+<section class="about"><small>เรื่องของ June</small><h2>จากเค้กไข่กล่องละ 40 บาท สู่ชิฟฟ่อนมะพร้าวอ่อน</h2>
+<p>June เริ่มจากร้านออนไลน์เล็ก ๆ ในเดือนเมษายน 2563 ทำขนมเองทุกชิ้นเพราะชอบทำขนม จนได้เจอ "ชิฟฟ่อนใบเตยมะพร้าวอ่อน" ที่ใช้มะพร้าวน้ำหอมขูดเองสด ๆ ขายดีจนต้องพักเมนูอื่น ออกบูธมาตั้งแต่ K-Village จนถึงเทศกาลกินปลาทูแม่กลอง วันนี้ June กลับมาพร้อมที่ใหม่ ขอบคุณลูกค้าที่ยังคิดถึงกันเสมอค่ะ</p></section>
+<script>
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tabs button,.v').forEach(x=>x.classList.remove('on'));b.classList.add('on');const v=document.getElementById(b.dataset.v);v.classList.add('on');v.querySelectorAll('*').forEach(e=>{e.style.animation='none';e.offsetWidth;e.style.animation=''});scrollTo(0,0)})
+</script>
+</body>
+</html>
