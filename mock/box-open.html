@@ -128,15 +128,25 @@ const bounce=t=>{const n=7.5625,d=2.75;return t<1/d?n*t*t:t<2/d?n*(t-=1.5/d)*t+.
 const ease=t=>t<.5?2*t*t:1-(-2*t+2)**2/2, clamp=t=>Math.min(1,Math.max(0,t)), lerp=(a,b,t)=>a+(b-a)*t
 function size(){const w=pin.clientWidth,h=pin.clientHeight;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
 addEventListener('resize',size);size()
+let dropAt=null
 function frame(){
   const rect=scene.getBoundingClientRect(), p=clamp(-rect.top/(rect.height-innerHeight))
   // C: the box waits open (lid up), the pieces drop in one by one, then the lid lies back and the camera looks down
   const look=ease(clamp((p-.62)/.25)), show=ease(clamp(p/.06))
   hinge.rotation.x=-lerp(1.75,2.95,look)          // ~100 deg while filling, ~170 deg (lying back) at the end
   s.scale.setScalar(lerp(.7,1,show)); s.visible=show>.01
-  pieces.children.forEach((h,k)=>{const t=clamp((p-(.1+k*.12))/.13), {x,z,ry}=h.userData.home
-    h.visible=t>0; const fall=1-bounce(t)
-    h.position.set(x,T+fall*3.2,z); h.rotation.set(fall*.5,ry+fall*.9,fall*-.3)})
+  // the drop plays on its own clock (real bounce speed), started once the box is in place; scrolling back to the
+  // top of the section empties the box so it plays again
+  const now=performance.now()
+  if(p>.08&&dropAt==null)dropAt=now
+  if(p<.02)dropAt=null
+  pieces.children.forEach((h,k)=>{const {x,z,ry}=h.userData.home
+    const t=dropAt==null?0:clamp((now-dropAt-k*380)/750)
+    h.visible=t>0; const up=(1-bounce(t))*3.2            // height above its place in the box
+    // tilt and spin only while clear of the walls (above the rim); inside the box it stays square, so no corner
+    // pokes through the box or the next piece
+    const free=clamp((up-.75)/1.2)
+    h.position.set(x,T+up,z); h.rotation.set(free*.45,ry+free*.8,free*-.25)})
   s.rotation.y=lerp(-.55,-.15,p)                  // slow turn while scrolling
   const narrow=innerWidth<700, dist=narrow?13:8
   cam.position.set(0,lerp(3.2,dist*1.2,look),lerp(dist,dist*.4,look)); cam.lookAt(0,lerp(.7,.2,look),lerp(0,-.7,look)) // ends looking down, like the photo
