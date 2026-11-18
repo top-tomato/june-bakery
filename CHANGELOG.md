@@ -5,6 +5,9 @@
 
 ## [Unreleased]
 
+### Added
+- rich menu v3 แบบใหญ่ (บนสีเขียวเข้ม โลโก้ June สีครีม) บน 1 ล่าง 3 (`line-assets/rich-menu-v3-2500x1686.jpg`): บน เว็บไซต์ → `https://junedessert.com/` · ล่าง Gallery → `/gallery/`, โปรเดือนนี้ → `/promo`, คุยกับแอดมิน → แชต
+
 ## [0.16.0] - 2026-11-19
 
 ### Changed

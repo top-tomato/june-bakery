@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@400;500&display=block" rel="stylesheet">
+<style>
+/* Rich menu v3, large (2500x1686): 1 wide on top + 3 below. Background drawn with AI (rich-menu-background-v3.png),
+   labels set here so the Thai text is crisp. Areas: top = เว็บไซต์ -> /, bottom left to right: Gallery -> /gallery/,
+   โปรเดือนนี้ -> /promo, คุยกับแอดมิน -> chat. */
+*{margin:0;box-sizing:border-box}
+html,body{width:2500px;height:1686px;overflow:hidden;background:#FFF6E6}
+body{background:url(rich-menu-background-v3.png) 0 0/100% 100% no-repeat;position:relative;font-family:Mitr,"Sukhumvit Set",Thonburi,sans-serif;color:#2F4A45}
+.top{position:absolute;left:1300px;right:120px;top:0;height:843px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center}
+.top b{font:500 190px/1 Mitr,sans-serif}
+.top span{font:400 76px/1.2 Mitr,sans-serif;margin-top:34px;color:#5d7a73}
+.bot{position:absolute;top:1425px;width:833px;text-align:center;font:500 104px/1 Mitr,sans-serif}
+</style>
+</head>
+<body>
+  <div class="top"><b>เว็บไซต์</b><span>ดูเมนู · สั่งทาง LINE</span></div>
+  <div class="bot" style="left:0">Gallery</div>
+  <div class="bot" style="left:833px">โปรเดือนนี้</div>
+  <div class="bot" style="left:1666px">คุยกับแอดมิน</div>
+</body>
+</html>
