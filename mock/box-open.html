@@ -103,7 +103,7 @@ const pieces=new THREE.Group(); s.add(pieces)
 const loader=new GLTFLoader(); loader.setMeshoptDecoder(MeshoptDecoder)
 loader.load('img/pandan.glb',g=>{
   const mdl=g.scene, b=new THREE.Box3().setFromObject(mdl), size=b.getSize(new THREE.Vector3()), c=b.getCenter(new THREE.Vector3())
-  const cell=(W-T*2)/2-.01, k=cell/Math.max(size.x,size.z), q=cell/2+.005
+  const cell=(W-T*2)/2, k=cell/Math.max(size.x,size.z)*1.03, q=cell/2-.022 // slightly oversize and overlapping so the uneven sides press together like one cut sheet
   mdl.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true}})
   ;[[-q,-q,0],[q,-q,Math.PI/2],[-q,q,Math.PI],[q,q,-Math.PI/2]].forEach(([x,z,ry])=>{
     const holder=new THREE.Group(), clone=mdl.clone(); clone.position.set(-c.x,-b.min.y,-c.z); holder.add(clone)
