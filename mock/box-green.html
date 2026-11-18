@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mock · /box แบบ D (เขียวทั้งหน้า) + ปุ่มรีวิว</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#fff6e6;--ink:#243b37;--indigo:#3e5d58;--line:#e4d6bb}
+*{box-sizing:border-box;margin:0}
+body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);padding:24px 16px 50px}
+.wrap{max-width:760px;margin:0 auto;display:grid;grid-template-columns:360px 1fr;gap:28px;align-items:start}
+@media (max-width:760px){.wrap{grid-template-columns:1fr}}
+.side{color:#f2ece0;font-size:.9rem}
+.side h1{font:600 1.15rem Mitr,sans-serif;margin-bottom:8px}
+.side li{margin:0 0 6px 18px}
+.replay{margin:4px 0 14px;font:500 .9rem Mitr,sans-serif;background:#c9de98;color:var(--ink);border:0;border-radius:999px;padding:8px 18px;cursor:pointer}
+
+.phone{width:360px;max-width:100%;background:var(--indigo);border-radius:30px;overflow:hidden;padding-bottom:26px}
+.head{color:var(--cream);text-align:center;padding:30px 20px 22px}
+.head img{width:140px;display:block;margin:0 auto}
+.head h2{font:500 1.4rem Mitr,sans-serif;margin-top:6px}
+.body{padding:0 14px}
+.card{background:var(--cream);border-radius:18px;overflow:hidden;box-shadow:0 14px 30px rgba(0,0,0,.22);margin-top:12px}
+.card:first-child{margin-top:0}
+.again img{display:block;width:100%;height:160px;object-fit:cover;object-position:30% 50%}
+.in{padding:12px 14px 14px}
+.again h3{font:500 1.05rem Mitr,sans-serif}
+.pr{font-size:.88rem;opacity:.75}
+.btn{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding:13px;border-radius:999px;background:#2c3a37;color:var(--cream);font:500 .95rem Mitr,sans-serif;text-decoration:none}
+.btn svg{width:18px;height:18px}
+.btn.soft{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+/* review */
+.review{text-align:center}
+.review h4{font:500 1.02rem Mitr,sans-serif}
+.review p{font-size:.86rem;opacity:.8;margin-top:2px}
+.stars{display:flex;justify-content:center;gap:6px;margin-top:8px;color:#d9a441}
+.stars svg{width:26px;height:26px}
+/* links */
+.links{padding:2px 14px}
+.links a{display:flex;align-items:center;gap:10px;padding:12px 0;border-top:1px solid var(--line);color:var(--ink);text-decoration:none;font-size:.9rem}
+.links a:first-child{border-top:0}
+.links a span{flex:1}
+.links svg{width:20px;height:20px;flex:none}
+.foot{color:#cfe0d9;text-align:center;font-size:.8rem;margin-top:16px;opacity:.85}
+
+/* opening */
+.play .head img{animation:pop .7s cubic-bezier(.2,1.4,.4,1) both .1s;transform-origin:50% 80%}
+.play .head h2{animation:up .7s both .45s}
+.play .card{animation:rise .8s cubic-bezier(.2,.9,.3,1) both calc(.7s + var(--i) * .16s)}
+.play .foot{animation:up .7s both 1.4s}
+.play .stars svg{animation:star .5s cubic-bezier(.2,1.6,.4,1) both calc(1.3s + var(--s) * .08s)}
+@keyframes pop{0%{opacity:0;transform:scale(.6) rotate(-6deg)}60%{opacity:1}100%{transform:none}}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+@keyframes star{from{opacity:0;transform:scale(.3)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.play *{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="phone" id="ph">
+    <div class="head"><img src="img/june-mark-cream.svg" alt="June"><h2>ขอบคุณที่อุดหนุนนะคะ</h2></div>
+    <div class="body">
+      <section class="card again" style="--i:0"><img src="img/box-4.jpg" alt=""><div class="in">
+        <h3>ชิฟฟ่อนมะพร้าวใบเตย</h3><p class="pr">฿120 · กล่อง 4 ชิ้น</p>
+        <a class="btn" href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8-6C21.4 14.2 22 12.7 22 11c0-4.4-4.5-8-10-8Z"/></svg>สั่งอีกรอบทาง LINE</a>
+      </div></section>
+
+      <section class="card review in" style="--i:1">
+        <h4>อร่อยไหม เล่าให้ร้านฟังหน่อย</h4>
+        <p>พิมพ์รีวิวหรือแนบรูปในแชต LINE ของร้าน</p>
+        <div class="stars" aria-hidden="true" id="stars"></div>
+        <a class="btn soft" href="#">รีวิวทาง LINE</a>
+      </section>
+
+      <section class="card links" style="--i:2">
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/></svg><span>เพิ่มเพื่อน LINE รับข่าววันหยุด เมนูใหม่</span>›</a>
+        <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span>ดูเว็บ June</span>›</a>
+      </section>
+
+      <p class="foot">หน้าร้าน June · 10 พหลโยธิน · ใกล้อนุสาวรีย์ชัยสมรภูมิ<br>เวลาเปิด 10:00–20:00</p>
+    </div>
+  </div>
+
+  <div class="side">
+    <h1>/box แบบ D + ปุ่มรีวิว</h1>
+    <button class="replay" id="replay">เล่น animation ตอนเปิดอีกครั้ง</button>
+    <ul>
+      <li>ทั้งหน้าเป็นเขียว การ์ดครีมลอยบนพื้นเขียว ไม่มีหยด ไม่มี "หวังว่าจะอร่อย ทานให้สนุก"</li>
+      <li>ตอนเปิด: โลโก้เด้งขึ้น ข้อความลอยขึ้น การ์ดลอยขึ้นทีละใบ ดาว 5 ดวงเด้งตามกัน</li>
+      <li><b>การ์ดรีวิวใหม่</b> อยู่ใต้ปุ่มสั่ง กด "รีวิวทาง LINE" แล้วเข้าแชตร้าน มีข้อความรอไว้ว่า "รีวิว ชิฟฟ่อนมะพร้าวใบเตย:" ลูกค้าพิมพ์ต่อหรือแนบรูปได้เลย</li>
+      <li>ดาวเป็นแค่ลวดลาย กดไม่ได้ ไม่ได้เก็บคะแนน</li>
+      <li>เอา "ถ่ายรูปส่งมาอวดกันหน่อย" ออก เพราะรวมอยู่ในการ์ดรีวิวแล้ว</li>
+      <li>วันหลังพอร้านมีหมุดบน Google แล้ว ค่อยเพิ่มปุ่ม "รีวิวบน Google" ในการ์ดนี้</li>
+    </ul>
+  </div>
+</div>
+<script>
+const star = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2.8 2.8 5.7 6.3.9-4.6 4.4 1.1 6.3L12 17.1l-5.6 3 1.1-6.3L2.9 9.4l6.3-.9Z"/></svg>'
+document.getElementById('stars').innerHTML = [0,1,2,3,4].map((s) => star.replace('<svg', `<svg style="--s:${s}"`)).join('')
+const ph = document.getElementById('ph')
+const play = () => { ph.classList.remove('play'); void ph.offsetWidth; ph.classList.add('play') }
+document.getElementById('replay').onclick = play
+addEventListener('load', play)
+</script>
+</body>
+</html>
