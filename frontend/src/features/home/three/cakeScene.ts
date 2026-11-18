@@ -57,7 +57,9 @@ const outCubic = (t: number) => 1 - Math.pow(1 - t, 3)
 const outBack = (t: number) => 1 + 2.4 * Math.pow(t - 1, 3) + 1.4 * Math.pow(t - 1, 2)
 
 export function createCakeScene(o: CakeSceneOptions): () => void {
-  const renderer = new WebGLRenderer({ canvas: o.canvas, alpha: true, antialias: !debug.lowres })
+  // preserveDrawingBuffer: the stills copy the canvas right after rendering; without it iOS (LINE's browser) handed
+  // back the previous frame, so the box's still showed the story's single cake
+  const renderer = new WebGLRenderer({ canvas: o.canvas, alpha: true, antialias: !debug.lowres, preserveDrawingBuffer: true })
   renderer.setPixelRatio(debug.lowres ? 1 : Math.min(devicePixelRatio, innerWidth < 700 ? 1.5 : 2))
   renderer.toneMapping = ACESFilmicToneMapping
   renderer.toneMappingExposure = 0.9
