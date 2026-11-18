@@ -1,0 +1,138 @@
+/* /promo: this month's promotions as a flyer pinned on the green (mock/promo.html A), same look as /box */
+.pm {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: calc(var(--vh) * 100);
+  background: var(--indigo);
+  color: var(--ink);
+  overflow: hidden;
+  padding: calc(28px + env(safe-area-inset-top)) 16px calc(32px + env(safe-area-inset-bottom));
+}
+.pm .logo {
+  display: block;
+  margin: 0 auto 16px;
+  width: min(30vw, 110px);
+  height: auto;
+  color: var(--cream);
+}
+.pm-sheet {
+  position: relative;
+  background: var(--cream);
+  border-radius: 6px;
+  padding: 28px 22px 22px;
+  box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
+  transform: rotate(-1deg);
+  animation: pm-drop 0.9s cubic-bezier(0.2, 1.1, 0.3, 1) both 0.45s;
+}
+/* a strip of tape holding the sheet up */
+.pm-sheet::before {
+  content: '';
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 90px;
+  height: 22px;
+  margin-left: -45px;
+  background: rgba(233, 140, 116, 0.75);
+  transform: rotate(2deg);
+  border-radius: 2px;
+}
+.pm-month {
+  text-align: center;
+  font: 1.2rem var(--hand);
+  color: #d0705a;
+}
+.pm-sheet h1 {
+  text-align: center;
+  font: 600 1.8rem/1.2 var(--display);
+  margin-top: 2px;
+}
+.pm-sheet ul {
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 0;
+  border-top: 2px dashed #e4d6bb;
+}
+.pm-sheet li {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2px 12px;
+  align-items: baseline;
+  padding: 12px 0;
+  animation: op-up 0.6s both calc(1s + var(--k, 0) * 0.12s);
+}
+.pm-sheet li + li {
+  border-top: 1px solid #e4d6bb;
+}
+.pm-sheet h2 {
+  font: 500 1.06rem/1.35 var(--display);
+}
+.pm-sheet .pr {
+  font: 600 1.35rem var(--display);
+  text-align: right;
+  white-space: nowrap;
+}
+.pm-sheet .pr s {
+  display: block;
+  font: 400 0.8rem var(--body);
+  opacity: 0.55;
+}
+.pm-sheet .det {
+  grid-column: 1 / -1;
+  font-size: 0.88rem;
+  opacity: 0.8;
+}
+.pm-fine {
+  font-size: 0.8rem;
+  opacity: 0.7;
+  text-align: center;
+  margin-top: 10px;
+}
+.pm-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  border-radius: 999px;
+  background: var(--ink);
+  color: var(--cream);
+  font: 500 1.02rem var(--display);
+  text-decoration: none;
+}
+.pm-btn.light {
+  background: var(--cream);
+  color: var(--ink);
+}
+.pm-btn svg {
+  width: 20px;
+  height: 20px;
+}
+.pm-none {
+  text-align: center;
+  color: var(--cream);
+  padding-top: 24px;
+  animation: op-up 0.7s both 0.4s;
+}
+.pm-none h1 {
+  font: 500 1.35rem var(--display);
+}
+.pm-none p {
+  color: #cfe0d9;
+  font-size: 0.92rem;
+  margin-top: 4px;
+}
+@keyframes pm-drop {
+  from {
+    opacity: 0;
+    transform: translateY(-30px) rotate(-5deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pm-sheet,
+  .pm-sheet li,
+  .pm-none {
+    animation: none;
+  }
+}

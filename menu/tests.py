@@ -630,3 +630,52 @@ class BoxQrTests(MediaTestCase):
 
         req = RequestFactory().get("/", HTTP_HOST="testserver")
         self.assertEqual(encoded_url(req, QrCode.objects.get(slug="box")), "http://testserver/q/box")
+
+
+class PromoTests(TestCase):
+    """/promo: this month's flyer, written in the back office (โปรโมชั่น)"""
+
+    def test_lines_become_items(self) -> None:
+        info = ShopInfo.load()
+        info.promo = "ชิฟฟ่อน 2 กล่อง | 220.- (240.-) | สั่งล่วงหน้า 1 วัน\n\n• ครบ 10 แถม 1 | ฟรี 1\nเพื่อนใหม่ | | ลด 10 บาท"
+        info.promo_until = date(2026, 11, 30)
+        info.promo_note = "ใช้ร่วมกับโปรอื่นไม่ได้"
+        info.save()
+        p = info.promo_payload(date(2026, 11, 19))
+        assert p is not None
+        self.assertEqual(p["month"], "พฤศจิกายน 2569")
+        self.assertEqual(p["until"], "30 พ.ย. 2569")
+        self.assertEqual(p["items"], [
+            {"name": "ชิฟฟ่อน 2 กล่อง", "price": "220.-", "was": "240.-", "detail": "สั่งล่วงหน้า 1 วัน"},
+            {"name": "ครบ 10 แถม 1", "price": "ฟรี 1", "was": "", "detail": ""},
+            {"name": "เพื่อนใหม่", "price": "", "was": "", "detail": "ลด 10 บาท"},
+        ])
+
+    def test_none_when_empty_or_over(self) -> None:
+        info = ShopInfo.load()
+        self.assertIsNone(info.promo_payload())
+        info.promo = "ชิฟฟ่อน 2 กล่อง | 220.-"
+        info.promo_until = date(2026, 11, 30)
+        self.assertIsNotNone(info.promo_payload(date(2026, 11, 30)))  # still on, on its last day
+        self.assertIsNone(info.promo_payload(date(2026, 12, 1)))
+
+    def test_page_and_api(self) -> None:
+        info = ShopInfo.load()
+        info.promo = "ชิฟฟ่อน 2 กล่อง | 220.-"
+        info.save()
+        page = self.client.get("/promo")
+        self.assertEqual(page.status_code, 200)
+        self.assertContains(page, "โปรเดือนนี้ · June")
+        data = self.client.get("/api/menu/").json()
+        self.assertEqual(data["promo"]["items"][0]["name"], "ชิฟฟ่อน 2 กล่อง")
+
+    def test_back_office_edit(self) -> None:
+        from django.contrib.auth.models import User
+
+        self.assertEqual(self.client.get("/admin/shop/promo/").status_code, 302)  # staff only
+        self.client.force_login(User.objects.create_user("s", is_staff=True))
+        self.assertContains(self.client.get("/admin/shop/promo/"), "ยังไม่มีโปร")
+        r = self.client.post("/admin/shop/promo/", {"promo": "ชิฟฟ่อน 2 กล่อง | 220.-", "promo_until": "2099-01-31", "promo_note": ""})
+        self.assertEqual(r.status_code, 302)
+        self.assertEqual(ShopInfo.load().promo_until, date(2099, 1, 31))
+        self.assertContains(self.client.get("/admin/shop/promo/"), "1 โปร")

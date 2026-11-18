@@ -1,3 +1,5 @@
+import re
+from datetime import date
 from urllib.parse import urlsplit
 
 from django.conf import settings
@@ -6,6 +8,9 @@ from django.core.files.base import ContentFile
 from django.core.validators import FileExtensionValidator
 from django.db import models
 from django.utils import timezone
+
+TH_MONTHS_SHORT = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."]
+TH_MONTHS_LONG = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]
 
 
 class UniqueName:
@@ -110,6 +115,12 @@ class ShopInfo(models.Model):
         "วิธีเก็บขนม", blank=True,
         help_text="ขึ้นในหน้าที่ลูกค้าเห็นหลังสแกน QR บนกล่อง (/box) บรรทัดละข้อ เขียนแบบ หัวข้อ: รายละเอียด (ว่าง = ไม่แสดง)",
     )
+    promo = models.TextField(
+        "โปรเดือนนี้", blank=True,
+        help_text="หน้าโปรโมชั่น (/promo) บรรทัดละโปร: ชื่อโปร | ราคา | รายละเอียด เช่น ชิฟฟ่อน 2 กล่อง | 220.- (240.-) | สั่งล่วงหน้า 1 วัน (ว่าง = เดือนนี้ไม่มีโปร)",
+    )
+    promo_until = models.DateField("โปรหมดเขต", null=True, blank=True, help_text="เลยวันนี้แล้วหน้าโปรขึ้นว่าไม่มีโปรเอง (ว่าง = ไม่มีวันหมดเขต)")
+    promo_note = models.CharField("หมายเหตุท้ายใบโปร", max_length=120, blank=True, help_text="เช่น ใช้ร่วมกับโปรอื่นไม่ได้")
     instagram_url = models.URLField("ลิงก์ Instagram", blank=True, help_text="เช่น https://www.instagram.com/ชื่อร้าน/ (ว่าง = ไม่แสดงปุ่ม)")
     facebook_url = models.URLField("ลิงก์เพจ Facebook", blank=True, help_text="ว่าง = ไม่แสดงปุ่ม")
     updated_at = models.DateTimeField(auto_now=True)
@@ -165,6 +176,33 @@ class ShopInfo(models.Model):
             tip["icon"] = "fridge" if "ตู้เย็น" in h or "แช่" in h else "warm" if "ก่อนทาน" in h or "อุ่น" in h else "clock"
             tips.append(tip)
         return tips[:6]
+
+    def promo_payload(self, today: date | None = None) -> dict[str, object] | None:
+        """this month's flyer for /promo (mock/promo.html A); None = no promo now (none written, or past its end date)"""
+        today = today or timezone.localdate()
+        if self.promo_until and self.promo_until < today:
+            return None
+        items = []
+        for line in self.promo.splitlines():
+            line = line.strip().lstrip("-•· ").strip()
+            if not line:
+                continue
+            name, price, detail = ([p.strip() for p in line.split("|", 2)] + ["", ""])[:3]
+            # "220.- (240.-)": the price in brackets is the usual one, shown struck through
+            was = ""
+            m = re.fullmatch(r"(.*?)\s*\((.+)\)", price)
+            if m and m.group(1):
+                price, was = m.group(1).strip(), m.group(2).strip()
+            items.append({"name": name, "price": price, "was": was, "detail": detail})
+        if not items:
+            return None
+        until = self.promo_until
+        return {
+            "month": f"{TH_MONTHS_LONG[today.month - 1]} {today.year + 543}",
+            "items": items[:8],
+            "until": f"{until.day} {TH_MONTHS_SHORT[until.month - 1]} {until.year + 543}" if until else "",
+            "note": self.promo_note,
+        }
 
     @property
     def social(self) -> dict[str, str]:

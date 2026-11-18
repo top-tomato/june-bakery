@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mock · หน้าโปรโมชั่น /promo แบบใบปลิว</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Itim&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#fff6e6;--ink:#243b37;--indigo:#3e5d58;--line:#e4d6bb;--lime:#dcebb5;--coral:#e98c74}
+*{box-sizing:border-box;margin:0}
+body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);padding:24px 16px 60px}
+.top{max-width:1160px;margin:0 auto 18px;color:#f2ece0}
+.top h1{font:600 1.2rem Mitr,sans-serif}
+.top p{opacity:.75;font-size:.88rem}
+.replay{margin-top:10px;font:500 .9rem Mitr,sans-serif;background:#c9de98;color:var(--ink);border:0;border-radius:999px;padding:8px 18px;cursor:pointer}
+.grid{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:26px;align-items:start}
+.tag{color:#f2ece0;font:600 .92rem Mitr,sans-serif;margin-bottom:8px}
+.tag small{display:block;font:400 .8rem Anuphan,sans-serif;opacity:.7}
+.tag .pick{background:#c9de98;color:var(--ink);border-radius:999px;padding:1px 10px;font-size:.72rem;margin-left:6px;vertical-align:2px}
+
+.phone{width:360px;max-width:100%;background:var(--indigo);border-radius:30px;overflow:hidden;padding:26px 16px 24px}
+.logo{width:96px;display:block;margin:0 auto 14px}
+
+/* A: a flyer sheet */
+.sheet{background:var(--cream);border-radius:6px;padding:26px 22px 22px;box-shadow:0 18px 36px rgba(0,0,0,.28);position:relative;transform:rotate(-1deg)}
+.sheet::before{content:"";position:absolute;top:-10px;left:50%;width:90px;height:22px;margin-left:-45px;background:rgba(233,140,116,.75);transform:rotate(2deg);border-radius:2px}
+.month{text-align:center;font:400 1.15rem Itim,cursive;color:var(--coral)}
+.sheet h2{text-align:center;font:600 1.7rem/1.2 Mitr,sans-serif;margin-top:2px}
+.rule{height:0;border-top:2px dashed var(--line);margin:16px 0}
+.item{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:baseline;padding:10px 0}
+.item+.item{border-top:1px solid var(--line)}
+.item h3{font:500 1.05rem/1.35 Mitr,sans-serif}
+.item .price{font:600 1.35rem Mitr,sans-serif;text-align:right;white-space:nowrap}
+.item .price s{display:block;font:400 .8rem Anuphan,sans-serif;opacity:.55;text-align:right}
+.item p{grid-column:1/-1;font-size:.86rem;opacity:.8}
+.fine{font-size:.78rem;opacity:.7;text-align:center;margin-top:12px}
+.btn{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:16px;padding:13px;border-radius:999px;background:#2c3a37;color:var(--cream);font:500 .95rem Mitr,sans-serif;text-decoration:none}
+.btn svg{width:18px;height:18px}
+.btn.on-green{background:var(--cream);color:var(--ink)}
+
+/* B: the shop's own poster picture */
+.poster{display:block;width:100%;border-radius:12px;box-shadow:0 18px 36px rgba(0,0,0,.28);aspect-ratio:4/5;object-fit:cover}
+.fake-poster{aspect-ratio:4/5;border-radius:12px;box-shadow:0 18px 36px rgba(0,0,0,.28);background:linear-gradient(160deg,#f6c9b8,#fff1d6 55%,#dcebb5);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+.fake-poster img{width:70%;border-radius:10px;transform:rotate(-3deg);box-shadow:0 8px 20px rgba(0,0,0,.18)}
+.fake-poster b{font:600 1.6rem Mitr,sans-serif;margin-top:14px}
+.fake-poster span{font:400 1.1rem Itim,cursive;color:#a4553f}
+.fake-poster small{position:absolute;top:10px;right:12px;font-size:.7rem;background:rgba(255,255,255,.8);border-radius:6px;padding:1px 6px}
+.cap{color:#cfe0d9;text-align:center;font-size:.84rem;margin-top:12px}
+
+/* empty */
+.none{text-align:center;color:var(--cream);padding:30px 6px 6px}
+.none h2{font:500 1.3rem Mitr,sans-serif}
+.none p{color:#cfe0d9;font-size:.9rem;margin-top:4px}
+
+/* opening: the sheet drops in like it's pinned to a board */
+.play .logo{animation:pop .7s cubic-bezier(.2,1.4,.4,1) both .1s}
+.play .sheet,.play .fake-poster{animation:drop .9s cubic-bezier(.2,1.1,.3,1) both .45s}
+.play .item{animation:up .6s both calc(1s + var(--k) * .12s)}
+.play .none{animation:up .7s both .4s}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:none}}
+@keyframes drop{from{opacity:0;transform:translateY(-30px) rotate(-5deg)}to{opacity:1}}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.play *{animation:none!important}}
+
+.notes{max-width:1160px;margin:26px auto 0;background:#fffbf3;border-radius:14px;padding:16px 20px;font-size:.9rem}
+.notes h3{font:600 1rem Mitr,sans-serif;margin:8px 0 4px}
+.notes h3:first-child{margin-top:0}
+.notes li{margin-left:18px}
+.notes code{background:#f1e8d6;border-radius:4px;padding:0 4px}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>หน้าโปรโมชั่น <code>/promo</code> แบบใบปลิว "เดือนนี้มีโปรอะไร"</h1>
+  <p>อ่านอย่างเดียว มีปุ่มเดียวคือสั่งทาง LINE · โปรในภาพเป็น<b>ตัวอย่าง</b> ยังไม่ใช่โปรจริงของร้าน</p>
+  <button class="replay" id="replay">เล่น animation ตอนเปิดอีกครั้ง</button>
+</div>
+
+<template id="line"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8-6C21.4 14.2 22 12.7 22 11c0-4.4-4.5-8-10-8Z"/></svg></template>
+
+<div class="grid">
+  <div>
+    <p class="tag">A · ใบปลิวพิมพ์ข้อความ <span class="pick">เลือกแล้ว</span><small>ร้านพิมพ์โปรเป็นบรรทัด ๆ ในหลังร้าน เว็บจัดหน้าให้</small></p>
+    <div class="phone">
+      <img class="logo" src="img/june-mark-cream.svg" alt="June">
+      <div class="sheet">
+        <p class="month">พฤศจิกายน 2569</p>
+        <h2>โปรเดือนนี้</h2>
+        <div class="rule"></div>
+        <div class="item" style="--k:0"><h3>ชิฟฟ่อนมะพร้าวใบเตย 2 กล่อง</h3><span class="price">220.-<s>240.-</s></span><p>สั่งล่วงหน้า 1 วัน รับที่หน้าร้าน</p></div>
+        <div class="item" style="--k:1"><h3>ซื้อครบ 10 กล่อง แถม 1</h3><span class="price">ฟรี 1</span><p>บอกแอดมินในแชต ร้านนับให้</p></div>
+        <div class="item" style="--k:2"><h3>เพื่อนใหม่ใน LINE</h3><span class="price">ลด 10.-</span><p>กล่องแรกหลังเพิ่มเพื่อน</p></div>
+        <p class="fine">ถึง 30 พ.ย. 2569 · ใช้ร่วมกับโปรอื่นไม่ได้</p>
+        <a class="btn" href="#" data-ic="line">สั่งทาง LINE</a>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="tag">B · รูปโปสเตอร์ของร้านเอง<small>ร้านทำรูปใน Canva แล้วอัปโหลด เว็บโชว์รูปเต็ม ๆ</small></p>
+    <div class="phone">
+      <img class="logo" src="img/june-mark-cream.svg" alt="June">
+      <div class="fake-poster"><small>รูปตัวอย่าง</small><img src="img/box-4.jpg" alt=""><b>2 กล่อง 220.-</b><span>โปรพฤศจิกาฯ นี้เท่านั้น</span></div>
+      <p class="cap">ถึง 30 พ.ย. 2569</p>
+      <a class="btn on-green" href="#" data-ic="line">สั่งทาง LINE</a>
+    </div>
+  </div>
+
+  <div>
+    <p class="tag">ไม่มีโปรเดือนนี้<small>ใช้ได้ทั้ง A และ B</small></p>
+    <div class="phone">
+      <img class="logo" src="img/june-mark-cream.svg" alt="June">
+      <div class="none"><h2>เดือนนี้ยังไม่มีโปรนะคะ</h2><p>มีโปรเมื่อไหร่ June แจ้งใน LINE ก่อนใคร</p></div>
+      <a class="btn on-green" href="#" data-ic="line">คุยกับร้านทาง LINE</a>
+    </div>
+  </div>
+</div>
+
+<div class="notes">
+  <h3>หลังร้าน → โปรโมชั่น (แบบ A)</h3>
+  <ul>
+    <li>ช่องเดียว พิมพ์บรรทัดละโปร แบบ <code>ชื่อโปร | ราคา | รายละเอียด</code> เช่น <code>ชิฟฟ่อน 2 กล่อง | 220.- (240.-) | สั่งล่วงหน้า 1 วัน</code></li>
+    <li>ช่อง "หมดเขต" กับ "หมายเหตุท้ายใบ" · หัวเดือนขึ้นเอง</li>
+    <li>เลยวันหมดเขตแล้วจะขึ้นหน้า "เดือนนี้ยังไม่มีโปร" เอง</li>
+  </ul>
+  <h3>แบบ B</h3>
+  <ul>
+    <li>อัปโหลดรูป 1 รูป + วันหมดเขต · สวยได้เต็มที่ แต่ต้องทำรูปใหม่ทุกเดือน และตัวหนังสือในรูปค้นหาใน Google ไม่เจอ</li>
+  </ul>
+  <h3>กดแล้ว</h3>
+  <ul>
+    <li>ปุ่มเดียว "สั่งทาง LINE" → เข้าแชตร้าน มีข้อความรอไว้ "สนใจโปรเดือนพฤศจิกายน"</li>
+  </ul>
+</div>
+
+<script>
+for (const el of document.querySelectorAll('[data-ic]')) el.insertAdjacentHTML('afterbegin', document.getElementById(el.dataset.ic).innerHTML)
+const play = () => document.querySelectorAll('.phone').forEach((p) => { p.classList.remove('play'); void p.offsetWidth; p.classList.add('play') })
+document.getElementById('replay').onclick = play
+addEventListener('load', play)
+</script>
+</body>
+</html>

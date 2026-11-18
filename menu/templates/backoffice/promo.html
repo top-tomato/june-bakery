@@ -1,0 +1,14 @@
+{% extends "backoffice/base.html" %}
+{% block content %}
+<form class="card-form" method="post">{% csrf_token %}
+  <b style="font:600 1rem Mitr,sans-serif">โปรเดือนนี้ <small class="muted" style="font:400 .85rem Anuphan">ขึ้นในหน้า <a href="/promo" target="_blank" rel="noopener">/promo</a> (ปุ่มโปรโมชั่นใน rich menu) หัวเดือนขึ้นเอง</small></b>
+  <p class="muted" style="font-size:.85rem;margin:4px 0 0">
+    {% if live %}ตอนนี้หน้าโปรโชว์ {{ live.items|length }} โปร{% if live.until %} ถึง {{ live.until }}{% endif %}{% else %}ตอนนี้หน้าโปรขึ้นว่า "เดือนนี้ยังไม่มีโปร"{% endif %}
+  </p>
+  <label for="{{ form.promo.id_for_label }}">โปร บรรทัดละข้อ: ชื่อโปร | ราคา | รายละเอียด</label>{{ form.promo }}{{ form.promo.errors }}
+  <small class="muted" style="font-size:.8rem;line-height:1.5;display:block">ราคาใส่วงเล็บราคาปกติได้ เช่น <code>220.- (240.-)</code> จะขีดฆ่าราคาปกติให้ · ไม่มีราคาเว้นว่างได้ เช่น <code>เพื่อนใหม่ใน LINE | | กล่องแรกลด 10 บาท</code></small>
+  <div class="row2"><div><label for="{{ form.promo_until.id_for_label }}">หมดเขต</label>{{ form.promo_until }}{{ form.promo_until.errors }}</div><div><label for="{{ form.promo_note.id_for_label }}">หมายเหตุท้ายใบ</label>{{ form.promo_note }}</div></div>
+  {{ form.non_field_errors }}
+  <button class="btn2" type="submit">บันทึก</button>
+</form>
+{% endblock %}

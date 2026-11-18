@@ -45,6 +45,17 @@ export interface MenuData {
   closedDays: string[]
   /** "วิธีเก็บขนม" tips for /box (back office → ข้อมูลร้าน); [] = card hidden */
   care: CareTip[]
+  /** this month's promotion flyer for /promo (back office → โปรโมชั่น); null = no promo now */
+  promo: Promo | null
+}
+
+export interface Promo {
+  /** e.g. "พฤศจิกายน 2569" (the current month) */
+  month: string
+  items: { name: string; price: string; was: string; detail: string }[]
+  /** end date, e.g. "30 พ.ย. 2569"; "" = no end date */
+  until: string
+  note: string
 }
 
 export interface CareTip {

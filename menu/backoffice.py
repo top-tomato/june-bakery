@@ -468,6 +468,31 @@ def shop(request: HttpRequest) -> HttpResponse:
     return render(request, "backoffice/shop.html", base_context(request, "shop", "ข้อมูลร้าน") | {"form": form, "og_home": home_image_url()})
 
 
+class PromoForm(forms.ModelForm):
+    class Meta:
+        model = ShopInfo
+        fields = ["promo", "promo_until", "promo_note"]
+        widgets = {
+            "promo": forms.Textarea(attrs={"rows": 5, "placeholder": "ชิฟฟ่อนมะพร้าวใบเตย 2 กล่อง | 220.- (240.-) | สั่งล่วงหน้า 1 วัน รับที่หน้าร้าน\nซื้อครบ 10 กล่อง แถม 1 | ฟรี 1 | บอกแอดมินในแชต ร้านนับให้"}),
+            "promo_until": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+            "promo_note": forms.TextInput(attrs={"placeholder": "เช่น ใช้ร่วมกับโปรอื่นไม่ได้"}),
+        }
+
+
+@staff_member_required
+def promo(request: HttpRequest) -> HttpResponse:
+    """โปรเดือนนี้ for /promo (mock/promo.html A): one line per promo, an end date, a note"""
+    info = ShopInfo.load()
+    form = PromoForm(request.POST or None, instance=info)
+    if request.method == "POST":
+        if form.is_valid():
+            form.save()
+            messages.success(request, "บันทึกโปรแล้ว")
+            return redirect("backoffice:promo")
+        messages.error(request, "บันทึกไม่ได้ ตรวจช่องที่ขึ้นสีแดง")
+    return render(request, "backoffice/promo.html", base_context(request, "promo", "โปรโมชั่น") | {"form": form, "live": info.promo_payload()})
+
+
 # ---------------------------------------------------------------- staff accounts (owner only)
 
 

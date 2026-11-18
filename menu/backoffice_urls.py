@@ -17,6 +17,7 @@ urlpatterns = [
     path("menu/", backoffice.menu, name="menu"),
     path("reviews/", backoffice.reviews, name="reviews"),
     path("shop/", backoffice.shop, name="shop"),
+    path("promo/", backoffice.promo, name="promo"),
     path("staff/", backoffice.staff, name="staff"),
     path("qr/", qr.codes, name="qr"),
     path("qr/preview.svg", qr.preview, name="qr-preview"),

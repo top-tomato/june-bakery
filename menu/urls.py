@@ -11,6 +11,7 @@ urlpatterns = [
     # หน้าของแอป React (TanStack Router จัดการเส้นทางต่อในเบราว์เซอร์) เพิ่มที่นี่เมื่อมีหน้าใหม่
     # QR บนกล่อง: ลิงก์สั้นที่นับยอดสแกน (menu/qr.py) และหน้าสำหรับคนที่ถือกล่อง
     path("q/<slug:slug>", qr.go, name="qr-go"),
+    path("promo", views.app, name="promo"),  # React page (frontend/src/routes/promo.tsx), this month's promotion flyer
     path("box", views.app, name="box"),  # React page (frontend/src/routes/box.tsx), same animations as the landing page
     path("", views.app, name="index"),
     path("book/", views.app, name="book"),

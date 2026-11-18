@@ -52,6 +52,8 @@ def menu_data() -> dict[str, object]:
         "about": info["about"],
         # "วิธีเก็บขนม" for the page people see after scanning the box's QR (/box); [] = card hidden
         "care": ShopInfo.load().care_tips(),
+        # this month's promotion flyer (/promo, back office → โปรโมชั่น); None = no promo now
+        "promo": ShopInfo.load().promo_payload(today),
         "reviews": [r.as_payload() for r in Review.objects.filter(is_active=True)],
         # days the shop is closed in the next 30 days (back office calendar); shown on the site
         "closedDays": [d.isoformat() for d in ClosedDay.objects.filter(date__gte=today, date__lte=today + timedelta(days=30)).values_list("date", flat=True)],
@@ -73,7 +75,7 @@ def app(request: HttpRequest) -> HttpResponse:
     name = request.resolver_match.url_name if request.resolver_match else ""
     gallery = name == "gallery"
     og = {
-        "title": "Gallery · June" if gallery else "ขอบคุณที่อุดหนุน · June" if name == "box" else "June — อบใหม่ หอม นุ่มนาน",
+        "title": "Gallery · June" if gallery else "ขอบคุณที่อุดหนุน · June" if name == "box" else "โปรเดือนนี้ · June" if name == "promo" else "June — อบใหม่ หอม นุ่มนาน",
         "description": "รูปขนมที่อบเสร็จทุกวันของ June" if gallery else "ดูเมนูขนมของ June แล้วทักสั่งทาง LINE ได้เลย",
         "image": gallery_image_url() if gallery else home_image_url(),
     }

@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as BookRouteImport } from './routes/book'
 import { Route as BoxRouteImport } from './routes/box'
 import { Route as GalleryRouteImport } from './routes/gallery'
+import { Route as PromoRouteImport } from './routes/promo'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -34,18 +35,25 @@ const GalleryRoute = GalleryRouteImport.update({
   path: '/gallery',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PromoRoute = PromoRouteImport.update({
+  id: '/promo',
+  path: '/promo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/book': typeof BookRoute
   '/box': typeof BoxRoute
   '/gallery': typeof GalleryRoute
+  '/promo': typeof PromoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/book': typeof BookRoute
   '/box': typeof BoxRoute
   '/gallery': typeof GalleryRoute
+  '/promo': typeof PromoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +61,14 @@ export interface FileRoutesById {
   '/book': typeof BookRoute
   '/box': typeof BoxRoute
   '/gallery': typeof GalleryRoute
+  '/promo': typeof PromoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/book' | '/box' | '/gallery'
+  fullPaths: '/' | '/book' | '/box' | '/gallery' | '/promo'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/book' | '/box' | '/gallery'
-  id: '__root__' | '/' | '/book' | '/box' | '/gallery'
+  to: '/' | '/book' | '/box' | '/gallery' | '/promo'
+  id: '__root__' | '/' | '/book' | '/box' | '/gallery' | '/promo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +76,7 @@ export interface RootRouteChildren {
   BookRoute: typeof BookRoute
   BoxRoute: typeof BoxRoute
   GalleryRoute: typeof GalleryRoute
+  PromoRoute: typeof PromoRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +109,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GalleryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/promo': {
+      id: '/promo'
+      path: '/promo'
+      fullPath: '/promo'
+      preLoaderRoute: typeof PromoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +124,7 @@ const rootRouteChildren: RootRouteChildren = {
   BookRoute: BookRoute,
   BoxRoute: BoxRoute,
   GalleryRoute: GalleryRoute,
+  PromoRoute: PromoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
