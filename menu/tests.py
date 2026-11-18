@@ -679,3 +679,17 @@ class PromoTests(TestCase):
         self.assertEqual(r.status_code, 302)
         self.assertEqual(ShopInfo.load().promo_until, date(2099, 1, 31))
         self.assertContains(self.client.get("/admin/shop/promo/"), "1 โปร")
+
+
+@override_settings(ALLOWED_HOSTS=["junedessert.com", "www.junedessert.com", "june-bakery.fly.dev"], CANONICAL_HOST="junedessert.com")
+class CanonicalHostTests(TestCase):
+    """the old fly.dev host (printed on the QR stickers) and www. go to junedessert.com, same path"""
+
+    def test_old_host_redirects_with_path(self) -> None:
+        r = self.client.get("/q/box?x=1", HTTP_HOST="june-bakery.fly.dev")
+        self.assertEqual(r.status_code, 301)
+        self.assertEqual(r["Location"], "https://junedessert.com/q/box?x=1")
+        self.assertEqual(self.client.get("/", HTTP_HOST="www.junedessert.com")["Location"], "https://junedessert.com/")
+
+    def test_own_domain_is_served(self) -> None:
+        self.assertEqual(self.client.get("/api/menu/", HTTP_HOST="junedessert.com").status_code, 200)

@@ -5,6 +5,9 @@
 
 ## [Unreleased]
 
+### Changed
+- โดเมนร้าน `junedessert.com`: `june-bakery.fly.dev` และ `www.junedessert.com` ส่งต่อมาที่ `junedessert.com` ทางเดิม (301) QR บนสติกเกอร์ที่พิมพ์ไปแล้ว (`june-bakery.fly.dev/q/box`) ยังสแกนได้และนับยอดเหมือนเดิม · ตัวแปรใหม่ `CANONICAL_HOST`
+
 ## [0.15.1] - 2026-11-19
 
 ### Changed

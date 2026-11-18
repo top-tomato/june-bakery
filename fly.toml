@@ -3,7 +3,8 @@ app = "june-bakery"
 primary_region = "sin"
 
 [env]
-  DJANGO_ALLOWED_HOSTS = "june-bakery.fly.dev"
+  DJANGO_ALLOWED_HOSTS = "junedessert.com,www.junedessert.com,june-bakery.fly.dev"
+  CANONICAL_HOST = "junedessert.com"
   LINE_OA_ID = "@561hgrea"
 
 # ดิสก์ถาวร เก็บฐานข้อมูลและไฟล์ที่อัปโหลด

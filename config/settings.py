@@ -32,6 +32,8 @@ if not SECRET_KEY:
 
 ALLOWED_HOSTS = [host for host in os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',') if host]
 CSRF_TRUSTED_ORIGINS = [f'https://{host}' for host in ALLOWED_HOSTS]
+# the shop's own domain; other hosts (june-bakery.fly.dev, www.) redirect there, same path (menu/canonical.py). '' = off
+CANONICAL_HOST = os.environ.get('CANONICAL_HOST', '').lower()
 
 if not DEBUG:
     # อยู่หลัง proxy ของผู้ให้บริการ ซึ่งรับ HTTPS แล้วส่งต่อมาเป็น HTTP
@@ -58,6 +60,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'menu.canonical.CanonicalHostMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',

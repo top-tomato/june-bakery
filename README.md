@@ -109,6 +109,7 @@ cd frontend && npm run build && npm run test:e2e   # Playwright (ใช้ Chrom
 | `DJANGO_DEBUG` | `1` | `1` คือโหมดพัฒนา ตั้งเป็น `0` เมื่อใช้งานจริง |
 | `DJANGO_SECRET_KEY` | มีค่าสำรองเฉพาะโหมดพัฒนา | บังคับตั้งเมื่อ `DJANGO_DEBUG=0` |
 | `DJANGO_ALLOWED_HOSTS` | ว่าง | โดเมนที่อนุญาต คั่นด้วยจุลภาค |
+| `CANONICAL_HOST` | ว่าง | โดเมนหลักของร้าน (`junedessert.com`) โดเมนอื่นใน `DJANGO_ALLOWED_HOSTS` ส่งต่อมาที่นี่ (301 ทางเดิม) ว่าง = ไม่ส่งต่อ |
 | `DATA_DIR` | โฟลเดอร์โปรเจกต์ | ที่เก็บ `db.sqlite3` และ `media/` ตอนใช้งานจริงชี้ไปที่ดิสก์ถาวร |
 | `LINE_OA_ID` | `@561hgrea` | ID ของ LINE Official Account รวม `@` |
 | `VITE_DEV_SERVER` | ว่าง | ตอนพัฒนาหน้าบ้าน ตั้งเป็น `http://localhost:5173` เพื่อโหลดโค้ดจาก Vite แทนไฟล์ที่ build แล้ว |
@@ -129,6 +130,8 @@ fly ssh console -C "python manage.py createsuperuser"
 ```
 
 ครั้งต่อไปใช้ `fly deploy` อย่างเดียว ตอนเครื่องเปิด `docker-entrypoint.sh` จะ migrate ฐานข้อมูลและใส่เมนูตั้งต้นให้เองถ้ายังไม่มีขนมในระบบ
+
+โดเมนของร้านคือ `junedessert.com` (จดที่ Cloudflare, DNS แบบ DNS only ชี้ A/AAAA ไปที่ Fly ทั้ง `@` และ `www`, ใบรับรองจาก `fly certs add`) ส่วน `june-bakery.fly.dev` ยังเปิดได้และส่งต่อไปโดเมนร้าน เพราะ QR บนสติกเกอร์ที่พิมพ์ไปแล้วชี้มาที่นี่
 
 ถ้าชื่อ app ซ้ำกับคนอื่น ให้เปลี่ยนทั้ง `app` และ `DJANGO_ALLOWED_HOSTS` ใน `fly.toml` ให้ตรงกัน
 
