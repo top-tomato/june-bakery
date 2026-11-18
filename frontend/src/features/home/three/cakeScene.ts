@@ -57,9 +57,7 @@ const outCubic = (t: number) => 1 - Math.pow(1 - t, 3)
 const outBack = (t: number) => 1 + 2.4 * Math.pow(t - 1, 3) + 1.4 * Math.pow(t - 1, 2)
 
 export function createCakeScene(o: CakeSceneOptions): () => void {
-  // preserveDrawingBuffer: the stills copy the canvas right after rendering; without it iOS (LINE's browser) handed
-  // back the previous frame, so the box's still showed the story's single cake
-  const renderer = new WebGLRenderer({ canvas: o.canvas, alpha: true, antialias: !debug.lowres, preserveDrawingBuffer: true })
+  const renderer = new WebGLRenderer({ canvas: o.canvas, alpha: true, antialias: !debug.lowres })
   renderer.setPixelRatio(debug.lowres ? 1 : Math.min(devicePixelRatio, innerWidth < 700 ? 1.5 : 2))
   renderer.toneMapping = ACESFilmicToneMapping
   renderer.toneMappingExposure = 0.9
@@ -165,6 +163,8 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
    * Taking one: render just that part of the screen stretched over the whole canvas, copy it into a 2D canvas, then
    * the normal frame is drawn over it in the same task, so it never shows.
    */
+  // what the 3D is doing, for the ?fps meter on a real phone
+  const dbg = ((window as unknown as { __june3d?: Record<string, string | number> }).__june3d ??= {})
   const snaps: HTMLCanvasElement[] = []
   const makeSnap = (parent: HTMLElement) => {
     const c = document.createElement('canvas')
@@ -187,7 +187,30 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
     camera.setViewOffset(cw, ch, ox + R.left, oy + R.top, R.width, R.height)
     camera.updateProjectionMatrix()
     renderer.render(sc, camera)
-    c.getContext('2d')?.drawImage(o.canvas, 0, 0, o.canvas.width, o.canvas.height, 0, 0, c.width, c.height)
+    // read the pixels straight from WebGL: copying the canvas with drawImage gave the previous frame on iPhone
+    // (LINE), so the box's still showed the story's cake
+    const gl = renderer.getContext(), W = gl.drawingBufferWidth, H = gl.drawingBufferHeight
+    const px = new Uint8ClampedArray(W * H * 4)
+    gl.readPixels(0, 0, W, H, gl.RGBA, gl.UNSIGNED_BYTE, px)
+    const img = new ImageData(W, H), row = W * 4
+    let solid = 0
+    for (let y = 0; y < H; y++) {
+      const from = (H - 1 - y) * row, to = y * row // WebGL rows run bottom-up
+      for (let i = 0; i < row; i += 4) {
+        const a = px[from + i + 3] ?? 0, k = a ? 255 / a : 0 // undo premultiplied alpha
+        img.data[to + i] = (px[from + i] ?? 0) * k
+        img.data[to + i + 1] = (px[from + i + 1] ?? 0) * k
+        img.data[to + i + 2] = (px[from + i + 2] ?? 0) * k
+        img.data[to + i + 3] = a
+        if (a > 128) solid++
+      }
+    }
+    const tmp = document.createElement('canvas')
+    tmp.width = W
+    tmp.height = H
+    tmp.getContext('2d')?.putImageData(img, 0, 0)
+    c.getContext('2d')?.drawImage(tmp, 0, 0, W, H, 0, 0, c.width, c.height)
+    dbg[c === boxEnd.el ? 'end' : c === boxStart.el ? 'start' : 'story'] = Math.round((solid * 100) / (W * H)) // % covered, for ?fps
     camera.clearViewOffset()
     camera.updateProjectionMatrix()
   }
@@ -220,6 +243,7 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
     }
     const r = pinnedRect(o.boxStage), key = `${i}|${cw}x${ch}|${Math.round(r.width)}x${Math.round(r.height)}|${Math.round(r.left)},${Math.round(r.top)}`
     if (boxStart.key === key) return
+    dbg.geo = `${cw}x${ch} stage ${Math.round(r.width)}x${Math.round(r.height)}@${Math.round(r.top)} pr ${renderer.getPixelRatio()}`
     for (const [snap, p, ms] of [
       [boxStart, 0, null],
       [boxEnd, 1, 1e4],
@@ -250,8 +274,6 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
   }
 
   let smooth = 0, away = false, stillsBroken = false
-  // what the 3D is doing, for the ?fps meter on a real phone
-  const dbg = ((window as unknown as { __june3d?: Record<string, string | number> }).__june3d ??= {})
   const off = onFrame({
     after: ({ t, y }) => {
       // re-check the canvas size every frame (cheap, layout is already fresh here): if the scene started before the

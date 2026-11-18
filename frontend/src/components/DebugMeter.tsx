@@ -39,7 +39,7 @@ export function DebugMeter() {
         const section = document.elementFromPoint(innerWidth / 2, innerHeight / 2)?.closest('section')?.id ?? '-'
         send(`fps=${fps}&worst=${Math.round(worst)}&slow=${slow}&y=${Math.round(y)}&sec=${section}&moved=${moved}&maxStep=${maxStep}&resizes=${resizes}&ih=${innerHeight}`)
         const g = (window as unknown as { __june3d?: Record<string, string | number> }).__june3d
-        const gl = g ? `\n3D ${g.frames ?? 0} box ${g.box ?? '-'} p ${g.p ?? '-'} still ${g.stills ?? '-'}${g.err ? `\n${g.err}` : ''}${lastErr ? `\n${lastErr}` : ''}` : lastErr
+        const gl = g ? `\n3D ${g.frames ?? 0} box ${g.box ?? '-'} p ${g.p ?? '-'} still ${g.stills ?? '-'} ${g.story ?? '-'}/${g.start ?? '-'}/${g.end ?? '-'}%${g.geo ? `\n${g.geo}` : ''}${g.err ? `\n${g.err}` : ''}${lastErr ? `\n${lastErr}` : ''}` : lastErr
         if (ref.current) ref.current.textContent = `${fps} fps\nช้าสุด ${Math.round(worst)} ms\nสะดุด ${slow} ครั้ง${gl}`
         n = worst = slow = resizes = moved = maxStep = 0
         t0 = t
