@@ -20,6 +20,9 @@ export function DebugMeter() {
     let last = performance.now(), t0 = last, lastY = scrollY
     const onResize = () => resizes++
     addEventListener('resize', onResize)
+    let lastErr = ''
+    const onError = (e: ErrorEvent) => void (lastErr = String(e.message).slice(0, 120))
+    addEventListener('error', onError)
     const off = onFrame({
       write: ({ t, y }) => {
         const d = t - last
@@ -35,7 +38,9 @@ export function DebugMeter() {
         const fps = Math.round((n * 1000) / (t - t0))
         const section = document.elementFromPoint(innerWidth / 2, innerHeight / 2)?.closest('section')?.id ?? '-'
         send(`fps=${fps}&worst=${Math.round(worst)}&slow=${slow}&y=${Math.round(y)}&sec=${section}&moved=${moved}&maxStep=${maxStep}&resizes=${resizes}&ih=${innerHeight}`)
-        if (ref.current) ref.current.textContent = `${fps} fps\nช้าสุด ${Math.round(worst)} ms\nสะดุด ${slow} ครั้ง`
+        const g = (window as unknown as { __june3d?: Record<string, string | number> }).__june3d
+        const gl = g ? `\n3D ${g.frames ?? 0} box ${g.box ?? '-'} p ${g.p ?? '-'} still ${g.stills ?? '-'}${g.err ? `\n${g.err}` : ''}${lastErr ? `\n${lastErr}` : ''}` : lastErr
+        if (ref.current) ref.current.textContent = `${fps} fps\nช้าสุด ${Math.round(worst)} ms\nสะดุด ${slow} ครั้ง${gl}`
         n = worst = slow = resizes = moved = maxStep = 0
         t0 = t
       },
@@ -43,6 +48,7 @@ export function DebugMeter() {
     return () => {
       off()
       removeEventListener('resize', onResize)
+      removeEventListener('error', onError)
     }
   }, [])
 

@@ -247,7 +247,9 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
     return true
   }
 
-  let smooth = 0, away = false
+  let smooth = 0, away = false, stillsBroken = false
+  // what the 3D is doing, for the ?fps meter on a real phone
+  const dbg = ((window as unknown as { __june3d?: Record<string, string | number> }).__june3d ??= {})
   const off = onFrame({
     after: ({ t, y }) => {
       // re-check the canvas size every frame (cheap, layout is already fresh here): if the scene started before the
@@ -257,12 +259,25 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
       const S = o.story
       const st = o.stage.getBoundingClientRect()
       const bs = o.boxStage.getBoundingClientRect()
-      // stills, taken once the sections are near (and again if the size or the cake changes)
-      if (S.p > 0.5 || st.bottom < 0) snapStory(Math.round(o.active()))
-      if (bs.top < ch * 2) snapBox()
+      // stills, taken once the sections are near (and again if the size or the cake changes). If taking one fails on
+      // some phone, give up on stills for good rather than failing every frame (that froze the 3D on a real iPhone)
+      if (!stillsBroken) {
+        try {
+          if (S.p > 0.5 || st.bottom < 0) snapStory(Math.round(o.active()))
+          if (bs.top < ch * 2) snapBox()
+        } catch (e) {
+          stillsBroken = true
+          for (const c of snaps) c.style.visibility = 'hidden'
+          dbg.err = `still: ${String(e)}`
+        }
+      }
       const done = S.p >= 0.999 // story un-pinned: its still takes over
       show(storySnap, done)
       const boxOn = updateBox()
+      dbg.p = o.box.p.toFixed(2)
+      dbg.box = boxOn ? 'live' : '-'
+      dbg.stills = stillsBroken ? 'off' : `${storySnap.key ? 's' : ''}${boxStart.key ? 'b' : ''}`
+      dbg.frames = ((dbg.frames as number) || 0) + 1
       const nowAway = (done || st.bottom < -300) && !boxOn
       if (nowAway !== away) {
         away = nowAway
