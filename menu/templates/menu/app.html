@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>June — อบใหม่ หอม นุ่มนาน</title>
-<meta name="description" content="ร้านขนมอบ June ใกล้อนุสาวรีย์ชัยฯ ดูเมนูแล้วทักสั่งทาง LINE {{ bootstrap.line.oaId }}">
+<meta name="description" content="ร้านขนมอบ June ใกล้อนุสาวรีย์ชัยฯ ดูเมนูแล้วทักสั่งทาง LINE">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="June Bakery">
 <meta property="og:locale" content="th_TH">
@@ -44,7 +44,7 @@
     <h1>June — อบใหม่ หอม นุ่มนาน</h1>
     <ul>{% for p in products %}<li><b>{{ p.name|join:"" }}</b> {% if p.price is not None %}฿{{ p.price }}{% else %}สอบถามราคา{% endif %} — {{ p.description }}</li>{% endfor %}</ul>
     <p>{{ shop.name }} · {{ shop.address }}</p>
-    <p><a style="color:inherit" href="{{ bootstrap.line.addUrl }}">ทักสั่งทาง LINE {{ bootstrap.line.oaId }}</a></p>
+    <p><a style="color:inherit" href="{{ bootstrap.line.addUrl }}">ทักสั่งทาง LINE</a></p>
   </main>
 </div>
 </body>
