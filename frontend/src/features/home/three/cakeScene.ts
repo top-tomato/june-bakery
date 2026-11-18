@@ -169,6 +169,9 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
   let smooth = 0, away = false
   const off = onFrame({
     after: ({ t, y }) => {
+      // re-check the canvas size every frame (cheap, layout is already fresh here): if the scene started before the
+      // page CSS applied, the first size was the bare canvas default and the box/cakes were drawn off screen
+      size()
       const VH = viewportHeight()
       const S = o.story
       const st = o.stage.getBoundingClientRect()

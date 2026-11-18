@@ -16,6 +16,8 @@ interface Props {
  * Mounts the three.js scene. three.js is loaded as a separate chunk after the page is up
  * (react skill: bundle-conditional / bundle-dynamic-imports), so the first paint doesn't wait for it.
  */
+const LAYER = { position: 'fixed', left: 0, top: 0, width: '100%', height: 'var(--vhmax)' } as const
+
 export function CakeLayer({ models, heroSpot, stage, boxStage, motion, onFail }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   // keep the latest callback without restarting the scene (react skill: advanced-event-handler-refs)
@@ -61,5 +63,6 @@ export function CakeLayer({ models, heroSpot, stage, boxStage, motion, onFail }:
     }
   }, [models, heroSpot, stage, boxStage, motion])
 
-  return <canvas ref={canvasRef} className="cake-layer" aria-hidden="true" />
+  // size inline as well as in home.css, so it is right even if the 3D starts before that stylesheet applies
+  return <canvas ref={canvasRef} className="cake-layer" style={LAYER} aria-hidden="true" />
 }
