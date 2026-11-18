@@ -78,8 +78,10 @@ export function Hero({ products, active, onPick, onOpen, spotRef, photo, motion,
     <section className="hero" id="flavors" data-nav="light">
       <JuneLogo ref={logoRef} className="logo go" role="img" aria-label="June" aria-hidden={false} style={{ '--t0': `${logoDelay}ms` } as CSSProperties} />
       <h1>
-        <span>อบใหม่ หอม</span>
-        <span>นุ่มนาน</span>
+        <span className="reveal">อบใหม่ หอม</span>
+        <span className="reveal" style={{ '--i': 1 } as CSSProperties}>
+          นุ่มนาน
+        </span>
       </h1>
       <div ref={spotRef} className="hero-spot">
         {photo && <img className="cake-photo" src={photo} alt={fullName(product)} />}
@@ -103,15 +105,17 @@ export function Hero({ products, active, onPick, onOpen, spotRef, photo, motion,
         </>
       )}
       <div className="pick">
-        <h2>
+        <h2 className="reveal" style={{ '--i': 2 } as CSSProperties}>
           {fullName(product)} <span className="price-chip">
             {priceLabel(product)}
             {product.price != null && product.priceUnit && <small>{product.priceUnit}</small>}
           </span>
         </h2>
-        <p>{product.description}</p>
+        <p className="reveal" style={{ '--i': 3 } as CSSProperties}>
+          {product.description}
+        </p>
         <p className="hint">{products.length > 1 ? 'ลากเพื่อหมุนดู กดลูกศรเพื่อเปลี่ยนเมนู' : 'ลากเพื่อหมุนดูรอบชิ้น'}</p>
-        <div className="ctas">
+        <div className="ctas reveal" style={{ '--i': 4 } as CSSProperties}>
           <a className="btn" href={lineChatUrl(lineOaId, `สนใจสั่ง ${fullName(product)}`)} target="_blank" rel="noopener">
             <ChatIcon />
             สั่งทาง LINE

@@ -42,7 +42,9 @@ export function About({ about, above, flush }: { about: NonNullable<MenuData['ab
               {about.title}
             </h2>
           )}
-          <p className="about-text">{about.text}</p>
+          <p className="about-text reveal" style={{ '--i': 2 } as CSSProperties}>
+            {about.text}
+          </p>
         </div>
       </div>
     </section>
@@ -62,9 +64,11 @@ export function Gallery({ photos, above, flush }: { photos: MenuData['gallery'];
         <h2 className="sec-title reveal" style={{ '--i': 1 } as CSSProperties}>
           จากครัว June
         </h2>
-        <p className="gal-sub">อบเสร็จ ถ่ายเก็บไว้ทุกวัน</p>
+        <p className="gal-sub reveal" style={{ '--i': 2 } as CSSProperties}>
+          อบเสร็จ ถ่ายเก็บไว้ทุกวัน
+        </p>
         <Snapshots items={photos.slice(0, SHOWN)} />
-        <div className="more">
+        <div className="more reveal">
           <Link to="/gallery" className="btn">
             ดูทั้งหมด{photos.length > SHOWN ? ` (${photos.length})` : ''}
           </Link>

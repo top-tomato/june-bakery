@@ -26,15 +26,15 @@ export function Where({ shop, above }: Props) {
           ที่หน้าร้าน
         </h2>
         {/* preview/jemmy-order: only the opening hours stay from the shop box (no name, address, closed days) */}
-        {shop.hours && <p className="hours">เวลาเปิด {shop.hours}</p>}
-        <a className="btn go" href={shop.mapsUrl} target="_blank" rel="noopener">
+        {shop.hours && <p className="hours reveal" style={{ '--i': 1 } as CSSProperties}>เวลาเปิด {shop.hours}</p>}
+        <a className="btn go reveal" style={{ '--i': 2 } as CSSProperties} href={shop.mapsUrl} target="_blank" rel="noopener">
           <MapPinIcon />
           นำทางด้วย Google Maps
         </a>
       </div>
       <div>
         {/* 3D street map of the real spot baked to one picture; a live tilted 3D layer stalled phones on fast scroll */}
-        <a className="map" href={shop.mapsUrl} target="_blank" rel="noopener" aria-label={`แผนที่${shop.name} เปิดใน Google Maps`}>
+        <a className="map reveal" href={shop.mapsUrl} target="_blank" rel="noopener" aria-label={`แผนที่${shop.name} เปิดใน Google Maps`}>
           <img src={mapImage} alt="" width={1750} height={1313} decoding="async" fetchPriority="low" />
           <span className="pin" style={{ '--px': PIN.x, '--py': PIN.y } as CSSProperties}>
             <b>June อยู่ตรงนี้</b>
@@ -42,7 +42,7 @@ export function Where({ shop, above }: Props) {
             <s />
           </span>
         </a>
-        <p className="approx">แผนที่โดยประมาณ · แตะเพื่อเปิด Google Maps</p>
+        <p className="approx reveal" style={{ '--i': 1 } as CSSProperties}>แผนที่โดยประมาณ · แตะเพื่อเปิด Google Maps</p>
       </div>
     </section>
   )

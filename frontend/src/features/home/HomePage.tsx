@@ -43,18 +43,19 @@ export function HomePage({ data }: { data: MenuData }) {
     setNoGl((prev) => (what === 'all' || prev === 'all' ? 'all' : new Set(prev).add(what)))
   }, [])
 
-  // headings and lists fade up once as their section scrolls in (.reveal in home.css)
+  // text fades up gently as its section scrolls in (.reveal in home.css); it plays again each time the section comes
+  // back (preview/jemmy-order: "every section's text animates on scroll")
   useEffect(() => {
     const io = new IntersectionObserver(
       (entries) =>
         entries.forEach((e) => {
-          if (!e.isIntersecting) return
-          e.target.classList.add('in')
-          io.unobserve(e.target)
+          if (e.isIntersecting) e.target.classList.add('in')
+          // reset only once well off screen (below), so it never flickers at the edge and replays on the way down
+          else if (e.boundingClientRect.top > innerHeight) e.target.classList.remove('in')
         }),
       { rootMargin: '0px 0px -12% 0px' },
     )
-    document.querySelectorAll('main .reveal:not(.in)').forEach((el) => io.observe(el))
+    document.querySelectorAll('main .reveal').forEach((el) => io.observe(el))
     return () => io.disconnect()
   }, [data])
 
