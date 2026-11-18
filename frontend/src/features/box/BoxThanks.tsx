@@ -1,7 +1,9 @@
-import { useEffect, type CSSProperties, type ReactNode } from 'react'
+import { useEffect, useState, type CSSProperties, type ReactNode } from 'react'
 import { fullName, lineChatUrl, priceLabel, type CareTip, type MenuData } from '@/api/menu'
 import boxPhoto from '@/assets/box-4.jpg'
 import { JuneLogo } from '@/components/JuneLogo'
+import { Curtain } from '../home/Curtain'
+import { introDelayMs } from '../home/intro'
 import '../home/home.css'
 import './box.css'
 
@@ -42,15 +44,19 @@ export function BoxThanks({ data }: { data: MenuData }) {
   const product = products[0]
   const name = product ? fullName(product) : 'ขนมของ June'
 
+  const [t0] = useState(introDelayMs) // decided once, before the curtain marks itself played
+  const delay = { '--t0': `${t0}ms` } as CSSProperties
+
   useEffect(() => {
     document.title = 'ขอบคุณที่อุดหนุน · June'
   }, [])
 
   const i = (n: number) => ({ '--i': n }) as CSSProperties
   return (
-    <main className="bx">
+    <main className="bx" style={delay}>
+      <Curtain />
       <header className="bx-head">
-        <JuneLogo className="logo go" role="img" aria-label="June" aria-hidden={false} />
+        <JuneLogo className="logo go" role="img" aria-label="June" aria-hidden={false} style={delay} />
         <h1>ขอบคุณที่อุดหนุนนะคะ</h1>
       </header>
 

@@ -1,6 +1,8 @@
-import { useEffect, type CSSProperties } from 'react'
+import { useEffect, useState, type CSSProperties } from 'react'
 import { lineChatUrl, type MenuData } from '@/api/menu'
 import { JuneLogo } from '@/components/JuneLogo'
+import { Curtain } from '../home/Curtain'
+import { introDelayMs } from '../home/intro'
 import '../home/home.css'
 import './promo.css'
 
@@ -18,13 +20,17 @@ const lineIcon = (
 export function PromoPage({ data }: { data: MenuData }) {
   const { promo, line } = data
 
+  const [t0] = useState(introDelayMs) // decided once, before the curtain marks itself played
+  const delay = { '--t0': `${t0}ms` } as CSSProperties
+
   useEffect(() => {
     document.title = 'โปรเดือนนี้ · June'
   }, [])
 
   return (
-    <main className="pm">
-      <JuneLogo className="logo go" role="img" aria-label="June" aria-hidden={false} />
+    <main className="pm" style={delay}>
+      <Curtain />
+      <JuneLogo className="logo go" role="img" aria-label="June" aria-hidden={false} style={delay} />
       {promo ? (
         <article className="pm-sheet">
           <p className="pm-month">{promo.month}</p>

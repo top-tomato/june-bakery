@@ -22,7 +22,7 @@
   padding: 28px 22px 22px;
   box-shadow: 0 18px 36px rgba(0, 0, 0, 0.28);
   transform: rotate(-1deg);
-  animation: pm-drop 0.9s cubic-bezier(0.2, 1.1, 0.3, 1) both 0.45s;
+  animation: pm-drop 0.9s cubic-bezier(0.2, 1.1, 0.3, 1) both calc(var(--t0, 0ms) + 0.45s);
 }
 /* a strip of tape holding the sheet up */
 .pm-sheet::before {
@@ -59,7 +59,7 @@
   gap: 2px 12px;
   align-items: baseline;
   padding: 12px 0;
-  animation: op-up 0.6s both calc(1s + var(--k, 0) * 0.12s);
+  animation: op-up 0.6s both calc(var(--t0, 0ms) + 1s + var(--k, 0) * 0.12s);
 }
 .pm-sheet li + li {
   border-top: 1px solid #e4d6bb;
@@ -113,7 +113,7 @@
   text-align: center;
   color: var(--cream);
   padding-top: 24px;
-  animation: op-up 0.7s both 0.4s;
+  animation: op-up 0.7s both calc(var(--t0, 0ms) + 0.4s);
 }
 .pm-none h1 {
   font: 500 1.35rem var(--display);
