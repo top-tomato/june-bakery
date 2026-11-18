@@ -63,17 +63,17 @@ const film=new THREE.MeshPhysicalMaterial({color:0xffffff,transparent:true,opaci
 const part=(w,h,d,m,x,y,z)=>{const o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;return o}
 const rrect=(sh,x,y,w,h,r)=>{sh.moveTo(x+r,y);sh.lineTo(x+w-r,y);sh.quadraticCurveTo(x+w,y,x+w,y+r);sh.lineTo(x+w,y+h-r);sh.quadraticCurveTo(x+w,y+h,x+w-r,y+h);sh.lineTo(x+r,y+h);sh.quadraticCurveTo(x,y+h,x,y+h-r);sh.lineTo(x,y+r);sh.quadraticCurveTo(x,y,x+r,y);return sh}
 
-const W=2.08, H=.64, T=.025, box=new THREE.Group()
+const W=2.08, H=.64, T=.008, box=new THREE.Group()
 box.add(part(W,T,W,inner,0,T/2,0))
 for(const [w,d,x,z] of [[W,T,0,W/2],[W,T,0,-W/2],[T,W,W/2,0],[T,W,-W/2,0]]){
   box.add(part(w,H,d,paper,x,H/2,z))
-  box.add(part(w+.03,.035,d+.03,paper,x,H-.017,z)) // folded double rim
+  box.add(part(w+.012,.02,d+.012,paper,x,H-.01,z)) // folded double rim, still paper-thin
 }
 s.add(box)
 // lid: hinge on the back top edge, plate hangs forward (+z) from it
 const hinge=new THREE.Group(); hinge.position.set(0,H+.02,-W/2-.01); s.add(hinge)
 const lid=new THREE.Group(); hinge.add(lid)
-const L=W+.06, m=.24                                     // lid size, kraft border around the window
+const L=W+.02, m=.17                                     // lid size, kraft border around the window
 const plate=rrect(new THREE.Shape(),-L/2,0,L,L,.02); plate.holes.push(rrect(new THREE.Path(),-L/2+m,m,L-2*m,L-2*m,.16))
 const pg=new THREE.ExtrudeGeometry(plate,{depth:T,bevelEnabled:false}); pg.rotateX(Math.PI/2); pg.translate(0,T,0)
 const lidPlate=new THREE.Mesh(pg,paper); lidPlate.castShadow=lidPlate.receiveShadow=true; lid.add(lidPlate)
