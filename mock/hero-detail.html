@@ -12,6 +12,7 @@
 *{box-sizing:border-box;margin:0}
 body{font-family:Anuphan,system-ui,sans-serif;background:#1f2b29;color:var(--cream)}
 .note{position:fixed;top:8px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.6);font-size:.75rem;padding:4px 12px;border-radius:99px;z-index:9;white-space:nowrap}
+.before{min-height:90vh;display:grid;place-items:center;background:#fdf8ee;color:#243b37;font:500 1.1rem Mitr}
 .hero{position:relative;min-height:100vh;background:var(--indigo);overflow:hidden;display:grid;grid-template-columns:1fr 1fr;align-items:center;padding:90px clamp(16px,5vw,80px) 120px;gap:2vw}
 .nav{position:absolute;top:18px;left:18px;font:500 1rem Mitr}
 .brand{position:absolute;top:10px;left:50%;transform:translateX(-50%);width:110px;filter:brightness(0) invert(.95) sepia(.2)}
@@ -29,6 +30,9 @@ body{font-family:Anuphan,system-ui,sans-serif;background:#1f2b29;color:var(--cre
 .stage canvas{position:absolute;inset:-12%;width:124%!important;height:124%!important}
 .call{position:absolute;display:flex;align-items:center;gap:10px;white-space:nowrap;font-weight:600;color:var(--cream)}
 .call i{display:none} /* no pointer lines: without the plate they ended in mid-air */
+.call{opacity:0;transform:translateY(10px);transition:opacity .5s,transform .5s}
+.hero.in .call{opacity:1;transform:none}
+.hero.in .call:nth-child(2),.hero.in .after .call:nth-child(2){transition-delay:.15s}.hero.in .call:nth-child(3){transition-delay:.3s}
 .call span{background:rgba(255,246,230,.12);border:1px solid rgba(255,246,230,.35);padding:6px 14px;border-radius:99px;font-size:.95rem}
 .c1{left:88%;top:14%}.c2{left:96%;top:46%}.c3{left:86%;top:78%}
 .band{position:absolute;left:-10%;right:-10%;bottom:28px;transform:rotate(-3deg);background:var(--cream);color:var(--indigo);font:600 clamp(1.3rem,3vw,2.4rem) Mitr;white-space:nowrap;padding:6px 0;overflow:hidden}
@@ -52,7 +56,8 @@ body{font-family:Anuphan,system-ui,sans-serif;background:#1f2b29;color:var(--cre
 </head>
 <body>
 <p class="note">mock · หน้าแรกพื้นเขียวเข้ม + รายละเอียดแบบเล่าเรื่องขนม · ชิฟฟ่อนเป็นไฟล์ 3D จริง</p>
-<section class="hero">
+<section class="before"><p>(ส่วน Gallery ด้านบน) เลื่อนลงมา</p></section>
+<section class="hero" id="hero">
   <span class="nav">เมนู</span>
   <img class="brand" src="img/logo.png" alt="June">
   <div class="txt">
@@ -77,9 +82,29 @@ const s=new THREE.Scene(), pm=new THREE.PMREMGenerator(r); s.environment=pm.from
 const sun=new THREE.DirectionalLight(0xfff1dd,1.2); sun.position.set(2,4,3); s.add(sun)
 const cam=new THREE.PerspectiveCamera(30,1,.1,50); cam.position.z=8
 const g=new THREE.Group(); s.add(g)
-new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('img/pandan.glb',gl=>{const m=gl.scene,b=new THREE.Box3().setFromObject(m),sz=b.getSize(new THREE.Vector3()),ct=b.getCenter(new THREE.Vector3());m.position.sub(ct);g.add(m);g.scale.setScalar(2.4/Math.max(sz.x,sz.y,sz.z))})
+new GLTFLoader().setMeshoptDecoder(MeshoptDecoder).load('img/pandan.glb',gl=>{const m=gl.scene,b=new THREE.Box3().setFromObject(m),sz=b.getSize(new THREE.Vector3()),ct=b.getCenter(new THREE.Vector3());m.position.sub(ct);g.add(m);base=2.4/Math.max(sz.x,sz.y,sz.z)})
+let base=1
 const size=()=>{const w=c.clientWidth;r.setSize(w,w,false)};addEventListener('resize',size);size()
-const tick=t=>{g.rotation.set(.75,.35+t*.0004,0);r.render(s,cam);requestAnimationFrame(tick)};requestAnimationFrame(tick)
+// entrance, played on its own clock once the section is a third on screen (not tied to scroll speed):
+// the cake drops in from above spinning, lands with a little bounce, then settles into its slow turn; the labels
+// fade up once it lands. Scrolling the section fully away and back plays it again.
+let startAt=null
+const hero=document.getElementById('hero')
+new IntersectionObserver(([e])=>{
+  if(e.intersectionRatio>.33&&startAt==null){startAt=performance.now();setTimeout(()=>hero.classList.add('in'),900)}
+  if(e.intersectionRatio===0){startAt=null;hero.classList.remove('in')}
+},{threshold:[0,.33]}).observe(hero)
+const outBack=t=>1+2.4*Math.pow(t-1,3)+1.4*Math.pow(t-1,2)
+const bounce=t=>{const n=7.5625,d=2.75;return t<1/d?n*t*t:t<2/d?n*(t-=1.5/d)*t+.75:t<2.5/d?n*(t-=2.25/d)*t+.9375:n*(t-=2.625/d)*t+.984375}
+const tick=t=>{
+  const k=startAt==null?0:Math.min(1,(t-startAt)/1100)
+  g.visible=startAt!=null
+  g.position.y=(1-bounce(k))*3.2                  // falls from above the plate area, bounces to rest
+  const sc=.6+.4*outBack(Math.min(1,k*1.3))
+  g.scale.setScalar(base*sc)
+  g.rotation.set(.75-(1-k)*.6,.35+t*.0004+(1-k)*(1-k)*Math.PI*2.5,0) // extra spin that winds down as it lands
+  r.render(s,cam);requestAnimationFrame(tick)}
+requestAnimationFrame(tick)
 </script>
 </body>
 </html>
