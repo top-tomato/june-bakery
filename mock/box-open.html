@@ -61,23 +61,25 @@ function kraft(base){const c=document.createElement('canvas');c.width=c.height=5
     g.beginPath();g.moveTo(x,y);g.lineTo(x+Math.cos(a)*l,y+Math.sin(a)*l);g.stroke()}
   for(let i=0;i<30;i++){const x=Math.random()*512,y=Math.random()*512,r=40+Math.random()*80,rg=g.createRadialGradient(x,y,0,x,y,r);rg.addColorStop(0,`rgba(80,55,30,${Math.random()*.035})`);rg.addColorStop(1,'rgba(80,55,30,0)');g.fillStyle=rg;g.fillRect(x-r,y-r,2*r,2*r)} // faint, soft-edged tone changes
   const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.colorSpace=THREE.SRGBColorSpace;t.anisotropy=8;return t}
-const paper=new THREE.MeshStandardMaterial({map:kraft('#a37c55'),roughness:1,envMapIntensity:.6,side:THREE.DoubleSide})
-const inner=new THREE.MeshStandardMaterial({map:kraft('#ad8660'),roughness:1,envMapIntensity:.6})
+const paper=new THREE.MeshStandardMaterial({map:kraft('#7d5426'),roughness:1,envMapIntensity:.6,side:THREE.DoubleSide})
+const inner=new THREE.MeshStandardMaterial({map:kraft('#8a5d2a'),roughness:1,envMapIntensity:.6})
 const film=new THREE.MeshPhysicalMaterial({color:0xffffff,transparent:true,opacity:.14,roughness:.04,metalness:0,clearcoat:1,clearcoatRoughness:.05,side:THREE.DoubleSide,depthWrite:false})
 const part=(w,h,d,m,x,y,z)=>{const geo=new THREE.BoxGeometry(w,h,d), uv=geo.attributes.uv
   ;[[d,h],[d,h],[w,d],[w,d],[w,h],[w,h]].forEach(([su,sv],f)=>{for(let i=f*4;i<f*4+4;i++)uv.setXY(i,uv.getX(i)*su*.8,uv.getY(i)*sv*.8)})
   const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;return o}
 const rrect=(sh,x,y,w,h,r)=>{sh.moveTo(x+r,y);sh.lineTo(x+w-r,y);sh.quadraticCurveTo(x+w,y,x+w,y+r);sh.lineTo(x+w,y+h-r);sh.quadraticCurveTo(x+w,y+h,x+w-r,y+h);sh.lineTo(x+r,y+h);sh.quadraticCurveTo(x,y+h,x,y+h-r);sh.lineTo(x,y+r);sh.quadraticCurveTo(x,y,x+r,y);return sh}
 
-const W=2.08, H=.64, T=.008, box=new THREE.Group()
+// like the photo: low front/side walls, the cake rises above them; the back panel goes up to the lid, and the lid's
+// front and side flaps close the gap
+const W=2.08, H=.42, TOP=.66, T=.008, box=new THREE.Group()
 box.add(part(W,T,W,inner,0,T/2,0))
-for(const [w,d,x,z] of [[W,T,0,W/2],[W,T,0,-W/2],[T,W,W/2,0],[T,W,-W/2,0]]){
-  box.add(part(w,H,d,paper,x,H/2,z))
-  box.add(part(w+.012,.02,d+.012,paper,x,H-.01,z)) // folded double rim, still paper-thin
+for(const [w,d,x,z,h] of [[W,T,0,W/2,H],[W,T,0,-W/2,TOP],[T,W,W/2,0,H],[T,W,-W/2,0,H]]){
+  box.add(part(w,h,d,paper,x,h/2,z))
+  box.add(part(w+.012,.02,d+.012,paper,x,h-.01,z)) // folded double rim, still paper-thin
 }
 s.add(box)
 // lid: hinge on the back top edge, plate hangs forward (+z) from it
-const hinge=new THREE.Group(); hinge.position.set(0,H+.02,-W/2-.01); s.add(hinge)
+const hinge=new THREE.Group(); hinge.position.set(0,TOP+.004,-W/2-.01); s.add(hinge)
 const lid=new THREE.Group(); hinge.add(lid)
 const L=W+.02, m=.17                                     // lid size, kraft border around the window
 const plate=rrect(new THREE.Shape(),-L/2,0,L,L,.02); plate.holes.push(rrect(new THREE.Path(),-L/2+m,m,L-2*m,L-2*m,.16))
@@ -85,9 +87,9 @@ const pg=new THREE.ExtrudeGeometry(plate,{depth:T,bevelEnabled:false}); pg.rotat
 const lidPlate=new THREE.Mesh(pg,paper); lidPlate.castShadow=lidPlate.receiveShadow=true; lid.add(lidPlate)
 const win=new THREE.Mesh(new THREE.PlaneGeometry(L-2*m+.06,L-2*m+.06),film); win.rotation.x=-Math.PI/2; win.position.set(0,.002,L/2); lid.add(win)
 // front tuck flap + side flaps (hang down when closed, tuck inside the walls)
-const flap=part(W-.1,H*.62,T,paper,0,-H*.31,W-.03); lid.add(flap)
-for(const sx of [-1,1]){const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(L*.86,0);sh.lineTo(L*.74,-H*.5);sh.lineTo(L*.12,-H*.5);sh.closePath()
-  const g=new THREE.ShapeGeometry(sh);g.rotateY(-Math.PI/2);const f=new THREE.Mesh(g,paper);f.position.set(sx*(W/2-.04),0,L*.07);f.castShadow=true;lid.add(f)}
+const flap=part(W-.03,(TOP-H+.06),T,paper,0,-(TOP-H+.06)/2,W-.002); lid.add(flap)
+for(const sx of [-1,1]){const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(L*.985,0);sh.lineTo(L*.975,-(TOP-H+.06));sh.lineTo(L*.02,-(TOP-H+.06));sh.closePath()
+  const g=new THREE.ShapeGeometry(sh);g.rotateY(-Math.PI/2);const f=new THREE.Mesh(g,paper);f.position.set(sx*(W/2-.014),0,0);f.castShadow=true;lid.add(f)}
 
 // 4 chiffon pieces from the real model, packed tight
 const pieces=new THREE.Group(); s.add(pieces)
@@ -98,7 +100,7 @@ loader.load('img/pandan.glb',g=>{
   mdl.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true}})
   ;[[-q,-q,0],[q,-q,Math.PI/2],[-q,q,Math.PI],[q,q,-Math.PI/2]].forEach(([x,z,ry])=>{
     const holder=new THREE.Group(), clone=mdl.clone(); clone.position.set(-c.x,-b.min.y,-c.z); holder.add(clone)
-    holder.scale.set(k,Math.min(k,(H-.02)/size.y),k); holder.position.set(x,T,z); holder.rotation.y=ry; pieces.add(holder)})
+    holder.scale.set(k,Math.min(k,(TOP-.03)/size.y),k); holder.position.set(x,T,z); holder.rotation.y=ry; pieces.add(holder)})
 })
 
 const ease=t=>t<.5?2*t*t:1-(-2*t+2)**2/2, clamp=t=>Math.min(1,Math.max(0,t)), lerp=(a,b,t)=>a+(b-a)*t
@@ -107,10 +109,10 @@ addEventListener('resize',size);size()
 function frame(){
   const rect=scene.getBoundingClientRect(), p=clamp(-rect.top/(rect.height-innerHeight))
   const open=ease(clamp((p-.08)/.5)), look=ease(clamp((p-.45)/.4))
-  hinge.rotation.x=-open*2.75                      // ~158 degrees, lid lies back almost flat like the photo
+  hinge.rotation.x=-open*2.95                      // ~170 degrees, lid lies back on the table like the photo
   s.rotation.y=lerp(-.55,-.15,p)                  // slow turn while scrolling
   const narrow=innerWidth<700, dist=narrow?13:8
-  cam.position.set(0,lerp(3.2,5.6,look),lerp(dist,dist*.72,look)); cam.lookAt(0,lerp(.7,.35,look),0)
+  cam.position.set(0,lerp(3.2,dist*1.2,look),lerp(dist,dist*.4,look)); cam.lookAt(0,lerp(.7,.2,look),lerp(0,-.7,look)) // ends looking down, like the photo
   pin.style.setProperty('--p',p); pin.style.setProperty('--b',clamp((p-.72)/.2))
   r.render(s,cam); requestAnimationFrame(frame)
 }
