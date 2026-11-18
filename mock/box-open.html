@@ -8,30 +8,32 @@
 <style>
 /* Scroll-driven 3D box: lid opens, 4 chiffon pieces inside, price appears. The box and lid here are drawn in code as
    stand-ins; the real ones would be the two Meshy .glb files. The chiffon is the real pandan.glb from the site (x4). */
-:root{--ink:#243b37;--cream:#fff6e6;--tea:#f3a18f;--fl:#C9DE98}
+:root{--ink:#243b37;--cream:#fff6e6;--tea:#f3a18f;--fl:#C9DE98;--indigo:#3e5d58}
 *{box-sizing:border-box;margin:0}
 body{font-family:Anuphan,system-ui,sans-serif;background:var(--fl);color:var(--ink)}
 .intro,.outro{min-height:70vh;display:grid;place-items:center;text-align:center;padding:40px 16px}
 .intro h1{font:600 clamp(1.6rem,5vw,2.6rem) Mitr}
 .intro p,.outro p{opacity:.7;margin-top:6px}
-.scene{height:320vh;position:relative}
+.scene{height:320vh;position:relative;background:var(--indigo);color:var(--cream)}
+.kick{position:absolute;left:0;right:0;top:9vh;text-align:center;font:500 1rem Mitr;letter-spacing:.08em;opacity:calc(.85 - var(--p,0)*2)}
 .pin{position:sticky;top:0;height:100vh;overflow:hidden}
 canvas{display:block;width:100%;height:100%}
 .cap{position:absolute;left:0;right:0;bottom:7vh;text-align:center;pointer-events:none}
-.cap .k{font:26px Itim,cursive;opacity:calc(1 - var(--p,0)*3)}
+.cap .k{font:26px Itim,cursive;opacity:calc(1 - var(--p,0)*4)}
 .buy{display:inline-flex;align-items:center;gap:18px;opacity:var(--b,0);transform:translateY(calc((1 - var(--b,0))*20px))}
 .buy strong{font:500 2.2rem/1 Mitr;text-align:left}
 .buy strong small{display:block;font:500 1rem Anuphan;opacity:.75;margin-top:4px}
-.btn{font:500 1rem Mitr;background:var(--ink);color:var(--cream);padding:12px 22px;border-radius:999px;text-decoration:none;pointer-events:auto}
+.btn{font:500 1rem Mitr;background:var(--cream);color:var(--ink);padding:12px 22px;border-radius:999px;text-decoration:none;pointer-events:auto}
 .note{position:fixed;top:10px;left:50%;transform:translateX(-50%);background:rgba(36,59,55,.88);color:var(--cream);font-size:.8rem;padding:6px 14px;border-radius:14px;z-index:9;width:max-content;max-width:calc(100% - 32px);text-align:center}
 </style>
 </head>
 <body>
 <p class="note">mock · กล่องทำตามรูปกล่องจริงของร้าน · ชิฟฟ่อนเป็นไฟล์จริง</p>
-<section class="intro"><div><h1>ชิฟฟ่อน มะพร้าวใบเตย</h1><p>เลื่อนลงเพื่อเปิดกล่อง</p></div></section>
+<section class="intro"><div><h1>ชิฟฟ่อน มะพร้าวใบเตย</h1><p>(ส่วนเล่าเรื่องขนม) เลื่อนลง</p></div></section>
 <section class="scene" id="scene"><div class="pin">
   <canvas id="c"></canvas>
-  <div class="cap"><p class="k">เปิดกล่องดูข้างใน</p>
+  <p class="kick">สั่งเป็นกล่อง</p>
+  <div class="cap"><p class="k">ใส่ให้ครบ 4 ชิ้น</p>
     <div class="buy"><strong>฿120<small>กล่อง 4 ชิ้น</small></strong><a class="btn" href="#">สั่งทาง LINE</a></div></div>
 </div></section>
 <section class="outro"><div><p>(ส่วนถัดไปของหน้าเว็บ)</p></div></section>
@@ -119,20 +121,26 @@ loader.load('img/pandan.glb',g=>{
   mdl.traverse(o=>{if(o.isMesh){o.castShadow=o.receiveShadow=true}})
   ;[[-q,-q,0],[q,-q,Math.PI/2],[-q,q,Math.PI],[q,q,-Math.PI/2]].forEach(([x,z,ry])=>{
     const holder=new THREE.Group(), clone=mdl.clone(); clone.position.set(-c.x,-b.min.y,-c.z); holder.add(clone)
-    holder.scale.set(k,Math.min(k,(TOP-.03)/size.y),k); holder.position.set(x,T,z); holder.rotation.y=ry; pieces.add(holder)})
+    holder.scale.set(k,Math.min(k,(TOP-.03)/size.y),k); holder.position.set(x,T,z); holder.rotation.y=ry; holder.userData.home={x,z,ry}; holder.visible=false; pieces.add(holder)})
 })
 
+const bounce=t=>{const n=7.5625,d=2.75;return t<1/d?n*t*t:t<2/d?n*(t-=1.5/d)*t+.75:t<2.5/d?n*(t-=2.25/d)*t+.9375:n*(t-=2.625/d)*t+.984375}
 const ease=t=>t<.5?2*t*t:1-(-2*t+2)**2/2, clamp=t=>Math.min(1,Math.max(0,t)), lerp=(a,b,t)=>a+(b-a)*t
 function size(){const w=pin.clientWidth,h=pin.clientHeight;r.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
 addEventListener('resize',size);size()
 function frame(){
   const rect=scene.getBoundingClientRect(), p=clamp(-rect.top/(rect.height-innerHeight))
-  const open=ease(clamp((p-.08)/.5)), look=ease(clamp((p-.45)/.4))
-  hinge.rotation.x=-open*2.95                      // ~170 degrees, lid lies back on the table like the photo
+  // C: the box waits open (lid up), the pieces drop in one by one, then the lid lies back and the camera looks down
+  const look=ease(clamp((p-.62)/.25)), show=ease(clamp(p/.06))
+  hinge.rotation.x=-lerp(1.75,2.95,look)          // ~100 deg while filling, ~170 deg (lying back) at the end
+  s.scale.setScalar(lerp(.7,1,show)); s.visible=show>.01
+  pieces.children.forEach((h,k)=>{const t=clamp((p-(.1+k*.12))/.13), {x,z,ry}=h.userData.home
+    h.visible=t>0; const fall=1-bounce(t)
+    h.position.set(x,T+fall*3.2,z); h.rotation.set(fall*.5,ry+fall*.9,fall*-.3)})
   s.rotation.y=lerp(-.55,-.15,p)                  // slow turn while scrolling
   const narrow=innerWidth<700, dist=narrow?13:8
   cam.position.set(0,lerp(3.2,dist*1.2,look),lerp(dist,dist*.4,look)); cam.lookAt(0,lerp(.7,.2,look),lerp(0,-.7,look)) // ends looking down, like the photo
-  pin.style.setProperty('--p',p); pin.style.setProperty('--b',clamp((p-.72)/.2))
+  pin.style.setProperty('--p',p); pin.style.setProperty('--b',clamp((p-.74)/.16))
   r.render(s,cam); requestAnimationFrame(frame)
 }
 frame()
