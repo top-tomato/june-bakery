@@ -72,7 +72,7 @@ const rrect=(sh,x,y,w,h,r)=>{sh.moveTo(x+r,y);sh.lineTo(x+w-r,y);sh.quadraticCur
 // one-piece lock-corner window box (the usual Thai bakery kraft box, ~16x17.5x7.5 cm): four walls the same height,
 // the lid is the back wall folded over, closing flat on the rim; its front tuck flap and side dust flaps slide INSIDE
 // the walls, so from outside it is one plain box with a window on top
-const W=2.08, H=.68, TOP=H, T=.006, box=new THREE.Group()
+const W=2.08, H=.52, TOP=H, T=.005, box=new THREE.Group()
 box.add(part(W,T,W,inner,0,T/2,0))
 for(const [w,d,x,z,h] of [[W,T,0,W/2,H],[W,T,0,-W/2,H],[T,W,W/2,0,H],[T,W,-W/2,0,H]]){
   box.add(part(w,h,d,paper,x,h/2,z))
