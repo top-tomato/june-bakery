@@ -17,7 +17,7 @@ interface Props {
 }
 
 /**
- * Pinned section after the story (mock/box-open.html): an open box, four pieces drop in one by one, the lid lies back,
+ * Pinned section after the story (mock/box-open.html): an open box, four pieces drop in a quick ripple, the lid lies back,
  * then the price ("฿120 กล่อง 4 ชิ้น") and the order button come up. The box itself is drawn by the cake layer's 3D scene
  * on top of `stageRef`; this section only writes its progress.
  */

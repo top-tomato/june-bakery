@@ -26,7 +26,7 @@ import logoUrl from '@/assets/logo.png'
 /**
  * The shop's kraft window box (mock/box-open.html): one-piece lock-corner box, four walls the same height, the lid is
  * the back wall folded over, with a small clear window, a front tuck flap and side flaps on its edges that slide just
- * inside the walls. A June logo sticker on the front. Four pieces of the cake drop in one by one and pack tight 2 x 2.
+ * inside the walls. A June logo sticker on the front. Four pieces of the cake drop in a quick ripple (~0.1 s apart) and pack tight 2 x 2.
  *
  * Units: the box is W wide; the scene that shows it scales and places the group.
  */
@@ -305,7 +305,7 @@ export function createBox(): BoxModel {
     drop: (ms) =>
       pieces.children.forEach((h, k) => {
         const { x, z, ry } = h.userData.home as { x: number; z: number; ry: number }
-        const t = ms == null ? 0 : Math.min(1, Math.max(0, (ms - k * 380) / 750))
+        const t = ms == null ? 0 : Math.min(1, Math.max(0, (ms - k * 110) / 750))
         h.visible = t > 0
         const up = (1 - bounce(t)) * 3.2 // height above its place in the box
         // tilt and spin only while clear of the walls; inside the box it stays square so no corner pokes through
