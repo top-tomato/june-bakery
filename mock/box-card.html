@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mock · /box การ์ดขนมไม่กลืนกับพื้นครีม</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Itim&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#fff6e6;--ink:#243b37;--indigo:#3e5d58;--muted:#6b7d78}
+*{box-sizing:border-box;margin:0}
+body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);padding:24px 16px 50px}
+.top{max-width:1180px;margin:0 auto 18px;color:#f2ece0}
+.top h1{font:600 1.2rem Mitr,sans-serif}
+.top p{opacity:.75;font-size:.88rem}
+.grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:22px;align-items:start}
+.tag{color:#f2ece0;font:600 .92rem Mitr,sans-serif;margin-bottom:8px}
+.tag small{display:block;font:400 .8rem Anuphan,sans-serif;opacity:.7}
+.tag .pick{background:#c9de98;color:var(--ink);border-radius:999px;padding:1px 10px;font-size:.72rem;margin-left:6px;vertical-align:2px}
+.phone{width:340px;max-width:100%;background:var(--cream);border-radius:28px;overflow:hidden;height:640px;position:relative}
+.head{background:var(--indigo);color:var(--cream);text-align:center;padding:26px 20px 26px}
+.head img{width:130px;display:block;margin:0 auto}
+.head h2{font:500 1.35rem Mitr,sans-serif;margin-top:4px}
+.head p{font:1.1rem Itim,cursive;color:#c9de98}
+/* the drip edge: green hangs into the cream */
+.drip{display:block;width:100%;height:70px;margin-top:-1px}
+.body{padding:0 14px}
+.card{border-radius:18px;overflow:hidden;position:relative}
+.card img{display:block;width:100%;height:150px;object-fit:cover;object-position:30% 50%}
+.card .in{padding:11px 13px 13px}
+.card h3{font:500 1.05rem Mitr,sans-serif}
+.card .pr{font-size:.88rem;opacity:.75}
+.btn{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding:12px;border-radius:999px;background:#2c3a37;color:var(--cream);font:500 .95rem Mitr,sans-serif}
+.btn svg{width:18px;height:18px}
+.links{margin-top:12px;border-radius:16px;padding:4px 14px}
+.links div{padding:11px 0;border-top:1px solid #eadfca;font-size:.9rem}
+.links div:first-child{border-top:0}
+
+/* current: cream card overlapping the cream drips */
+.now .body{margin-top:-46px;position:relative}
+.now .card,.now .links{background:#fffbf3;box-shadow:0 1px 0 rgba(0,0,0,.06),0 8px 24px rgba(36,59,55,.08)}
+
+/* A: card starts below the drips, white with a thin line */
+.a .body{margin-top:6px}
+.a .card,.a .links{background:#fff;border:1px solid #eadfca;box-shadow:0 10px 26px rgba(36,59,55,.10)}
+
+/* B: card sits on the green, drips come after it */
+.b .head{padding-bottom:16px}
+.b .greenwrap{background:var(--indigo);padding:0 14px 14px}
+.b .card{background:#fff;box-shadow:0 12px 28px rgba(0,0,0,.22)}
+.b .links{background:#fff;border:1px solid #eadfca}
+
+/* C: stays where it is, but white + a dark-green outline so the edge reads against cream */
+.c .body{margin-top:-46px;position:relative}
+.c .card,.c .links{background:#fff;box-shadow:0 0 0 1.5px rgba(36,59,55,.18),0 14px 30px rgba(36,59,55,.16)}
+
+
+/* opening: same beats as the landing page (logo pops + palm sways, heading floats up, green pours down, cards rise) */
+.play .head img{animation:pop .7s cubic-bezier(.2,1.4,.4,1) both .1s;transform-origin:50% 80%}
+.play .head h2{animation:up .7s both .45s}
+.play .head p{animation:up .7s both .62s}
+.play .drip{animation:pour 1.1s cubic-bezier(.3,.9,.3,1) both .5s;transform-origin:50% 0}
+.play .card{animation:rise .8s cubic-bezier(.2,.9,.3,1) both 1.0s}
+.play .links{animation:rise .8s cubic-bezier(.2,.9,.3,1) both 1.18s}
+.play.b .greenwrap .card{animation-delay:.8s}
+@keyframes pop{0%{opacity:0;transform:scale(.6) rotate(-6deg)}60%{opacity:1}100%{transform:none}}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes pour{from{transform:scaleY(.05)}to{transform:none}}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+.replay{margin-top:10px;font:500 .9rem Mitr,sans-serif;background:#c9de98;color:var(--ink);border:0;border-radius:999px;padding:8px 18px;cursor:pointer}
+@media (prefers-reduced-motion:reduce){.play *{animation:none!important}}
+.notes{max-width:1180px;margin:26px auto 0;background:#fffbf3;border-radius:14px;padding:16px 20px;font-size:.9rem}
+.notes li{margin-left:18px}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>/box · การ์ดขนมกลืนไปกับหยดครีม</h1>
+  <button class="replay" id="replay">เล่น animation ตอนเปิดอีกครั้ง</button>
+  <p style="margin-top:8px">ปัญหา: การ์ดสีครีมวางทับขอบหยดสีครีมพอดี ขอบการ์ดกับหยดเลยดูเป็นก้อนเดียวกัน · ข้างล่างคือ 3 ทางแก้ เทียบกับของเดิม</p>
+</div>
+
+<template id="head">
+  <div class="head"><img src="img/june-mark-cream.svg" alt=""><h2>ขอบคุณที่อุดหนุนนะคะ</h2><p>หวังว่าจะอร่อย ทานให้สนุก</p></div>
+</template>
+<template id="drip">
+  <svg class="drip" viewBox="0 0 340 70" preserveAspectRatio="none"><path fill="#3e5d58" d="M0 0H340V22C330 22 326 40 318 46C308 54 300 30 292 22C270 22 262 30 250 30C240 30 238 58 226 60C214 62 214 30 200 26C170 22 150 28 130 26C118 26 116 50 104 52C92 54 92 26 78 24C60 22 46 26 30 26C20 26 18 44 10 44C4 44 2 30 0 26Z"/></svg>
+</template>
+<template id="card">
+  <div class="card"><img src="img/box-4.jpg" alt=""><div class="in"><h3>ชิฟฟ่อนมะพร้าวใบเตย</h3><p class="pr">฿120 · กล่อง 4 ชิ้น</p>
+    <div class="btn"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8-6C21.4 14.2 22 12.7 22 11c0-4.4-4.5-8-10-8Z"/></svg>สั่งอีกรอบทาง LINE</div></div></div>
+</template>
+<template id="links">
+  <div class="links"><div>เพิ่มเพื่อน LINE รับข่าววันหยุด เมนูใหม่</div><div>ถ่ายรูปส่งมาอวดกันหน่อย</div><div>ดูเว็บ June</div></div>
+</template>
+
+<div class="grid">
+  <div><p class="tag">เดิม<small>การ์ดครีมทับขอบหยดครีม</small></p><div class="phone now" data-k="overlap"></div></div>
+  <div><p class="tag">A · การ์ดอยู่ใต้หยด <span class="pick">แนะนำ</span><small>หยดไหลจบก่อน แล้วค่อยเป็นการ์ดสีขาวมีเส้นขอบบาง ๆ ไม่ทับกัน</small></p><div class="phone a" data-k="below"></div></div>
+  <div><p class="tag">B · การ์ดอยู่บนพื้นเขียว<small>การ์ดขาวบนพื้นเขียวเด่นสุด หยดไหลต่อจากใต้การ์ด</small></p><div class="phone b" data-k="ongreen"></div></div>
+  <div><p class="tag">C · ที่เดิม แต่ขอบชัดขึ้น<small>ยังทับหยดเหมือนเดิม แต่การ์ดขาว มีเส้นขอบเขียวจาง + เงาเข้มขึ้น</small></p><div class="phone c" data-k="overlap"></div></div>
+</div>
+
+<div class="notes">
+  <ul>
+    <li><b>A</b> แก้ตรงที่สุด หยดยังไหลเหมือนหน้าแรก แค่การ์ดเลื่อนลงไปไม่ทับ เสียพื้นที่ด้านบนไปนิดหน่อย</li>
+    <li><b>B</b> เห็นปุ่มสั่งเร็วสุดตอนเปิดหน้า แต่พื้นเขียวยาวลงมาถึงครึ่งจอ</li>
+    <li><b>C</b> แก้น้อยสุด แต่การ์ดยังทับหยดอยู่ อาจยังดูรก</li>
+    <li>ตอนเปิดหน้า: โลโก้เด้งขึ้น ข้อความลอยขึ้น สีเขียวไหลลง แล้วการ์ดค่อยลอยขึ้นมา ใช้ท่าเดียวกับหน้าแรก ยาวราว 2 วินาที กดปุ่มข้างบนเพื่อดูซ้ำ · มือถือที่ตั้งค่าลดการเคลื่อนไหวไว้จะไม่เล่น</li>
+    <li>ทุกแบบเปลี่ยนรูปให้เห็นเนื้อขนมมากขึ้น เห็นกระดาษในกล่องน้อยลง</li>
+  </ul>
+</div>
+
+<script>
+const t = (id) => document.getElementById(id).innerHTML
+for (const el of document.querySelectorAll('.phone')) {
+  const k = el.dataset.k
+  if (k === 'ongreen') el.innerHTML = t('head') + `<div class="greenwrap">${t('card')}</div>` + t('drip') + `<div class="body">${t('links')}</div>`
+  else if (k === 'below') el.innerHTML = t('head') + t('drip') + `<div class="body">${t('card')}${t('links')}</div>`
+  else {
+    el.innerHTML = t('head') + t('drip') + `<div class="body">${t('card')}${t('links')}</div>`
+  }
+}
+function play(){for(const el of document.querySelectorAll('.phone')){el.classList.remove('play');void el.offsetWidth;el.classList.add('play')}}
+document.getElementById('replay').onclick=play
+addEventListener('load',play)
+</script>
+</body>
+</html>
