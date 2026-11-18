@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>June — รูปปกตอนแปะลิงก์ (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@400;500;600&family=Itim&display=swap" rel="stylesheet">
+<style>
+/* Link-preview card (og:image, 1200x630) ideas. Each card is drawn at its real size and scaled down to fit; the real
+   one would be rendered once to a JPG on the server. Underneath each card: how it looks pasted in a LINE chat and on Facebook. */
+:root{--ink:#243b37;--green:#3E5D58;--cream:#FFF6E6;--pandan:#BFD98A;--peach:#F3A18F;--lime:#DCEBB5}
+*{box-sizing:border-box;margin:0}
+body{font-family:Anuphan,system-ui,sans-serif;background:#1f2b29;color:var(--cream);padding-bottom:40px}
+.top{padding:14px 16px;font-size:.9rem;text-align:center;opacity:.85}
+.opts{display:grid;gap:34px;max-width:1180px;margin:0 auto;padding:0 16px}
+.opt h2{font:600 1.15rem Mitr,sans-serif;margin-bottom:4px}
+.opt>p{font-size:.88rem;opacity:.75;margin-bottom:12px}
+.row{display:grid;grid-template-columns:1.35fr 1fr;gap:18px;align-items:start}
+@media (max-width:860px){.row{grid-template-columns:1fr}}
+/* scaled card holder */
+.fit{position:relative;width:100%;aspect-ratio:1200/630;overflow:hidden;border-radius:10px;background:#000}
+.fit>.card{position:absolute;left:0;top:0;transform-origin:0 0}
+.card{width:1200px;height:630px;overflow:hidden;position:relative;color:var(--ink);font-family:Mitr,sans-serif}
+.card img{display:block}
+.logo-ink{filter:brightness(0) invert(19%) sepia(12%) saturate(1500%) hue-rotate(118deg) brightness(92%)}
+.logo-white{filter:brightness(0) invert(1)}
+
+/* A: cream left, photo right */
+.A{background:var(--cream);display:grid;grid-template-columns:560px 1fr}
+.A .l{padding:70px 0 60px 78px;display:flex;flex-direction:column;justify-content:center;gap:18px;position:relative}
+.A .l img{width:330px}
+.A .tag{font:600 64px/1.15 Mitr;letter-spacing:-.5px}
+.A .sub{font:34px Itim,cursive;color:var(--green);opacity:.85}
+.A .pill{align-self:flex-start;margin-top:10px;background:var(--green);color:var(--cream);font:500 28px Mitr;padding:12px 30px;border-radius:99px}
+.A .r{position:relative;overflow:hidden;border-radius:44px 0 0 44px}
+.A .r img{width:100%;height:100%;object-fit:cover}
+.A .leaf{position:absolute;left:-30px;bottom:-40px;width:200px;height:200px;border-radius:50%;background:var(--lime);opacity:.7}
+
+/* B: green, polaroids */
+.B{background:var(--green);color:var(--cream)}
+.B .l{position:absolute;left:80px;top:0;bottom:0;width:470px;display:flex;flex-direction:column;justify-content:center;gap:18px}
+.B .l img{width:320px}
+.B .tag{font:600 60px/1.15 Mitr}
+.B .sub{font:32px Itim,cursive;color:var(--pandan)}
+.B .pol{position:absolute;background:#fff;padding:16px 16px 58px;border-radius:6px;box-shadow:0 18px 40px rgba(0,0,0,.35)}
+.B .pol img{width:100%;height:100%;object-fit:cover;border-radius:2px}
+.B .pol span{position:absolute;left:0;right:0;bottom:12px;text-align:center;font:30px Itim,cursive;color:var(--ink)}
+.B .p1{width:320px;height:390px;left:560px;top:66px;transform:rotate(-6deg)}
+.B .p2{width:290px;height:350px;left:880px;top:170px;transform:rotate(5deg)}
+.B .tape{position:absolute;width:120px;height:34px;background:rgba(220,235,181,.75);left:50%;top:-14px;transform:translateX(-50%) rotate(-3deg)}
+
+/* C: full photo */
+.C .bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.C .shade{position:absolute;inset:0;background:linear-gradient(90deg,rgba(20,32,30,.82) 0%,rgba(20,32,30,.55) 42%,rgba(20,32,30,0) 70%)}
+.C .l{position:absolute;left:78px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;gap:16px;color:#fff}
+.C .l img{width:300px}
+.C .tag{font:600 66px/1.12 Mitr;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+.C .sub{font:32px Itim,cursive;opacity:.92}
+
+/* D: gallery collage */
+.D{background:var(--cream)}
+.D .grid{position:absolute;inset:0;display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:1fr 1fr;gap:10px;padding:10px}
+.D .grid img{width:100%;height:100%;object-fit:cover;border-radius:18px}
+.D .badge{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:var(--cream);border-radius:34px;padding:34px 56px 30px;text-align:center;box-shadow:0 16px 50px rgba(0,0,0,.28)}
+.D .badge img{width:260px;margin:0 auto}
+.D .badge b{display:block;font:600 46px Mitr;margin-top:6px}
+.D .badge small{display:block;font:28px Itim,cursive;color:var(--green)}
+
+/* previews */
+.pv{display:grid;gap:14px}
+.pv h3{font:500 .85rem Mitr;opacity:.7;margin-bottom:6px}
+.line{background:#8CABD9;border-radius:14px;padding:14px;display:flex;gap:8px;align-items:flex-start}
+.line .av{width:34px;height:34px;border-radius:50%;background:#ddd;flex:none}
+.line .bub{background:#fff;border-radius:16px;overflow:hidden;width:min(100%,280px);color:#111}
+.line .bub .fit{border-radius:0}
+.line .bub .t{padding:8px 12px 2px;font:600 .9rem Anuphan}
+.line .bub .d{padding:0 12px 10px;font-size:.75rem;color:#777}
+.fb{background:#fff;color:#050505;border-radius:10px;overflow:hidden;max-width:400px}
+.fb .fit{border-radius:0}
+.fb .meta{background:#f0f2f5;padding:10px 12px}
+.fb .meta small{display:block;font-size:.72rem;color:#65676b;text-transform:uppercase}
+.fb .meta b{display:block;font:600 .95rem Anuphan;margin:2px 0}
+.fb .meta span{font-size:.82rem;color:#65676b}
+</style>
+</head>
+<body>
+<p class="top">mock: รูปที่ขึ้นตอนแปะลิงก์เว็บ (1200×630) · ใต้แต่ละแบบคือหน้าตาตอนแปะใน LINE และ Facebook · รูปขนมเป็นรูปจริงจาก Gallery</p>
+<div class="opts">
+
+<section class="opt"><h2>A · ครีม + รูปขนม</h2><p>ซ้ายโลโก้กับคำโปรย ขวารูปชิฟฟ่อนใบเตยเต็มครึ่งหนึ่ง อ่านง่าย เห็นขนมชัด</p>
+<div class="row"><div class="fit"><div class="card A" id="cA">
+  <div class="l"><img class="logo-ink" src="img/logo.png" alt=""><div class="tag">อบใหม่ หอม<br>นุ่มนาน</div><div class="sub">ชิฟฟ่อนมะพร้าวอ่อน ใบเตย</div><div class="pill">ทักสั่งทาง LINE</div></div>
+  <div class="r"><img src="img/shop-12.jpg" alt=""></div></div></div>
+  <div class="pv" data-of="cA"></div></div></section>
+
+<section class="opt"><h2>B · พื้นเขียว + รูปโพลารอยด์</h2><p>โทนเดียวกับหน้า Gallery แบบสมุดภาพ รูปสองใบเอียงนิด ๆ มีเทปแปะ</p>
+<div class="row"><div class="fit"><div class="card B" id="cB">
+  <div class="l"><img class="logo-white" src="img/logo.png" alt=""><div class="tag">อบใหม่ หอม<br>นุ่มนาน</div><div class="sub">ทักสั่งทาง LINE ได้เลย</div></div>
+  <div class="pol p1"><i class="tape"></i><img src="img/shop-12.jpg" alt=""><span>ชิฟฟ่อนใบเตย</span></div>
+  <div class="pol p2"><i class="tape"></i><img src="img/shop-08.jpg" alt=""><span>อบใหม่ทุกวัน</span></div></div></div>
+  <div class="pv" data-of="cB"></div></div></section>
+
+<section class="opt"><h2>C · รูปเต็มกรอบ</h2><p>ใช้รูปขนมทั้งใบ เงาเข้มด้านซ้ายให้โลโก้กับตัวหนังสือสีขาวอ่านออก ดูหรูแบบนิตยสาร</p>
+<div class="row"><div class="fit"><div class="card C" id="cC">
+  <img class="bg" src="img/shop-13.jpg" alt="" style="object-position:50% 60%"><div class="shade"></div>
+  <div class="l"><img class="logo-white" src="img/logo.png" alt=""><div class="tag">อบใหม่ หอม<br>นุ่มนาน</div><div class="sub">ทักสั่งทาง LINE ได้เลย</div></div></div></div>
+  <div class="pv" data-of="cC"></div></div></section>
+
+<section class="opt"><h2>D · สำหรับลิงก์หน้า Gallery</h2><p>รูปล่าสุด 8 รูปเรียงเต็ม ป้ายโลโก้ตรงกลาง · ของจริงสร้างเองจากรูปที่ staff อัปโหลด เปลี่ยนตามรูปใหม่</p>
+<div class="row"><div class="fit"><div class="card D" id="cD">
+  <div class="grid"><img src="img/shop-12.jpg" alt=""><img src="img/shop-08.jpg" alt=""><img src="img/shop-13.jpg" alt=""><img src="img/shop-07.jpg" alt=""><img src="img/shop-03.jpg" alt=""><img src="img/shop-11.jpg" alt=""><img src="img/shop-09.jpg" alt=""><img src="img/shop-05.jpg" alt=""></div>
+  <div class="badge"><img class="logo-ink" src="img/logo.png" alt=""><b>Gallery</b><small>อบเสร็จ ถ่ายเก็บไว้ทุกวัน</small></div></div></div>
+  <div class="pv" data-of="cD" data-title="Gallery · June" data-desc="รูปขนมที่อบเสร็จทุกวัน"></div></div></section>
+</div>
+<script>
+// previews: clone each card into a LINE bubble and a Facebook post
+document.querySelectorAll('.pv').forEach(pv=>{
+  const card=document.getElementById(pv.dataset.of), t=pv.dataset.title||'June — อบใหม่ หอม นุ่มนาน', d=pv.dataset.desc||'ดูเมนูขนมของ June แล้วทักสั่งทาง LINE ได้เลย'
+  const fit=()=>{const f=document.createElement('div');f.className='fit';f.appendChild(card.cloneNode(true)).removeAttribute('id');return f}
+  pv.innerHTML=`<div><h3>แปะในแชต LINE</h3><div class="line"><i class="av"></i><div class="bub"><div class="slot"></div><div class="t">${t}</div><div class="d">june-bakery.fly.dev</div></div></div></div>
+  <div><h3>แปะใน Facebook</h3><div class="fb"><div class="slot"></div><div class="meta"><small>june-bakery.fly.dev</small><b>${t}</b><span>${d}</span></div></div></div>`
+  pv.querySelectorAll('.slot').forEach(s=>s.replaceWith(fit()))
+})
+const scale=()=>document.querySelectorAll('.fit').forEach(f=>f.firstElementChild.style.transform=`scale(${f.clientWidth/1200})`)
+addEventListener('resize',scale);scale()
+</script>
+</body>
+</html>
