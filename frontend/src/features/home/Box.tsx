@@ -1,5 +1,6 @@
 import { useEffect, useRef, type RefObject } from 'react'
 import { fullName, lineChatUrl, priceLabel, type Product } from '@/api/menu'
+import boxPhoto from '@/assets/box-4.jpg'
 import { onFrame } from '@/lib/frame'
 import { clamp, ease } from '@/lib/math'
 import { Drips } from './Drips'
@@ -9,7 +10,7 @@ interface Props {
   product: Product
   lineOaId: string
   stageRef: RefObject<HTMLDivElement | null>
-  /** the cake's photo when there is no 3D (shown in the stage instead of the box) */
+  /** the cake's photo when there is no 3D; then the stage shows a photo of the real box instead */
   photo: string | null
   motion: RefObject<HomeMotion>
   above: string
@@ -51,7 +52,7 @@ export function Box({ product, lineOaId, stageRef, photo, motion, above }: Props
       <div ref={pinRef} className="pin">
         <p className="kick">สั่งเป็นกล่อง</p>
         <div ref={stageRef} className="box-stage">
-          {photo && <img src={photo} alt="" />}
+          {photo && <img src={boxPhoto} alt="ชิฟฟ่อน 4 ชิ้นในกล่อง" />}
         </div>
         <div className="cap">
           <p className="hint">ใส่ให้ครบ 4 ชิ้น</p>

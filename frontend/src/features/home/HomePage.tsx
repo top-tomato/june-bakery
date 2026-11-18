@@ -45,6 +45,8 @@ export function HomePage({ data }: { data: MenuData }) {
     if (story) scrollTo({ top: story.offsetTop + viewportHeight() * 0.9, behavior: calm ? 'auto' : 'smooth' })
   }, [])
 
+  const onLate = useCallback(() => setNoGl((prev) => (prev === 'all' ? new Set() : prev)), [])
+
   const onFail = useCallback((what: 'all' | number) => {
     setNoGl((prev) => (what === 'all' || prev === 'all' ? 'all' : new Set(prev).add(what)))
   }, [])
@@ -94,7 +96,7 @@ export function HomePage({ data }: { data: MenuData }) {
   return (
     <>
       <GooFilter />
-      <CakeLayer models={models} heroSpot={heroSpot} stage={stage} boxStage={boxStage} motion={motion} onFail={onFail} />
+      <CakeLayer models={models} heroSpot={heroSpot} stage={stage} boxStage={boxStage} motion={motion} onFail={onFail} onLate={onLate} />
       <Curtain />
       <Nav />
       <main>

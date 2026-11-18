@@ -10,6 +10,8 @@ interface Props {
   motion: RefObject<HomeMotion>
   /** 'all' = no 3D at all (show photos), a number = that cake's model failed */
   onFail: (what: 'all' | number) => void
+  /** the 3D arrived after the photos had already taken over (slow first load): switch back to 3D */
+  onLate: () => void
 }
 
 /**
@@ -18,12 +20,14 @@ interface Props {
  */
 const LAYER = { position: 'fixed', left: 0, top: 0, width: '100%', height: 'var(--vhmax)' } as const
 
-export function CakeLayer({ models, heroSpot, stage, boxStage, motion, onFail }: Props) {
+export function CakeLayer({ models, heroSpot, stage, boxStage, motion, onFail, onLate }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   // keep the latest callback without restarting the scene (react skill: advanced-event-handler-refs)
   const onFailRef = useRef(onFail)
+  const onLateRef = useRef(onLate)
   useEffect(() => {
     onFailRef.current = onFail
+    onLateRef.current = onLate
   })
 
   useEffect(() => {
@@ -36,7 +40,12 @@ export function CakeLayer({ models, heroSpot, stage, boxStage, motion, onFail }:
     let dispose: (() => void) | undefined
     let cancelled = false
     // no scene within 4.5 s (slow network, blocked script): show photos instead
-    const giveUp = setTimeout(() => onFailRef.current('all'), 4500)
+    // (the site's server sleeps when idle, so a first visit can take longer; if the 3D still arrives, it takes over again)
+    let late = false
+    const giveUp = setTimeout(() => {
+      late = true
+      onFailRef.current('all')
+    }, 4500)
     import('./three/cakeScene')
       .then(({ createCakeScene }) => {
         if (cancelled || !heroSpot.current || !stage.current || !boxStage.current) return
@@ -54,6 +63,7 @@ export function CakeLayer({ models, heroSpot, stage, boxStage, motion, onFail }:
           introAt: motion.current.introAt,
           onModelError: (i) => onFailRef.current(i),
         })
+        if (late) onLateRef.current()
       })
       .catch(() => onFailRef.current('all'))
     return () => {
