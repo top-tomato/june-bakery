@@ -390,6 +390,10 @@ main .buy strong.ask {
   gap: clamp(24px, 4vw, 64px);
   align-items: start;
 }
+/* right after the box section (same dark green): no drips, so no tall gap for them */
+.where.flush {
+  padding-top: 48px !important;
+}
 .where h2 {
   font-size: clamp(2.2rem, 5vw, 4.4rem);
   margin-bottom: 22px;
