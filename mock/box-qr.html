@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>June — QR บนกล่อง (mock แบบ 1)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* แบบ 1: QR เดียวกันทุกกล่อง -> หน้าเล็ก /b สำหรับคนที่ถือกล่อง (สั่งอีกรอบ, วิธีเก็บ, เพิ่มเพื่อน LINE)
+   1) สติกเกอร์ 2 แบบ + ตำแหน่งบนกล่อง  2) หน้าที่ลูกค้าเห็นหลังสแกน  3) admin เห็นอะไร (ยอดสแกน) */
+:root{--tea:#f3a18f;--cream:#fff6e6;--paper:#fffbf3;--indigo:#3e5d58;--indigo-2:#2c4540;--ink:#243b37;--lime:#dcebb5;--kraft:#c9a27a;--kraft-2:#b98f66;--line:#06c755}
+*{box-sizing:border-box;margin:0}
+body{font-family:Anuphan,system-ui,sans-serif;background:#1f2b29;color:var(--cream);padding:0 16px 48px}
+.top{padding:14px 0 6px;font-size:.9rem;text-align:center;opacity:.85}
+.top b{font-family:Mitr;font-weight:500}
+section.blk{max-width:1000px;margin:26px auto 0}
+h2.t{font:600 1.15rem Mitr;margin-bottom:4px}
+.blk>p.d{font-size:.9rem;opacity:.75;margin-bottom:14px;max-width:62ch}
+.lab{font:500 .8rem Mitr;opacity:.7;margin:10px 0 6px}
+.ex{display:inline-block;font:400 .68rem Anuphan;border:1px dashed currentColor;border-radius:999px;padding:0 7px;opacity:.7;vertical-align:middle;margin-left:4px}
+
+/* ---------- 1. stickers ---------- */
+.stickers{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:820px){.stickers{grid-template-columns:1fr}}
+.kraft{background:var(--kraft) repeating-linear-gradient(100deg,rgba(255,255,255,.05) 0 3px,rgba(0,0,0,.04) 3px 7px);border-radius:14px;min-height:260px;display:grid;place-items:center;padding:24px;position:relative}
+.qr{display:block;width:100%;height:auto;shape-rendering:crispEdges}
+.qr path{stroke-width:1}
+
+/* A: round (logo + qr) */
+.st-round{width:190px;height:190px;border-radius:50%;background:var(--cream);color:var(--ink);display:grid;place-items:center;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.12),0 6px 16px rgba(0,0,0,.18);padding:16px}
+.st-round img{width:62px;display:block;margin:0 auto 2px;filter:brightness(0) saturate(100%) invert(19%) sepia(12%) saturate(1200%) hue-rotate(120deg)}
+.st-round .q{width:74px;margin:2px auto 4px;background:#fff;padding:5px;border-radius:6px}
+.st-round b{font:500 .82rem Mitr;display:block;line-height:1.15}
+.st-round small{font-size:.64rem;opacity:.7}
+
+/* B: small label (side / back of box) */
+.st-label{width:230px;background:var(--cream);color:var(--ink);border-radius:12px;display:flex;gap:12px;align-items:center;padding:12px;box-shadow:0 2px 0 rgba(0,0,0,.12),0 6px 16px rgba(0,0,0,.18)}
+.st-label .q{flex:0 0 84px;background:#fff;padding:6px;border-radius:6px}
+.st-label b{font:500 1rem Mitr;line-height:1.15;display:block}
+.st-label p{font-size:.74rem;opacity:.75;margin-top:3px;line-height:1.35}
+.st-label .row{display:flex;align-items:center;gap:4px;font-size:.7rem;margin-top:6px;opacity:.85}
+.st-label .row svg{width:13px;height:13px}
+
+/* C: on the box (top view): logo oval stays alone on the front, QR label on the side wall */
+.boxtop{width:250px;height:180px;position:relative}
+.boxtop .lid{position:absolute;inset:0 0 30px 0;background:var(--kraft-2);border-radius:6px;box-shadow:inset 0 0 0 2px rgba(0,0,0,.08)}
+.boxtop .win{position:absolute;inset:26px 34px 56px 34px;background:linear-gradient(135deg,rgba(255,255,255,.55),rgba(255,255,255,.15) 40%,rgba(255,255,255,.35));border-radius:3px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.4)}
+.boxtop .front{position:absolute;left:0;right:0;bottom:0;height:30px;background:var(--kraft);border-radius:0 0 6px 6px;box-shadow:inset 0 2px 0 rgba(0,0,0,.08)}
+.boxtop .logo-oval{position:absolute;left:50%;bottom:4px;transform:translateX(-50%);width:62px;height:22px;border-radius:50%;background:var(--cream);display:grid;place-items:center}
+.boxtop .logo-oval img{width:30px;filter:brightness(0) saturate(100%) invert(19%) sepia(12%) saturate(1200%) hue-rotate(120deg)}
+.boxtop .mini{position:absolute;right:-8px;top:40px;width:46px;height:46px;background:var(--cream);border-radius:6px;padding:4px;transform:rotate(4deg);box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.boxtop .mini .qr{background:#fff}
+.boxtop .tag{position:absolute;font:500 .7rem Mitr;color:var(--cream);white-space:nowrap}
+.cap{font-size:.82rem;opacity:.8;margin-top:8px;line-height:1.45}
+
+/* ---------- 2. the page after scanning ---------- */
+.two{display:grid;grid-template-columns:auto 1fr;gap:28px;align-items:start}
+@media (max-width:820px){.two{grid-template-columns:1fr;justify-items:center}}
+.phone{width:340px;max-width:100%;border-radius:38px;background:#111;padding:12px;box-shadow:0 18px 40px rgba(0,0,0,.4)}
+.screen{border-radius:28px;overflow:hidden;background:var(--cream);color:var(--ink);height:690px;overflow-y:auto;scrollbar-width:none}
+.screen::-webkit-scrollbar{display:none}
+.bar{height:30px;background:var(--indigo)}
+.p-head{background:var(--indigo);color:var(--cream);text-align:center;padding:4px 20px 22px}
+.p-head img{width:86px;filter:brightness(0) invert(94%) sepia(10%) saturate(400%) hue-rotate(330deg)}
+.p-head h1{font:500 1.35rem Mitr;margin-top:4px}
+.p-head p{font-size:.85rem;opacity:.85;margin-top:2px}
+.p-body{padding:16px}
+.again{background:var(--paper);border-radius:18px;overflow:hidden;box-shadow:0 1px 0 rgba(0,0,0,.06)}
+.again img{display:block;width:100%;height:150px;object-fit:cover}
+.again div{padding:12px 14px 14px}
+.again h2{font:500 1.05rem Mitr}
+.again .pr{font-size:.85rem;opacity:.75;margin-top:1px}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:999px;padding:13px 16px;font:500 1rem Mitr;text-decoration:none;cursor:pointer;margin-top:12px}
+.btn svg{width:20px;height:20px}
+.btn.go{background:var(--ink);color:var(--cream)}
+.btn.soft{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+.card{background:var(--paper);border-radius:18px;padding:14px;margin-top:14px;box-shadow:0 1px 0 rgba(0,0,0,.06)}
+.card h3{font:500 1rem Mitr;margin-bottom:8px}
+.tips{list-style:none;padding:0;display:grid;gap:10px}
+.tips li{display:flex;gap:10px;align-items:flex-start;font-size:.88rem;line-height:1.4}
+.tips .ic{flex:0 0 34px;height:34px;border-radius:10px;background:var(--lime);display:grid;place-items:center}
+.tips .ic svg{width:19px;height:19px}
+.tips b{font-weight:600;display:block}
+.small-links{display:grid;gap:2px;margin-top:6px}
+.small-links a{display:flex;align-items:center;gap:10px;padding:10px 2px;color:var(--ink);text-decoration:none;font-size:.9rem;border-top:1px solid rgba(36,59,55,.1)}
+.small-links a:first-child{border-top:0}
+.small-links svg{width:18px;height:18px;flex:0 0 18px}
+.small-links span{flex:1}
+.p-foot{text-align:center;font-size:.78rem;opacity:.7;padding:18px 16px 26px;line-height:1.6}
+
+/* notes beside the phone */
+.notes{display:grid;gap:12px;max-width:520px}
+.note{background:rgba(255,246,230,.06);border-radius:12px;padding:12px 14px;font-size:.88rem;line-height:1.5}
+.note b{font-family:Mitr;font-weight:500}
+.note .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--tea);color:var(--ink);font:600 .75rem Mitr;margin-right:6px}
+
+/* ---------- 3. admin ---------- */
+.admin{background:var(--cream);color:var(--ink);border-radius:16px;padding:16px;max-width:560px}
+.admin h3{font:600 1rem Mitr}
+.admin .sub{font-size:.8rem;opacity:.65}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}
+.stat{background:var(--paper);border-radius:12px;padding:10px 12px}
+.stat b{font:600 1.5rem Mitr;display:block;line-height:1.1}
+.stat span{font-size:.75rem;opacity:.75}
+.spark{display:flex;align-items:flex-end;gap:4px;height:46px;margin-top:12px}
+.spark i{flex:1;background:var(--indigo);border-radius:4px 4px 0 0;opacity:.85}
+.days{display:flex;gap:4px;font-size:.66rem;opacity:.6;margin-top:3px}
+.days span{flex:1;text-align:center}
+</style>
+</head>
+<body>
+
+<p class="top"><b>mock แบบ 1</b> · QR เดียวกันแปะทุกกล่อง → สแกนแล้วเข้าหน้า <code>june-bakery.fly.dev/b</code> (QR ในหน้านี้สแกนได้จริง แต่หน้า /b ยังไม่มี)</p>
+
+<!-- 1. stickers -->
+<section class="blk">
+  <h2 class="t">1. สติกเกอร์</h2>
+  <p class="d">ขนาดจริงประมาณ 5 ซม. (กลม) และ 4×6 ซม. (ป้ายเล็ก) QR กว้างราว 2–2.5 ซม. พิมพ์บนสติกเกอร์พื้นครีม เพราะพื้นคราฟต์ทำให้กล้องอ่านยาก</p>
+  <div class="stickers">
+    <div>
+      <div class="lab">A · ดวงกลม โลโก้ + QR</div>
+      <div class="kraft">
+        <div class="st-round">
+          <div>
+            <img src="img/logo.png" alt="June">
+            <div class="q" id="qrA"></div>
+            <b>สั่งอีกรอบ สแกนเลย</b>
+          </div>
+        </div>
+      </div>
+      <p class="cap">ใช้แทนสติกเกอร์โลโก้ด้านหน้าได้เลย ดวงเดียวจบ แต่โลโก้จะเล็กลง</p>
+    </div>
+    <div>
+      <div class="lab">B · ป้ายเล็ก แปะด้านข้าง / ด้านหลัง</div>
+      <div class="kraft">
+        <div class="st-label">
+          <div class="q" id="qrB"></div>
+          <div>
+            <b>อร่อยไหม<br>สั่งอีกรอบ</b>
+            <p>สแกนดูวิธีเก็บให้นุ่ม และกดสั่งทาง LINE</p>
+            <div class="row"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2M17 3h2a2 2 0 0 1 2 2v2M21 17v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg>เปิดกล้องมือถือ / LINE</div>
+          </div>
+        </div>
+      </div>
+      <p class="cap">โลโก้ด้านหน้ายังเด่นเหมือนเดิม ป้ายนี้อยู่แยก ผมแนะนำแบบนี้</p>
+    </div>
+    <div>
+      <div class="lab">ตำแหน่งบนกล่อง (B) มองจากด้านบน</div>
+      <div class="kraft">
+        <div class="boxtop">
+          <div class="lid"></div><div class="win"></div>
+          <div class="front"><div class="logo-oval"><img src="img/logo.png" alt=""></div></div>
+          <div class="mini" id="qrC"></div>
+          <span class="tag" style="left:-4px;bottom:-22px">โลโก้ด้านหน้า (เหมือนเดิม)</span>
+          <span class="tag" style="right:-14px;top:18px">ป้าย QR มุมฝา</span>
+        </div>
+      </div>
+      <p class="cap">ไม่ทับหน้าต่างพลาสติก ลูกค้ายังเห็นขนมข้างในชัด</p>
+    </div>
+  </div>
+</section>
+
+<!-- 2. page after scanning -->
+<section class="blk">
+  <h2 class="t">2. ลูกค้าสแกนแล้วเห็นอะไร</h2>
+  <p class="d">หน้าเล็ก ๆ หน้าเดียว ไม่ใช่หน้าแรกของเว็บ เปิดเร็ว (ไม่มี 3D) มีของ 3 อย่างที่คนถือกล่องอยู่อยากได้</p>
+  <div class="two">
+    <div class="phone"><div class="screen">
+      <div class="bar"></div>
+      <div class="p-head">
+        <img src="img/logo.png" alt="June">
+        <h1>ขอบคุณที่อุดหนุนนะคะ</h1>
+        <p>หวังว่าจะอร่อย ทานให้สนุก</p>
+      </div>
+      <div class="p-body">
+        <div class="again">
+          <img src="img/box-4.jpg" alt="ชิฟฟ่อน 4 ชิ้นในกล่อง">
+          <div>
+            <h2>ชิฟฟ่อนมะพร้าวใบเตย</h2>
+            <p class="pr">฿120 · กล่อง 4 ชิ้น</p>
+            <a class="btn go" href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8-6C21.4 14.2 22 12.7 22 11c0-4.4-4.5-8-10-8Z"/></svg>สั่งอีกรอบทาง LINE</a>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>เก็บยังไงให้นุ่ม <span class="ex">ข้อความตัวอย่าง ร้านแก้เองในหลังร้าน</span></h3>
+          <ul class="tips">
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#243b37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span><b>อร่อยสุดภายใน 2 วัน</b>วางไว้ในกล่อง ปิดฝาให้สนิท</span></li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#243b37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M6 10h12M9 6v1M9 13v3"/></svg></span><span><b>เก็บตู้เย็นได้อีก 2–3 วัน</b>ใส่ถุงหรือกล่องปิดสนิท กันขนมแห้ง</span></li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#243b37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="4"/></svg></span><span><b>ออกจากตู้เย็นแล้ว</b>วางไว้สัก 15 นาที ให้กลับมานุ่มก่อนทาน</span></li>
+          </ul>
+        </div>
+
+        <div class="card">
+          <div class="small-links">
+            <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/></svg><span>เพิ่มเพื่อน LINE รับข่าววันหยุด เมนูใหม่</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
+            <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8a2 2 0 0 1 2-2h2l2-3h6l2 3h2a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/><circle cx="12" cy="13" r="4"/></svg><span>ถ่ายรูปส่งมาอวดกันหน่อย</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
+            <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/><circle cx="12" cy="12" r="9"/></svg><span>ดูเว็บ June</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 6 6 6-6 6"/></svg></a>
+          </div>
+        </div>
+      </div>
+      <p class="p-foot">หน้าร้าน June · 10 พหลโยธิน ใกล้อนุสาวรีย์ชัยฯ<br>เปิด 10:00–20:00</p>
+    </div></div>
+
+    <div class="notes">
+      <div class="note"><span class="n">1</span><b>สั่งอีกรอบ</b> ปุ่มใหญ่สุด กดแล้วเข้าแชต LINE @561hgrea มีข้อความพิมพ์ไว้ให้ "สนใจสั่ง ชิฟฟ่อนมะพร้าวใบเตย อีกรอบ" ลูกค้ากดส่งได้เลย ราคาและรูปดึงจากเมนูในหลังร้าน แก้ที่เดียว</div>
+      <div class="note"><span class="n">2</span><b>เก็บยังไงให้นุ่ม</b> ข้อความในการ์ดนี้เป็นตัวอย่าง ผมไม่รู้วิธีเก็บจริงของร้าน ร้านพิมพ์เองในหลังร้านช่อง "เก็บได้นานแค่ไหน" (มีอยู่แล้ว ยังว่าง) ถ้าช่องว่าง การ์ดนี้ไม่ขึ้น</div>
+      <div class="note"><span class="n">3</span><b>ลิงก์เล็ก ๆ</b> เพิ่มเพื่อน LINE, ส่งรูปมาให้ร้าน (เข้าแชต LINE เหมือนกัน), ดูเว็บเต็ม</div>
+      <div class="note">เวลาเปิดกับที่อยู่ด้านล่าง ดึงจากหลังร้านเหมือนหน้าเว็บหลัก</div>
+    </div>
+  </div>
+</section>
+
+<!-- 3. admin -->
+<section class="blk">
+  <h2 class="t">3. admin ได้อะไร</h2>
+  <p class="d">admin สแกนเองก็เห็นหน้าเดียวกับลูกค้า (แบบ 1 ไม่รู้ว่าเป็นกล่องไหน) สิ่งที่ admin ได้คือ <b>ยอด</b>: มีคนสแกนกี่ครั้ง และกดสั่งอีกรอบกี่ครั้ง จะได้รู้ว่าสติกเกอร์คุ้มไหม ขึ้นในหน้าสรุปของหลังร้าน</p>
+  <div class="admin">
+    <h3>QR บนกล่อง <span class="ex">ตัวเลขตัวอย่าง</span></h3>
+    <p class="sub">7 วันล่าสุด</p>
+    <div class="stats">
+      <div class="stat"><b>23</b><span>ครั้งที่สแกน</span></div>
+      <div class="stat"><b>7</b><span>กดสั่งอีกรอบ</span></div>
+      <div class="stat"><b>4</b><span>กดเพิ่มเพื่อน</span></div>
+    </div>
+    <div class="spark"><i style="height:30%"></i><i style="height:55%"></i><i style="height:40%"></i><i style="height:20%"></i><i style="height:70%"></i><i style="height:100%"></i><i style="height:60%"></i></div>
+    <div class="days"><span>พฤ</span><span>ศ</span><span>ส</span><span>อา</span><span>จ</span><span>อ</span><span>พ</span></div>
+  </div>
+</section>
+
+<script>
+// same QR (https://june-bakery.fly.dev/b) in all three stickers
+const QR = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" class="qr"><path stroke="#243b37" d="M0 0.5h7m1 0h2m4 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-29 1h1m5 0h1m1 0h1m1 0h3m1 0h1m2 0h1m4 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m1 0h1m4 0h1m1 0h3m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m3 0h1m1 0h2m2 0h2m2 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m2 0h1m4 0h4m1 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m6 0h1m3 0h1m2 0h1m1 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-20 1h1m1 0h3m1 0h2m3 0h1m-20 1h1m4 0h5m6 0h1m2 0h2m5 0h2m-28 1h1m2 0h2m5 0h1m4 0h1m1 0h2m1 0h1m1 0h2m1 0h2m-28 1h1m1 0h1m1 0h3m2 0h1m1 0h1m1 0h1m6 0h3m1 0h1m1 0h1m-27 1h1m2 0h3m1 0h2m1 0h1m1 0h3m5 0h1m1 0h2m1 0h1m-26 1h3m3 0h1m1 0h1m1 0h3m5 0h2m1 0h2m4 0h1m-26 1h1m1 0h1m2 0h1m3 0h2m1 0h1m1 0h1m1 0h3m1 0h1m1 0h2m1 0h2m-29 1h1m2 0h1m2 0h2m1 0h3m2 0h5m2 0h3m-24 1h1m3 0h2m1 0h1m1 0h3m4 0h1m1 0h5m1 0h5m-28 1h4m1 0h4m1 0h1m1 0h1m1 0h2m1 0h2m1 0h1m3 0h2m-27 1h4m1 0h1m4 0h2m2 0h1m2 0h4m1 0h3m1 0h1m1 0h1m-29 1h2m1 0h1m2 0h1m1 0h1m1 0h2m1 0h3m1 0h1m1 0h2m2 0h1m2 0h1m1 0h1m-29 1h1m1 0h1m2 0h1m1 0h3m1 0h4m5 0h5m2 0h1m-28 1h1m1 0h5m1 0h1m1 0h1m2 0h1m1 0h1m1 0h1m2 0h5m1 0h1m1 0h1m-21 1h1m2 0h3m1 0h1m2 0h1m1 0h1m3 0h3m-27 1h7m1 0h2m1 0h1m1 0h1m1 0h2m1 0h3m1 0h1m1 0h1m-25 1h1m5 0h1m2 0h1m2 0h1m1 0h1m3 0h3m3 0h2m1 0h2m-29 1h1m1 0h3m1 0h1m2 0h3m2 0h11m2 0h1m-28 1h1m1 0h3m1 0h1m2 0h6m1 0h1m1 0h3m2 0h1m1 0h3m-28 1h1m1 0h3m1 0h1m3 0h2m1 0h1m3 0h8m1 0h2m-28 1h1m5 0h1m1 0h2m1 0h1m2 0h2m2 0h1m2 0h1m2 0h3m1 0h1m-29 1h7m2 0h2m1 0h1m1 0h1m2 0h1m1 0h1m1 0h2m1 0h1m1 0h1"/></svg>`
+for (const id of ['qrA', 'qrB', 'qrC']) document.getElementById(id).innerHTML = QR
+</script>
+</body>
+</html>
