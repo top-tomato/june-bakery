@@ -16,8 +16,8 @@ interface Props {
 }
 
 /**
- * Pinned section after the story (mock/box-open.html): scrolling opens the box lid to show four pieces inside, then
- * the price ("฿120 กล่อง 4 ชิ้น") and the order button come up. The box itself is drawn by the cake layer's 3D scene
+ * Pinned section after the story (mock/box-open.html): an open box, four pieces drop in one by one, the lid lies back,
+ * then the price ("฿120 กล่อง 4 ชิ้น") and the order button come up. The box itself is drawn by the cake layer's 3D scene
  * on top of `stageRef`; this section only writes its progress.
  */
 export function Box({ product, lineOaId, stageRef, photo, motion, above }: Props) {
@@ -39,21 +39,22 @@ export function Box({ product, lineOaId, stageRef, photo, motion, above }: Props
         const p = clamp((y - top) / (height - vh))
         motion.current.box.p = p
         pin.style.setProperty('--p', p.toFixed(3))
-        pin.style.setProperty('--b', ease(clamp((p - 0.62) / 0.16)).toFixed(3))
+        pin.style.setProperty('--b', ease(clamp((p - 0.74) / 0.16)).toFixed(3))
       },
     })
   }, [motion])
 
   const unit = product.price != null && product.priceUnit
   return (
-    <section ref={sectionRef} className="boxsec" id="box" data-nav="dark">
+    <section ref={sectionRef} className="boxsec" id="box" data-nav="light">
       <Drips count={22} color={above} />
       <div ref={pinRef} className="pin">
+        <p className="kick">สั่งเป็นกล่อง</p>
         <div ref={stageRef} className="box-stage">
           {photo && <img src={photo} alt="" />}
         </div>
         <div className="cap">
-          <p className="hint">เปิดกล่องดูข้างใน</p>
+          <p className="hint">ใส่ให้ครบ 4 ชิ้น</p>
           <div className="buy">
             <strong className={product.price == null ? 'ask' : undefined}>
               {priceLabel(product)}

@@ -126,6 +126,7 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
   boxScene.add(box.group)
   const boxCam = new PerspectiveCamera(32, 1, 0.1, 100)
   let boxFilled = -1
+  let dropAt: number | null = null
 
   /** pose the box for this frame; true when it should be drawn */
   const updateBox = () => {
@@ -139,15 +140,21 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
       box.fill(it.mesh.geometry, it.mesh.material, it.mesh.matrix)
       boxFilled = i
     }
-    const open = calm ? clamp((p - 0.08) / 0.5) : ease(clamp((p - 0.08) / 0.5))
-    const look = calm ? clamp((p - 0.45) / 0.4) : ease(clamp((p - 0.45) / 0.4))
+    // the box waits open, the pieces drop in on their own clock (real bounce speed, however fast you scroll), then the
+    // lid lies back and the camera looks down. Scrolling back to the top of the section empties it to play again.
+    const now = performance.now()
+    if (p > 0.08 && dropAt == null) dropAt = calm ? now - 1e4 : now
+    if (p < 0.02) dropAt = null
+    box.drop(dropAt == null ? null : now - dropAt)
+    const look = calm ? clamp((p - 0.62) / 0.25) : ease(clamp((p - 0.62) / 0.25))
+    const open = lerp(1.75, 2.95, look)
     box.pose(open)
     box.group.rotation.y = lerp(-0.55, -0.15, p)
     box.group.scale.setScalar(lerp(0.6, 1, show))
     // fill the stage: closed box ~1.6 widths across, more room at the end for the lid lying back; on a narrow phone
     // the box may use the full width (the stage is taller than wide there)
     // while the lid stands up it is the tallest thing: aim higher and pull back a little so it stays in frame
-    const lift = Math.sin(clamp((open * 2.95) / Math.PI) * Math.PI) * (1 - look)
+    const lift = Math.sin(clamp(open / Math.PI) * Math.PI) * (1 - look)
     const span = lerp(3.3, 4.4, look) + lift * 0.7, fit = Math.min(r.width * 1.3, r.height)
     const d = (ch * span) / fit / (2 * Math.tan((boxCam.fov * Math.PI) / 360))
     boxCam.aspect = cw / ch

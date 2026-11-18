@@ -26,7 +26,7 @@ import logoUrl from '@/assets/logo.png'
 /**
  * The shop's kraft window box (mock/box-open.html): one-piece lock-corner box, four walls the same height, the lid is
  * the back wall folded over, with a small clear window, a front tuck flap and side flaps on its edges that slide just
- * inside the walls. A June logo sticker on the front. Four pieces of the cake packed tight 2 x 2 inside.
+ * inside the walls. A June logo sticker on the front. Four pieces of the cake drop in one by one and pack tight 2 x 2.
  *
  * Units: the box is W wide; the scene that shows it scales and places the group.
  */
@@ -40,8 +40,10 @@ export interface BoxModel {
   group: Group
   /** put four pieces of this cake mesh in the box (replaces any earlier pieces) */
   fill: (geometry: BufferGeometry, material: Material | Material[], matrix: Matrix4) => void
-  /** 0 = closed, 1 = lid lying back */
-  pose: (open: number) => void
+  /** lid angle in radians from closed (pi/2 = standing up, ~2.95 = lying back on the table) */
+  pose: (lid: number) => void
+  /** drop the pieces in: ms since the drop started, or null = box still empty */
+  drop: (ms: number | null) => void
   dispose: () => void
 }
 
@@ -117,6 +119,15 @@ function blob(): Texture {
   g.fillStyle = rg
   g.fillRect(0, 0, 128, 128)
   return new CanvasTexture(c)
+}
+
+/** easeOutBounce: falls, then smaller and smaller hops */
+function bounce(t: number) {
+  const n = 7.5625, d = 2.75
+  if (t < 1 / d) return n * t * t
+  if (t < 2 / d) return n * (t -= 1.5 / d) * t + 0.75
+  if (t < 2.5 / d) return n * (t -= 2.25 / d) * t + 0.9375
+  return n * (t -= 2.625 / d) * t + 0.984375
 }
 
 const roundRect = <P extends Path>(p: P, x: number, y: number, w: number, h: number, r: number) => {
@@ -274,6 +285,8 @@ export function createBox(): BoxModel {
       holder.scale.set(k, ky, k)
       holder.position.set(x, T, z)
       holder.rotation.y = ry
+      holder.userData.home = { x, z, ry }
+      holder.visible = false
       pieces.add(holder)
     })
   }
@@ -281,7 +294,18 @@ export function createBox(): BoxModel {
   return {
     group,
     fill,
-    pose: (open) => void (hinge.rotation.x = -open * 2.95), // ~170 deg: the lid lies back on the table
+    pose: (lid) => void (hinge.rotation.x = -lid),
+    drop: (ms) =>
+      pieces.children.forEach((h, k) => {
+        const { x, z, ry } = h.userData.home as { x: number; z: number; ry: number }
+        const t = ms == null ? 0 : Math.min(1, Math.max(0, (ms - k * 380) / 750))
+        h.visible = t > 0
+        const up = (1 - bounce(t)) * 3.2 // height above its place in the box
+        // tilt and spin only while clear of the walls; inside the box it stays square so no corner pokes through
+        const free = Math.min(1, Math.max(0, (up - 0.75) / 1.2))
+        h.position.set(x, T + up, z)
+        h.rotation.set(free * 0.45, ry + free * 0.8, free * -0.25)
+      }),
     dispose: () => disposables.forEach((d) => d.dispose()),
   }
 }

@@ -82,7 +82,7 @@ export function HomePage({ data }: { data: MenuData }) {
   // drips take the colour of whatever is visible right above it.
   const sections: { key: string; bg: string }[] = [
     { key: 'story', bg: product.accent },
-    { key: 'box', bg: BG.cream },
+    { key: 'box', bg: BG.indigo },
     { key: 'how', bg: BG.pink },
   ]
   if (data.reviews.length) sections.push({ key: 'reviews', bg: BG.indigo })
