@@ -748,7 +748,7 @@ main .kicker {
   overflow: hidden;
   display: grid;
   grid-template-rows: 1fr auto;
-  padding: calc(var(--vh) * 9) 16px calc(var(--vh) * 6);
+  padding: calc(var(--vh) * 7) 16px calc(var(--vh) * 5);
 }
 .box-stage {
   min-height: 0;

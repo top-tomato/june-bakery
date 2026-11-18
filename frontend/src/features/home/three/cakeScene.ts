@@ -144,14 +144,17 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
     box.pose(open)
     box.group.rotation.y = lerp(-0.55, -0.15, p)
     box.group.scale.setScalar(lerp(0.6, 1, show))
-    // fit ~2 box widths (box + the lid lying back) into the stage, centred on it
-    const span = 5.2, fit = Math.min(r.width, r.height)
+    // fill the stage: closed box ~1.6 widths across, more room at the end for the lid lying back; on a narrow phone
+    // the box may use the full width (the stage is taller than wide there)
+    // while the lid stands up it is the tallest thing: aim higher and pull back a little so it stays in frame
+    const lift = Math.sin(clamp((open * 2.95) / Math.PI) * Math.PI) * (1 - look)
+    const span = lerp(3.3, 4.4, look) + lift * 0.7, fit = Math.min(r.width * 1.3, r.height)
     const d = (ch * span) / fit / (2 * Math.tan((boxCam.fov * Math.PI) / 360))
     boxCam.aspect = cw / ch
     boxCam.setViewOffset(cw, ch, cw / 2 - (r.left + r.width / 2), ch / 2 - (r.top + r.height / 2), cw, ch)
     const dir = new Vector3(0, lerp(3.2, 9.6, look), lerp(8, 3.2, look)).normalize()
     boxCam.position.copy(dir.multiplyScalar(d))
-    boxCam.lookAt(0, lerp(0.35, 0.2, look), lerp(0, -0.7, look))
+    boxCam.lookAt(0, lerp(0.35, 0.2, look) + lift * 0.75, lerp(0, -0.7, look) - lift * 0.4)
     boxCam.updateProjectionMatrix()
     return true
   }
