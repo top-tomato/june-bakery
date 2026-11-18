@@ -813,6 +813,12 @@ main .kicker {
   /* drips hang up to ~265px into the section at full stretch; keep the heading below them */
   padding: clamp(260px, calc(var(--vh) * 32), 320px) clamp(16px, 6vw, 96px) 96px;
 }
+/* same colour as the section above: no drips, so no room for them (the two read as one continuing section) */
+.reviews.flush,
+.about.flush,
+.gallery.flush {
+  padding-top: 32px;
+}
 .how {
   background: #dcebb5;
   color: var(--ink);
@@ -954,6 +960,11 @@ main .steps .ways svg {
   main .steps {
     grid-template-columns: 1fr;
     gap: 26px;
+  }
+  .reviews.flush,
+  .about.flush,
+  .gallery.flush {
+    padding-top: 24px;
   }
   .about-grid {
     grid-template-columns: 1fr;

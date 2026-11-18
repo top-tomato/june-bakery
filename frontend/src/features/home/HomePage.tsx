@@ -91,6 +91,7 @@ export function HomePage({ data }: { data: MenuData }) {
   if (data.about) sections.push({ key: 'about', bg: BG.cream })
   if (data.gallery.length) sections.push({ key: 'gallery', bg: BG.cream })
   const above = (key: string) => sections[sections.findIndex((s) => s.key === key) - 1]?.bg ?? BG.indigo
+  const flush = (key: string) => above(key) === sections.find((s) => s.key === key)?.bg
   const lastBg = sections[sections.length - 1]?.bg ?? BG.indigo
 
   return (
@@ -104,9 +105,9 @@ export function HomePage({ data }: { data: MenuData }) {
         <Story product={product} stageRef={stage} photo={photo} motion={motion} />
         <Box product={product} lineOaId={line.oaId} stageRef={boxStage} photo={photo} motion={motion} above={above('box')} />
         <HowToOrder order={data.order} shopName={shop.name} above={above('how')} />
-        {data.reviews.length > 0 && <Reviews reviews={data.reviews} above={above('reviews')} />}
-        {data.about && <About about={data.about} above={above('about')} />}
-        {data.gallery.length > 0 && <Gallery photos={data.gallery} above={above('gallery')} />}
+        {data.reviews.length > 0 && <Reviews reviews={data.reviews} above={above('reviews')} flush={flush('reviews')} />}
+        {data.about && <About about={data.about} above={above('about')} flush={flush('about')} />}
+        {data.gallery.length > 0 && <Gallery photos={data.gallery} above={above('gallery')} flush={flush('gallery')} />}
         <Where shop={shop} closedDays={data.closedDays} above={lastBg} />
         <End line={line} social={data.social} />
       </main>
