@@ -33,7 +33,7 @@ export interface MenuData {
   social: { instagram?: string; facebook?: string }
   shop: { name: string; address: string; hours: string; lat: number; lng: number; mapsUrl: string }
   /** facts shown under "how to order" — null/"" = not filled in yet (hidden) */
-  order: { preorderDays: number | null; shelfLife: string; payment: string }
+  order: { preorderDays: number | null; shelfLife: string; payment: string; delivery: string }
   /** the shop's story; null until the shop writes it (section hidden) */
   about: { title: string; text: string; photo: string } | null
   reviews: { id: number; text: string; author: string }[]

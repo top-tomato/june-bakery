@@ -96,6 +96,7 @@ class ShopInfo(models.Model):
     preorder_days = models.PositiveSmallIntegerField("ต้องสั่งล่วงหน้ากี่วัน", null=True, blank=True)
     shelf_life = models.CharField("เก็บได้นานแค่ไหน", max_length=120, blank=True, help_text="เช่น 2 วันในตู้เย็น")
     payment = models.CharField("วิธีจ่ายเงิน", max_length=120, blank=True, help_text="เช่น โอนพร้อมเพย์ / จ่ายตอนรับ")
+    delivery = models.CharField("ส่งถึงที่", max_length=120, blank=True, help_text="เช่น Grab / Lineman ค่าส่งตามระยะทาง")
     about_title = models.CharField("หัวข้อเรื่องของร้าน", max_length=80, blank=True)
     about_text = models.TextField("เรื่องของร้าน (2–3 ประโยค)", blank=True)
     about_photo = models.ImageField("รูปประกอบเรื่องของร้าน", upload_to=UniqueName("shop/"), blank=True)
@@ -155,6 +156,7 @@ class ShopInfo(models.Model):
             "preorderDays": self.preorder_days,
             "shelfLife": self.shelf_life,
             "payment": self.payment,
+            "delivery": self.delivery,
             "about": (
                 {
                     "title": self.about_title,

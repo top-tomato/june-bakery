@@ -47,7 +47,7 @@ def menu_data() -> dict[str, object]:
             "mapsUrl": f"https://www.google.com/maps/search/?api=1&query={SHOP['lat']},{SHOP['lng']}",
         },
         # filled in Django admin; the page hides whatever is still empty
-        "order": {"preorderDays": info["preorderDays"], "shelfLife": info["shelfLife"], "payment": info["payment"]},
+        "order": {"preorderDays": info["preorderDays"], "shelfLife": info["shelfLife"], "payment": info["payment"], "delivery": info["delivery"]},
         "about": info["about"],
         "reviews": [r.as_payload() for r in Review.objects.filter(is_active=True)],
         # days the shop is closed in the next 30 days (back office calendar); shown on the site

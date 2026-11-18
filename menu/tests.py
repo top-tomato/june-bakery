@@ -98,7 +98,7 @@ class MenuApiTests(MediaTestCase):
 
     def test_optional_sections_are_empty_until_filled_in(self) -> None:
         data = self.client.get(reverse("menu:api-menu")).json()
-        self.assertEqual(data["order"], {"preorderDays": None, "shelfLife": "", "payment": ""})
+        self.assertEqual(data["order"], {"preorderDays": None, "shelfLife": "", "payment": "", "delivery": ""})
         self.assertIsNone(data["about"])
         self.assertEqual(data["reviews"], [])
         self.assertEqual(data["gallery"], [])
@@ -108,6 +108,7 @@ class MenuApiTests(MediaTestCase):
         info = ShopInfo.load()
         info.preorder_days = 1
         info.shelf_life = "2 วันในตู้เย็น"
+        info.delivery = "Grab ค่าส่งตามระยะทาง"
         info.hours = "ทุกวัน 9:00–17:00"
         info.about_text = "ทำเองทุกชิ้น"
         info.save()
@@ -119,6 +120,7 @@ class MenuApiTests(MediaTestCase):
 
         self.assertEqual(data["order"]["preorderDays"], 1)
         self.assertEqual(data["order"]["shelfLife"], "2 วันในตู้เย็น")
+        self.assertEqual(data["order"]["delivery"], "Grab ค่าส่งตามระยะทาง")
         self.assertEqual(data["shop"]["hours"], "ทุกวัน 9:00–17:00")
         self.assertEqual(data["about"]["text"], "ทำเองทุกชิ้น")
         self.assertEqual([r["author"] for r in data["reviews"]], ["ฝน"])
@@ -420,8 +422,9 @@ class BackOfficeTests(MediaTestCase):
         self.client.post(reverse("backoffice:reviews"), {"action": "toggle", "id": rv.pk})
         rv.refresh_from_db()
         self.assertFalse(rv.is_active)
-        self.client.post(reverse("backoffice:shop"), {"preorder_days": "2", "shelf_life": "2 วัน", "payment": "โอน", "hours": "", "about_title": "", "about_text": ""})
+        self.client.post(reverse("backoffice:shop"), {"preorder_days": "2", "shelf_life": "2 วัน", "payment": "โอน", "delivery": "Lineman", "hours": "", "about_title": "", "about_text": ""})
         self.assertEqual(ShopInfo.load().preorder_days, 2)
+        self.assertEqual(ShopInfo.load().delivery, "Lineman")
 
     def test_owner_adds_staff(self) -> None:
         from django.contrib.auth import get_user_model

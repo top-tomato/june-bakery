@@ -93,7 +93,7 @@ export function buildPages({ products, line }: MenuData): string[] {
     page(
       'right',
       `<div class="h-num">วิธีสั่ง</div><div class="h-name" style="font-size:9cqw">ง่าย ๆ 3 ขั้น</div>
-      <ol class="steps"><li>เลือกขนมจากสมุดเล่มนี้</li><li>กด "สั่งทาง LINE" หรือทักแอดมิน</li><li>นัดรับที่หน้าร้าน</li></ol>
+      <ol class="steps"><li>เลือกขนมจากสมุดเล่มนี้</li><li>กด "สั่งทาง LINE" หรือทักแอดมิน</li><li>รับที่ร้าน หรือให้ส่งถึงที่</li></ol>
       <div class="buy"><span></span><a class="order" href="${chat()}" target="_blank" rel="noopener">ทักแอดมิน</a></div>`,
     ),
   )

@@ -22,7 +22,7 @@ class ShopInfoAdmin(admin.ModelAdmin):
     """แถวเดียว: ช่องที่ว่าง หน้าเว็บจะซ่อนส่วนนั้นไว้"""
 
     fieldsets = (
-        ("สั่งและรับ (ใต้ 'วิธีสั่ง')", {"fields": ("preorder_days", "shelf_life", "payment", "hours")}),
+        ("สั่งและรับ (ใต้ 'วิธีสั่ง')", {"fields": ("preorder_days", "shelf_life", "payment", "delivery", "hours")}),
         ("เรื่องของร้าน (ซ่อนไว้จนกว่าจะใส่ข้อความ)", {"fields": ("about_title", "about_text", "about_photo")}),
         ("โซเชียล (ปุ่มท้ายหน้าเว็บ · ชื่อ IG ในลายน้ำรูป)", {"fields": ("instagram_url", "facebook_url")}),
     )

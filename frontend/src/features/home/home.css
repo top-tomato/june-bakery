@@ -773,6 +773,35 @@ main .steps b {
   font: 600 1.15rem var(--display);
   margin-bottom: 4px;
 }
+main .steps em {
+  font-style: normal;
+  font-weight: 600;
+  background: linear-gradient(transparent 60%, rgba(243, 161, 143, 0.45) 60%);
+}
+main .steps .ways {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+main .steps .ways > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px 5px 8px;
+  border-radius: 999px;
+  background: #dcebb5;
+  font-size: 0.92rem;
+}
+main .steps .ways svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .facts {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
