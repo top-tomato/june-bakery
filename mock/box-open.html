@@ -141,7 +141,7 @@ function frame(){
   if(p>.08&&dropAt==null)dropAt=now
   if(p<.02)dropAt=null
   pieces.children.forEach((h,k)=>{const {x,z,ry}=h.userData.home
-    const t=dropAt==null?0:clamp((now-dropAt-k*380)/750)
+    const t=dropAt==null?0:clamp((now-dropAt-k*110)/750)   // B: a quick ripple, ~0.1 s apart
     h.visible=t>0; const up=(1-bounce(t))*3.2            // height above its place in the box
     // tilt and spin only while clear of the walls (above the rim); inside the box it stays square, so no corner
     // pokes through the box or the next piece
