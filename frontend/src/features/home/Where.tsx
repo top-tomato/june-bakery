@@ -25,6 +25,8 @@ export function Where({ shop, above }: Props) {
           <br />
           ที่หน้าร้าน
         </h2>
+        {/* preview/jemmy-order: only the opening hours stay from the shop box (no name, address, closed days) */}
+        {shop.hours && <p className="hours">เวลาเปิด {shop.hours}</p>}
         <a className="btn go" href={shop.mapsUrl} target="_blank" rel="noopener">
           <MapPinIcon />
           นำทางด้วย Google Maps
