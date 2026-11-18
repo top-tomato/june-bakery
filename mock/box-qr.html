@@ -25,6 +25,10 @@ h2.t{font:600 1.15rem Mitr;margin-bottom:4px}
 .kraft{background:var(--kraft) repeating-linear-gradient(100deg,rgba(255,255,255,.05) 0 3px,rgba(0,0,0,.04) 3px 7px);border-radius:14px;min-height:260px;display:grid;place-items:center;padding:24px;position:relative}
 .qr{display:block;width:100%;height:auto;shape-rendering:crispEdges}
 .qr path{stroke-width:1}
+/* logo in the middle of the QR: white plate ~30% wide (covers ~7% of the code; H allows 30%) */
+.q{position:relative}
+.qlogo{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:32%;aspect-ratio:1.3;background:#fff;border-radius:16%;display:grid;place-items:center}
+.q .qlogo img{width:84%;margin:0;display:block;filter:brightness(0) saturate(100%) invert(19%) sepia(12%) saturate(1200%) hue-rotate(120deg)}
 
 /* A: round (logo + qr) */
 .st-round{width:190px;height:190px;border-radius:50%;background:var(--cream);color:var(--ink);display:grid;place-items:center;text-align:center;box-shadow:0 2px 0 rgba(0,0,0,.12),0 6px 16px rgba(0,0,0,.18);padding:16px}
@@ -81,6 +85,7 @@ h2.t{font:600 1.15rem Mitr;margin-bottom:4px}
 .tips .ic{flex:0 0 34px;height:34px;border-radius:10px;background:var(--lime);display:grid;place-items:center}
 .tips .ic svg{width:19px;height:19px}
 .tips b{font-weight:600;display:block}
+.tips mark.x{background:var(--tea);color:var(--ink);border-radius:4px;padding:0 5px;font-weight:600}
 .small-links{display:grid;gap:2px;margin-top:6px}
 .small-links a{display:flex;align-items:center;gap:10px;padding:10px 2px;color:var(--ink);text-decoration:none;font-size:.9rem;border-top:1px solid rgba(36,59,55,.1)}
 .small-links a:first-child{border-top:0}
@@ -115,7 +120,7 @@ h2.t{font:600 1.15rem Mitr;margin-bottom:4px}
 <!-- 1. stickers -->
 <section class="blk">
   <h2 class="t">1. สติกเกอร์</h2>
-  <p class="d">ขนาดจริงประมาณ 5 ซม. (กลม) และ 4×6 ซม. (ป้ายเล็ก) QR กว้างราว 2–2.5 ซม. พิมพ์บนสติกเกอร์พื้นครีม เพราะพื้นคราฟต์ทำให้กล้องอ่านยาก</p>
+  <p class="d">ขนาดจริงประมาณ 5 ซม. (กลม) และ 4×6 ซม. (ป้ายเล็ก) QR กว้างราว 2.5 ซม. (มีโลโก้ตรงกลาง จุดเลยถี่ขึ้นนิดหน่อย ไม่ควรเล็กกว่านี้) พิมพ์บนสติกเกอร์พื้นครีม เพราะพื้นคราฟต์ทำให้กล้องอ่านยาก</p>
   <div class="stickers">
     <div>
       <div class="lab">A · ดวงกลม โลโก้ + QR</div>
@@ -128,10 +133,10 @@ h2.t{font:600 1.15rem Mitr;margin-bottom:4px}
           </div>
         </div>
       </div>
-      <p class="cap">ใช้แทนสติกเกอร์โลโก้ด้านหน้าได้เลย ดวงเดียวจบ แต่โลโก้จะเล็กลง</p>
+      <p class="cap">ใช้แทนสติกเกอร์โลโก้ด้านหน้าได้เลย ดวงเดียวจบ</p>
     </div>
     <div>
-      <div class="lab">B · ป้ายเล็ก แปะด้านข้าง / ด้านหลัง</div>
+      <div class="lab">B · ป้ายเล็ก แปะด้านข้าง / ด้านหลัง <span class="ex">เลือกแล้ว</span></div>
       <div class="kraft">
         <div class="st-label">
           <div class="q" id="qrB"></div>
@@ -183,11 +188,11 @@ h2.t{font:600 1.15rem Mitr;margin-bottom:4px}
         </div>
 
         <div class="card">
-          <h3>เก็บยังไงให้นุ่ม <span class="ex">ข้อความตัวอย่าง ร้านแก้เองในหลังร้าน</span></h3>
+          <h3>เก็บยังไงให้นุ่ม <span class="ex">ร่าง รอเจมมี่ยืนยัน</span></h3>
           <ul class="tips">
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#243b37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span><b>อร่อยสุดภายใน 2 วัน</b>วางไว้ในกล่อง ปิดฝาให้สนิท</span></li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#243b37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M6 10h12M9 6v1M9 13v3"/></svg></span><span><b>เก็บตู้เย็นได้อีก 2–3 วัน</b>ใส่ถุงหรือกล่องปิดสนิท กันขนมแห้ง</span></li>
-            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#243b37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="4"/></svg></span><span><b>ออกจากตู้เย็นแล้ว</b>วางไว้สัก 15 นาที ให้กลับมานุ่มก่อนทาน</span></li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#243b37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span><b>วันนี้–พรุ่งนี้</b>วางไว้ในกล่อง ปิดฝาให้สนิท ไม่โดนแดด</span></li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#243b37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M6 10h12M9 6v1M9 13v3"/></svg></span><span><b>เก็บนานกว่านั้น เข้าตู้เย็น</b>ใส่กล่องหรือถุงปิดสนิท อยู่ได้ <mark class="x">X</mark> วัน</span></li>
+            <li><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#243b37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="4"/></svg></span><span><b>ก่อนทาน</b>เอาออกจากตู้เย็นพักไว้ราว 15–20 นาที ให้กลับมานุ่ม</span></li>
           </ul>
         </div>
 
@@ -204,7 +209,7 @@ h2.t{font:600 1.15rem Mitr;margin-bottom:4px}
 
     <div class="notes">
       <div class="note"><span class="n">1</span><b>สั่งอีกรอบ</b> ปุ่มใหญ่สุด กดแล้วเข้าแชต LINE @561hgrea มีข้อความพิมพ์ไว้ให้ "สนใจสั่ง ชิฟฟ่อนมะพร้าวใบเตย อีกรอบ" ลูกค้ากดส่งได้เลย ราคาและรูปดึงจากเมนูในหลังร้าน แก้ที่เดียว</div>
-      <div class="note"><span class="n">2</span><b>เก็บยังไงให้นุ่ม</b> ข้อความในการ์ดนี้เป็นตัวอย่าง ผมไม่รู้วิธีเก็บจริงของร้าน ร้านพิมพ์เองในหลังร้านช่อง "เก็บได้นานแค่ไหน" (มีอยู่แล้ว ยังว่าง) ถ้าช่องว่าง การ์ดนี้ไม่ขึ้น</div>
+      <div class="note"><span class="n">2</span><b>เก็บยังไงให้นุ่ม</b> ร่างจากที่ research (อากาศไทยร้อนชื้น + หน้ามะพร้าวอ่อน เลยให้เข้าตู้เย็นถ้าเก็บเกินวันพรุ่งนี้) <b>X</b> = จำนวนวันในตู้เย็น รอเจมมี่บอก ร้านแก้ข้อความเองได้ในหลังร้านช่อง "เก็บได้นานแค่ไหน" ถ้าช่องว่าง การ์ดนี้ไม่ขึ้น</div>
       <div class="note"><span class="n">3</span><b>ลิงก์เล็ก ๆ</b> เพิ่มเพื่อน LINE, ส่งรูปมาให้ร้าน (เข้าแชต LINE เหมือนกัน), ดูเว็บเต็ม</div>
       <div class="note">เวลาเปิดกับที่อยู่ด้านล่าง ดึงจากหลังร้านเหมือนหน้าเว็บหลัก</div>
     </div>
@@ -229,9 +234,9 @@ h2.t{font:600 1.15rem Mitr;margin-bottom:4px}
 </section>
 
 <script>
-// same QR (https://june-bakery.fly.dev/b) in all three stickers
-const QR = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 29 29" class="qr"><path stroke="#243b37" d="M0 0.5h7m1 0h2m4 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-29 1h1m5 0h1m1 0h1m1 0h3m1 0h1m2 0h1m4 0h1m5 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m1 0h1m4 0h1m1 0h3m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m3 0h1m1 0h2m2 0h2m2 0h1m1 0h1m1 0h3m1 0h1m-29 1h1m1 0h3m1 0h1m2 0h1m2 0h1m4 0h4m1 0h1m1 0h3m1 0h1m-29 1h1m5 0h1m6 0h1m3 0h1m2 0h1m1 0h1m5 0h1m-29 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-20 1h1m1 0h3m1 0h2m3 0h1m-20 1h1m4 0h5m6 0h1m2 0h2m5 0h2m-28 1h1m2 0h2m5 0h1m4 0h1m1 0h2m1 0h1m1 0h2m1 0h2m-28 1h1m1 0h1m1 0h3m2 0h1m1 0h1m1 0h1m6 0h3m1 0h1m1 0h1m-27 1h1m2 0h3m1 0h2m1 0h1m1 0h3m5 0h1m1 0h2m1 0h1m-26 1h3m3 0h1m1 0h1m1 0h3m5 0h2m1 0h2m4 0h1m-26 1h1m1 0h1m2 0h1m3 0h2m1 0h1m1 0h1m1 0h3m1 0h1m1 0h2m1 0h2m-29 1h1m2 0h1m2 0h2m1 0h3m2 0h5m2 0h3m-24 1h1m3 0h2m1 0h1m1 0h3m4 0h1m1 0h5m1 0h5m-28 1h4m1 0h4m1 0h1m1 0h1m1 0h2m1 0h2m1 0h1m3 0h2m-27 1h4m1 0h1m4 0h2m2 0h1m2 0h4m1 0h3m1 0h1m1 0h1m-29 1h2m1 0h1m2 0h1m1 0h1m1 0h2m1 0h3m1 0h1m1 0h2m2 0h1m2 0h1m1 0h1m-29 1h1m1 0h1m2 0h1m1 0h3m1 0h4m5 0h5m2 0h1m-28 1h1m1 0h5m1 0h1m1 0h1m2 0h1m1 0h1m1 0h1m2 0h5m1 0h1m1 0h1m-21 1h1m2 0h3m1 0h1m2 0h1m1 0h1m3 0h3m-27 1h7m1 0h2m1 0h1m1 0h1m1 0h2m1 0h3m1 0h1m1 0h1m-25 1h1m5 0h1m2 0h1m2 0h1m1 0h1m3 0h3m3 0h2m1 0h2m-29 1h1m1 0h3m1 0h1m2 0h3m2 0h11m2 0h1m-28 1h1m1 0h3m1 0h1m2 0h6m1 0h1m1 0h3m2 0h1m1 0h3m-28 1h1m1 0h3m1 0h1m3 0h2m1 0h1m3 0h8m1 0h2m-28 1h1m5 0h1m1 0h2m1 0h1m2 0h2m2 0h1m2 0h1m2 0h3m1 0h1m-29 1h7m2 0h2m1 0h1m1 0h1m2 0h1m1 0h1m1 0h2m1 0h1m1 0h1"/></svg>`
-for (const id of ['qrA', 'qrB', 'qrC']) document.getElementById(id).innerHTML = QR
+// same QR (https://june-bakery.fly.dev/b) in all three stickers; error correction H (30%) so the logo in the middle doesn't stop it scanning
+const QR = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 33 33" class="qr"><path stroke="#243b37" d="M0 0.5h7m1 0h3m2 0h2m1 0h1m1 0h1m1 0h2m1 0h2m1 0h7m-33 1h1m5 0h1m1 0h2m4 0h1m3 0h2m1 0h1m2 0h1m1 0h1m5 0h1m-33 1h1m1 0h3m1 0h1m1 0h4m1 0h6m2 0h4m1 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m2 0h2m1 0h2m1 0h2m2 0h2m1 0h2m2 0h1m1 0h3m1 0h1m-33 1h1m1 0h3m1 0h1m6 0h4m1 0h1m1 0h1m3 0h1m1 0h1m1 0h3m1 0h1m-33 1h1m5 0h1m1 0h1m1 0h3m3 0h1m3 0h1m1 0h1m3 0h1m5 0h1m-33 1h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7m-25 1h1m1 0h1m2 0h2m2 0h1m1 0h3m2 0h1m-23 1h3m1 0h1m1 0h2m6 0h3m3 0h1m1 0h4m2 0h3m-33 1h4m1 0h1m3 0h3m1 0h2m2 0h1m5 0h4m3 0h3m-31 1h1m3 0h1m1 0h1m1 0h3m1 0h1m4 0h2m1 0h1m2 0h1m1 0h1m3 0h1m-32 1h1m1 0h4m6 0h1m1 0h5m1 0h1m3 0h2m3 0h2m1 0h1m-33 1h1m1 0h1m1 0h3m3 0h1m2 0h2m2 0h1m3 0h4m2 0h1m1 0h1m2 0h1m-31 1h1m1 0h2m1 0h12m4 0h1m2 0h2m1 0h2m1 0h1m-32 1h2m1 0h1m1 0h1m3 0h2m1 0h1m1 0h1m2 0h3m1 0h1m1 0h2m1 0h2m2 0h1m-32 1h2m1 0h2m2 0h7m1 0h1m1 0h1m2 0h5m1 0h2m2 0h2m-28 1h1m1 0h1m1 0h4m1 0h8m4 0h1m1 0h2m2 0h2m-30 1h2m2 0h1m2 0h1m1 0h5m1 0h1m1 0h1m2 0h2m1 0h1m4 0h2m-32 1h1m2 0h1m1 0h1m3 0h1m2 0h5m1 0h1m7 0h2m1 0h2m-31 1h1m2 0h1m4 0h4m7 0h5m3 0h4m-30 1h1m2 0h2m1 0h2m4 0h2m1 0h2m3 0h1m1 0h1m2 0h3m1 0h1m-32 1h3m4 0h2m5 0h3m1 0h4m7 0h4m-33 1h1m1 0h1m1 0h1m1 0h1m1 0h4m2 0h1m1 0h1m4 0h4m2 0h5m-32 1h1m2 0h3m2 0h2m2 0h1m1 0h1m1 0h2m3 0h1m1 0h1m4 0h4m-32 1h1m2 0h1m1 0h6m2 0h3m1 0h3m2 0h7m2 0h1m-24 1h6m2 0h1m1 0h4m1 0h2m3 0h1m3 0h1m-33 1h7m2 0h1m2 0h1m2 0h2m4 0h1m1 0h2m1 0h1m1 0h4m-32 1h1m5 0h1m2 0h3m1 0h2m4 0h1m1 0h4m3 0h1m1 0h3m-33 1h1m1 0h3m1 0h1m1 0h3m1 0h1m6 0h3m2 0h5m2 0h2m-33 1h1m1 0h3m1 0h1m1 0h1m1 0h1m1 0h4m1 0h4m1 0h1m1 0h2m2 0h2m1 0h1m-32 1h1m1 0h3m1 0h1m1 0h4m1 0h1m1 0h1m2 0h2m3 0h1m1 0h2m2 0h1m-30 1h1m5 0h1m2 0h1m2 0h1m2 0h1m4 0h1m4 0h3m1 0h2m-31 1h7m2 0h1m2 0h1m2 0h2m1 0h8m5 0h1"/></svg>`
+for (const id of ['qrA', 'qrB', 'qrC']) document.getElementById(id).innerHTML = QR + '<span class="qlogo"><img src="img/logo.png" alt=""></span>'
 </script>
 </body>
 </html>
