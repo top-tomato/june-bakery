@@ -417,7 +417,7 @@ class BackOfficeTests(MediaTestCase):
         self.assertEqual((o.total, o.channel, o.product_name), (135, "store", "ชิฟฟ่อนใบเตย"))
         page = self.client.get(reverse("backoffice:summary")).content.decode()
         self.assertIn("฿135", page)
-        self.assertIn("3 ชิ้น", page)
+        self.assertIn("3 กล่อง", page)
 
     def test_pre_order_needs_date_and_name_and_skips_closed_days(self) -> None:
         add = reverse("backoffice:order-add")
