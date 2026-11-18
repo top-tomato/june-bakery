@@ -12,6 +12,7 @@ import { About, Gallery } from './Extras'
 import { Hero } from './Hero'
 import { createMotion, type HomeMotion } from './motion'
 import { Nav } from './Nav'
+import { Opening } from './Opening'
 import { Where } from './Where'
 
 const BG = { indigo: '#3E5D58', pink: '#DCEBB5', cream: '#FFF6E6' }
@@ -75,14 +76,14 @@ export function HomePage({ data }: { data: MenuData }) {
 
   // Section backgrounds, top to bottom. Optional sections only appear once filled in (admin), and each section's
   // drips take the colour of whatever is visible right above it.
-  // Page order asked for in review (preview/jemmy-order): about, gallery, hero, box, shop, end. No story or how-to.
-  const sections: { key: string; bg: string }[] = []
+  // Page order asked for in review (preview/jemmy-order): opening, about, gallery, hero, box, shop, end. No story or
+  // how-to.
+  const sections: { key: string; bg: string }[] = [{ key: 'opening', bg: BG.indigo }]
   if (data.about) sections.push({ key: 'about', bg: BG.cream })
   if (data.gallery.length) sections.push({ key: 'gallery', bg: BG.cream })
   sections.push({ key: 'hero', bg: BG.indigo }, { key: 'box', bg: BG.indigo })
   const above = (key: string) => sections[sections.findIndex((s) => s.key === key) - 1]?.bg ?? BG.indigo
-  // the first section has nothing above it, so no drips either
-  const flush = (key: string) => sections[0]?.key === key || above(key) === sections.find((s) => s.key === key)?.bg
+  const flush = (key: string) => above(key) === sections.find((s) => s.key === key)?.bg
   const lastBg = sections[sections.length - 1]?.bg ?? BG.indigo
 
   return (
@@ -92,9 +93,10 @@ export function HomePage({ data }: { data: MenuData }) {
       <Curtain />
       <Nav />
       <main>
+        <Opening />
         {data.about && <About about={data.about} above={above('about')} flush={flush('about')} />}
         {data.gallery.length > 0 && <Gallery photos={data.gallery} above={above('gallery')} flush={flush('gallery')} />}
-        <Hero products={products} active={active} onPick={pick} spotRef={heroSpot} photo={photo} motion={motion} lineOaId={line.oaId} />
+        <Hero products={products} active={active} onPick={pick} spotRef={heroSpot} photo={photo} motion={motion} />
         <Box product={product} lineOaId={line.oaId} stageRef={boxStage} photo={photo} motion={motion} above={above('box')} flush={flush('box')} />
         <Where shop={shop} closedDays={data.closedDays} above={lastBg} />
         <End line={line} social={data.social} />

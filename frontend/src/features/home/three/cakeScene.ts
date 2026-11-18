@@ -56,6 +56,15 @@ export interface CakeSceneOptions {
 
 const outCubic = (t: number) => 1 - Math.pow(1 - t, 3)
 const outBack = (t: number) => 1 + 2.4 * Math.pow(t - 1, 3) + 1.4 * Math.pow(t - 1, 2)
+/** easeOutBounce: falls, then smaller and smaller hops */
+const bounce = (t: number) => {
+  const n = 7.5625, d = 2.75
+  if (t < 1 / d) return n * t * t
+  if (t < 2 / d) return n * (t -= 1.5 / d) * t + 0.75
+  if (t < 2.5 / d) return n * (t -= 2.25 / d) * t + 0.9375
+  return n * (t -= 2.625 / d) * t + 0.984375
+}
+const ENTER_MS = 1100
 
 export function createCakeScene(o: CakeSceneOptions): () => void {
   const renderer = new WebGLRenderer({ canvas: o.canvas, alpha: true, antialias: !debug.lowres })
@@ -180,6 +189,9 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
   // no story section: the hero is mid-page and scrolls natively, so while the page moves a still of the cake stands in
   const heroSnap = makeSnap(o.heroSpot)
   let lastY = Number.NaN, movedAt = -1e9, spin = 0, lastT = 0, heroStill = false
+  // mid-page hero: the cake drops in (on its own clock) once its section is a third on screen; resets when it leaves
+  let enterAt: number | null = null
+  const heroSection = o.heroSpot.closest('section')
   const boxStart = makeSnap(o.boxStage)
   const boxEnd = makeSnap(o.boxStage)
   const capture = (snap: { el: HTMLCanvasElement }, stage: Rect, margin: number, sc: Scene, camera: PerspectiveCamera, ox = 0, oy = 0) => {
@@ -292,6 +304,13 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
       if (y !== lastY) movedAt = t
       lastY = y
       const moving = !o.stage && t - movedAt < 160
+      if (!o.stage && heroSection) {
+        const r = heroSection.getBoundingClientRect()
+        const seen = (Math.min(r.bottom, ch) - Math.max(r.top, 0)) / Math.min(r.height, ch)
+        if (enterAt == null && seen > 0.33) enterAt = t
+        if (r.bottom < 0 || r.top > ch) enterAt = null
+      }
+      const entering = !o.stage && (enterAt == null || t - enterAt < ENTER_MS + 300)
       if (!moving) spin += t - lastT // the cake's idle turn pauses while it's a still
       lastT = t
       const bs = o.boxStage.getBoundingClientRect()
@@ -336,14 +355,16 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
         const dI = i - smooth
         const near = 1 - Math.min(1, Math.abs(dI))
         // intro: rise a little from below while growing 60% -> 105% -> 100% (mock/intro-drop.html)
-        const d = calm ? 1 : clamp((t - o.introAt - i * 200) / 900)
-        const drop = -(1 - outCubic(d)) * VH * 0.12
-        const grow = lerp(0.6, 1, outBack(d))
+        // with the story: rise a little on page load; mid-page: drop in from above spinning, bounce, settle
+        const d = calm ? 1 : o.stage ? clamp((t - o.introAt - i * 200) / 900) : enterAt == null ? 0 : clamp((t - enterAt - i * 200) / ENTER_MS)
+        const drop = o.stage ? -(1 - outCubic(d)) * VH * 0.12 : (1 - bounce(d)) * VH * 0.3
+        const grow = lerp(0.6, 1, outBack(o.stage ? d : Math.min(1, d * 1.3)))
         it.group.position.set((cx + dI * gap - cw / 2) * worldPerPx, -(cy - drop - ch / 2) * worldPerPx, 0)
         const hide = (1 - near) * ease(clamp(y / (VH * 0.3)))
         it.group.visible = it.loaded && hide < 0.99 && d > 0
         it.group.scale.setScalar(px * worldPerPx * (0.55 + 0.45 * near) * (1 - hide) * grow)
-        const free = ((calm ? 0 : (o.stage ? t : spin) * 0.0004) + o.dragX() + i * 1.3 + (1 - d) * 1.5) % (Math.PI * 2)
+        const wind = o.stage ? (1 - d) * 1.5 : (1 - d) * (1 - d) * Math.PI * 2.5 // extra spin that winds down as it lands
+        const free = ((calm ? 0 : (o.stage ? t : spin) * 0.0004) + o.dragX() + i * 1.3 + wind) % (Math.PI * 2)
         it.group.rotation.set(
           lerp(0.5, 0.75, S.a) - Math.sin(S.p * Math.PI) * 0.35 * near,
           lerp(free, 0.35, k) + ease(clamp((S.p - 0.15) / 0.8)) * Math.PI * 2 * near,
@@ -352,7 +373,8 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
       })
       if (!o.stage && !stillsBroken) {
         // page started moving: take a still of the cake as it is now and let it scroll with the hero
-        if (moving && !heroStill) {
+        // (not during the entrance: it should be seen moving, and it's over in about a second)
+        if (moving && !heroStill && !entering) {
           try {
             capture(heroSnap, { left: h.left, top: h.top, width: h.width, height: h.height }, h.height * 0.25, scene, cam)
             heroSnap.key = 'x'

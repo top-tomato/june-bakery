@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 // always on the page; reviews / about / gallery only appear once filled in via Django admin
-const REQUIRED_SECTIONS = ['flavors', 'box', 'where', 'end'] // preview/jemmy-order: no story / how-to
+const REQUIRED_SECTIONS = ['opening', 'flavors', 'box', 'where', 'end'] // preview/jemmy-order: no story / how-to
 async function expectRequiredSections(page: Page) {
   for (const id of REQUIRED_SECTIONS) await expect(page.locator(`section#${id}`)).toHaveCount(1)
 }
@@ -20,7 +20,7 @@ test('home: intro finishes, the required sections render, scrolling the whole pa
   await page.goto('/')
   await expectRequiredSections(page)
   await expect(page.locator('.curtain')).toHaveCount(0, { timeout: 8000 }) // removes itself after the intro
-  await expect(page.locator('.hero h1')).toContainText('อบใหม่ หอม')
+  await expect(page.locator('.opening h1')).toContainText('อบใหม่ หอม')
 
   // the order button (box section, under the price) points at LINE with the cake's name
   await expect(page.locator('#box .buy a')).toHaveAttribute('href', /line\.me\/R\/oaMessage\//)
@@ -41,11 +41,11 @@ test('home: intro finishes, the required sections render, scrolling the whole pa
 test('home: switching cakes updates the hero and the story', async ({ page }) => {
   await page.goto('/')
   await expect(page.locator('.curtain')).toHaveCount(0, { timeout: 8000 })
-  const first = await page.locator('.pick h2').textContent()
+  const first = await page.locator('.hd-name').textContent()
   const next = page.getByRole('button', { name: 'เมนูถัดไป' })
   test.skip((await next.count()) === 0, 'only one cake on the menu')
   await next.click()
-  await expect(page.locator('.pick h2')).not.toHaveText(first ?? '')
+  await expect(page.locator('.hd-name')).not.toHaveText(first ?? '')
 })
 
 test('book: opens, flips, and links back home without a reload', async ({ page }) => {

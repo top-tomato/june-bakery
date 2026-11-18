@@ -1,7 +1,8 @@
 import { useEffect, useRef } from 'react'
 import { onFrame } from '@/lib/frame'
 
-/** Top bar. Its colour follows the section under it (data-nav="dark" | "light"); the logo hides on the hero. */
+/** Top bar. Its colour follows the section under it (data-nav="dark" | "light"); the logo hides on the opening screen,
+ * which has the big one. */
 export function Nav() {
   const ref = useRef<HTMLElement>(null)
 
@@ -24,7 +25,7 @@ export function Nav() {
       write: ({ scrolled }) => {
         if (!scrolled || !hit) return
         nav.classList.toggle('dark', hit.dataset.nav === 'dark')
-        nav.classList.toggle('top', hit.id === 'flavors')
+        nav.classList.toggle('top', hit.id === 'opening')
       },
     })
     return off
