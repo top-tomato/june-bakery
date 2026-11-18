@@ -757,6 +757,7 @@ main .kicker {
   opacity: calc(0.85 - var(--p, 0) * 2);
 }
 .box-stage {
+  position: relative;
   min-height: 0;
   display: grid;
   place-items: center;
@@ -796,6 +797,12 @@ main .kicker {
   font: 500 1rem var(--body);
   opacity: 0.75;
   margin-top: 4px;
+}
+
+/* stills of the 3D placed in a section while it scrolls (three/cakeScene.ts) */
+.snap {
+  position: absolute;
+  pointer-events: none;
 }
 
 /* how to order */

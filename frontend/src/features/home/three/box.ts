@@ -42,6 +42,8 @@ export interface BoxModel {
   fill: (geometry: BufferGeometry, material: Material | Material[], matrix: Matrix4) => void
   /** lid angle in radians from closed (pi/2 = standing up, ~2.95 = lying back on the table) */
   pose: (lid: number) => void
+  /** true once the logo sticker is drawn (stills taken before that would miss it) */
+  ready: () => boolean
   /** drop the pieces in: ms since the drop started, or null = box still empty */
   drop: (ms: number | null) => void
   dispose: () => void
@@ -191,6 +193,7 @@ export function createBox(): BoxModel {
   shadow.position.y = -0.002
   group.add(shadow)
 
+  let logoReady = false
   // logo sticker: cream oval label, logo in the shop's dark green
   {
     const [c, g] = canvas(920, 440)
@@ -220,7 +223,10 @@ export function createBox(): BoxModel {
     }
     draw()
     const img = new Image()
-    img.onload = () => draw(img)
+    img.onload = () => {
+      draw(img)
+      logoReady = true
+    }
     img.src = logoUrl
     const sticker = new Mesh(
       keep(new PlaneGeometry(0.92, 0.44)),
@@ -295,6 +301,7 @@ export function createBox(): BoxModel {
     group,
     fill,
     pose: (lid) => void (hinge.rotation.x = -lid),
+    ready: () => logoReady,
     drop: (ms) =>
       pieces.children.forEach((h, k) => {
         const { x, z, ry } = h.userData.home as { x: number; z: number; ry: number }

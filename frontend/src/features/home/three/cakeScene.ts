@@ -26,13 +26,13 @@ import { createBox } from './box'
  * Phone lessons baked in (see CHANGELOG):
  * - the canvas is sized to the tallest viewport and only resized when that grows (no rebuild while toolbars slide)
  * - all scroll maths use the frozen viewport height
- * - the cake shrinks away before the story section un-pins: after that the page scrolls natively and a JS-positioned
- *   object can only trail it, which looked like stutter
+ * - nothing on this fixed canvas follows a section that is scrolling natively (a JS-positioned object can only trail
+ *   it, which looked like stutter): while the story or box section moves, a still picture inside the section stands in
  * - once the stage has scrolled away the canvas is hidden instead of being cleared every frame
  *
  * The same canvas then draws the box section (lid opens as you scroll, four pieces inside): a second scene on the
- * same renderer, not a second WebGL context. Same lesson: the box only shows while its section is pinned, growing in
- * after the pin starts and shrinking away before it ends.
+ * same renderer, not a second WebGL context. Same lesson: the live box only shows while its section is pinned; before
+ * and after, stills of it sit in the section.
  */
 export interface CakeSceneOptions {
   canvas: HTMLCanvasElement
@@ -128,40 +128,121 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
   let boxFilled = -1
   let dropAt: number | null = null
 
-  /** pose the box for this frame; true when it should be drawn */
-  const updateBox = () => {
-    const p = o.box.p
-    const show = calm ? (p > 0 && p < 1 ? 1 : 0) : ease(clamp(p / 0.06)) * (1 - ease(clamp((p - 0.94) / 0.06)))
-    if (show < 0.01) return false
-    const r = o.boxStage.getBoundingClientRect()
-    if (r.bottom < 0 || r.top > ch || !r.width) return false
-    const i = Math.round(o.active()), it = items[i]
-    if (it?.mesh && boxFilled !== i) {
-      box.fill(it.mesh.geometry, it.mesh.material, it.mesh.matrix)
-      boxFilled = i
-    }
-    // the box waits open, the pieces drop in on their own clock (real bounce speed, however fast you scroll), then the
-    // lid lies back and the camera looks down. Scrolling back to the top of the section empties it to play again.
-    const now = performance.now()
-    if (p > 0.08 && dropAt == null) dropAt = calm ? now - 1e4 : now
-    if (p < 0.02) dropAt = null
-    box.drop(dropAt == null ? null : now - dropAt)
+  type Rect = { left: number; top: number; width: number; height: number }
+  /** where an element sits on screen while its section is pinned (the pin's top is then 0) */
+  const pinnedRect = (el: HTMLElement): Rect => {
+    const r = el.getBoundingClientRect(), pin = el.closest('.pin')?.getBoundingClientRect()
+    return { left: r.left, top: r.top - (pin?.top ?? 0), width: r.width, height: r.height }
+  }
+
+  /** pose the box and aim its camera at `r` (the stage on screen); returns the view window offset */
+  const poseBox = (p: number, r: Rect, dropMs: number | null) => {
+    box.drop(dropMs)
     const look = calm ? clamp((p - 0.62) / 0.25) : ease(clamp((p - 0.62) / 0.25))
     const open = lerp(1.75, 2.95, look)
     box.pose(open)
     box.group.rotation.y = lerp(-0.55, -0.15, p)
-    box.group.scale.setScalar(lerp(0.6, 1, show))
     // fill the stage: closed box ~1.6 widths across, more room at the end for the lid lying back; on a narrow phone
     // the box may use the full width (the stage is taller than wide there)
     // while the lid stands up it is the tallest thing: aim higher and pull back a little so it stays in frame
     const lift = Math.sin(clamp(open / Math.PI) * Math.PI) * (1 - look)
     const span = lerp(3.3, 4.4, look) + lift * 0.7, fit = Math.min(r.width * 1.3, r.height)
     const d = (ch * span) / fit / (2 * Math.tan((boxCam.fov * Math.PI) / 360))
-    boxCam.aspect = cw / ch
-    boxCam.setViewOffset(cw, ch, cw / 2 - (r.left + r.width / 2), ch / 2 - (r.top + r.height / 2), cw, ch)
     const dir = new Vector3(0, lerp(3.2, 9.6, look), lerp(8, 3.2, look)).normalize()
     boxCam.position.copy(dir.multiplyScalar(d))
     boxCam.lookAt(0, lerp(0.35, 0.2, look) + lift * 0.75, lerp(0, -0.7, look) - lift * 0.4)
+    boxCam.aspect = cw / ch
+    return { ox: cw / 2 - (r.left + r.width / 2), oy: ch / 2 - (r.top + r.height / 2) }
+  }
+
+  /**
+   * Still pictures of the 3D, placed inside the section so they scroll with the page natively. They stand in while
+   * a section moves (before it pins, after it un-pins), so the cake and the box never vanish, and nothing drawn on the
+   * fixed canvas has to chase the page (the phone stutter lesson above).
+   *
+   * Taking one: render just that part of the screen stretched over the whole canvas, copy it into a 2D canvas, then
+   * the normal frame is drawn over it in the same task, so it never shows.
+   */
+  const snaps: HTMLCanvasElement[] = []
+  const makeSnap = (parent: HTMLElement) => {
+    const c = document.createElement('canvas')
+    c.className = 'snap'
+    c.setAttribute('aria-hidden', 'true')
+    c.style.visibility = 'hidden'
+    parent.append(c)
+    snaps.push(c)
+    return { el: c, key: '' }
+  }
+  const storySnap = makeSnap(o.stage)
+  const boxStart = makeSnap(o.boxStage)
+  const boxEnd = makeSnap(o.boxStage)
+  const capture = (snap: { el: HTMLCanvasElement }, stage: Rect, margin: number, sc: Scene, camera: PerspectiveCamera, ox = 0, oy = 0) => {
+    const R = { left: stage.left - margin, top: stage.top - margin, width: stage.width + margin * 2, height: stage.height + margin * 2 }
+    const pr = renderer.getPixelRatio(), c = snap.el
+    c.width = Math.round(R.width * pr)
+    c.height = Math.round(R.height * pr)
+    Object.assign(c.style, { left: `${-margin}px`, top: `${-margin}px`, width: `${R.width}px`, height: `${R.height}px` })
+    camera.setViewOffset(cw, ch, ox + R.left, oy + R.top, R.width, R.height)
+    camera.updateProjectionMatrix()
+    renderer.render(sc, camera)
+    c.getContext('2d')?.drawImage(o.canvas, 0, 0, o.canvas.width, o.canvas.height, 0, 0, c.width, c.height)
+    camera.clearViewOffset()
+    camera.updateProjectionMatrix()
+  }
+  const show = (snap: { el: HTMLCanvasElement; key: string }, on: boolean) => {
+    const v = on && snap.key ? '' : 'hidden'
+    if (snap.el.style.visibility !== v) snap.el.style.visibility = v
+  }
+
+  /** the story's cake at the end of its spin (S.p = 1), for when the story section scrolls on */
+  const snapStory = (i: number) => {
+    const it = items[i]
+    if (!it?.loaded) return
+    const r = pinnedRect(o.stage), key = `${i}|${cw}x${ch}|${Math.round(r.width)}x${Math.round(r.height)}|${Math.round(r.left)},${Math.round(r.top)}`
+    if (storySnap.key === key) return
+    items.forEach((x) => (x.group.visible = x === it))
+    it.group.position.set((r.left + r.width / 2 - cw / 2) * worldPerPx, -(r.top + r.height / 2 - ch / 2) * worldPerPx, 0)
+    it.group.scale.setScalar(r.height * 0.86 * worldPerPx)
+    it.group.rotation.set(0.75, 0.35 + Math.PI * 2, 0)
+    capture(storySnap, r, r.height * 0.15, scene, cam)
+    storySnap.key = key
+  }
+
+  /** the box before it pins (open and empty) and after (full, lid back, seen from above) */
+  const snapBox = () => {
+    const i = Math.round(o.active()), it = items[i]
+    if (!it?.mesh || !box.ready()) return
+    if (boxFilled !== i) {
+      box.fill(it.mesh.geometry, it.mesh.material, it.mesh.matrix)
+      boxFilled = i
+    }
+    const r = pinnedRect(o.boxStage), key = `${i}|${cw}x${ch}|${Math.round(r.width)}x${Math.round(r.height)}|${Math.round(r.left)},${Math.round(r.top)}`
+    if (boxStart.key === key) return
+    for (const [snap, p, ms] of [
+      [boxStart, 0, null],
+      [boxEnd, 1, 1e4],
+    ] as const) {
+      const { ox, oy } = poseBox(p, r, ms)
+      capture(snap, r, r.height * 0.2, boxScene, boxCam, ox, oy)
+      snap.key = key
+    }
+  }
+
+  /** live box while its section is pinned; true when it should be drawn */
+  const updateBox = () => {
+    const p = o.box.p
+    show(boxStart, p <= 0)
+    show(boxEnd, p >= 1)
+    if (p <= 0 || p >= 1) return false
+    const r = o.boxStage.getBoundingClientRect()
+    if (r.bottom < 0 || r.top > ch || !r.width) return false
+    // the box waits open, the pieces drop in on their own clock (real bounce speed, however fast you scroll), then the
+    // lid lies back and the camera looks down. Scrolling back to the top of the section empties it to play again.
+    const now = performance.now()
+    if (p > 0.08 && dropAt == null) dropAt = calm ? now - 1e4 : now
+    if (p < 0.02) dropAt = null
+    const { ox, oy } = poseBox(p, r, dropAt == null ? null : now - dropAt)
+    boxCam.setViewOffset(cw, ch, ox, oy, cw, ch)
     boxCam.updateProjectionMatrix()
     return true
   }
@@ -175,17 +256,21 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
       const VH = viewportHeight()
       const S = o.story
       const st = o.stage.getBoundingClientRect()
+      const bs = o.boxStage.getBoundingClientRect()
+      // stills, taken once the sections are near (and again if the size or the cake changes)
+      if (S.p > 0.5 || st.bottom < 0) snapStory(Math.round(o.active()))
+      if (bs.top < ch * 2) snapBox()
+      const done = S.p >= 0.999 // story un-pinned: its still takes over
+      show(storySnap, done)
       const boxOn = updateBox()
-      const nowAway = st.bottom < -300 && !boxOn
+      const nowAway = (done || st.bottom < -300) && !boxOn
       if (nowAway !== away) {
         away = nowAway
         o.canvas.style.visibility = away ? 'hidden' : ''
-        if (away) renderer.clear()
       }
-      if (away) return
+      if (away) return renderer.clear()
       if (boxOn) return renderer.render(boxScene, boxCam)
       const h = o.heroSpot.getBoundingClientRect()
-      const outro = calm ? (S.p >= 0.999 ? 1 : 0) : ease(clamp((S.p - 0.9) / 0.09))
       smooth += (o.active() - smooth) * (calm ? 1 : 0.12)
       const cx = lerp(h.left + h.width / 2, st.left + st.width / 2, S.a)
       const cy = lerp(Math.max(h.top + h.height / 2, VH * 0.42), st.top + st.height / 2, S.a)
@@ -201,8 +286,8 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
         const grow = lerp(0.6, 1, outBack(d))
         it.group.position.set((cx + dI * gap - cw / 2) * worldPerPx, -(cy - drop - ch / 2) * worldPerPx, 0)
         const hide = (1 - near) * ease(clamp(y / (VH * 0.3)))
-        it.group.visible = it.loaded && hide < 0.99 && d > 0 && outro < 0.995
-        it.group.scale.setScalar(px * worldPerPx * (0.55 + 0.45 * near) * (1 - hide) * grow * (1 - outro))
+        it.group.visible = it.loaded && hide < 0.99 && d > 0
+        it.group.scale.setScalar(px * worldPerPx * (0.55 + 0.45 * near) * (1 - hide) * grow)
         const free = ((calm ? 0 : t * 0.0004) + o.dragX() + i * 1.3 + (1 - d) * 1.5) % (Math.PI * 2)
         it.group.rotation.set(
           lerp(0.5, 0.75, S.a) - Math.sin(S.p * Math.PI) * 0.35 * near,
@@ -217,6 +302,7 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
   // three.js skill: memory-dispose-on-unmount / memory-renderer-dispose
   return () => {
     off()
+    for (const c of snaps) c.remove()
     box.dispose()
     removeEventListener('resize', size)
     for (const { geometry, material } of owned) {
