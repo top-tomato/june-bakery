@@ -54,6 +54,14 @@ body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);pa
 .c .card,.c .links{background:#fff;box-shadow:0 0 0 1.5px rgba(36,59,55,.18),0 14px 30px rgba(36,59,55,.16)}
 
 
+/* D: no cream at all: the whole page is green, cream cards float on it */
+.d{background:var(--indigo)}
+.d .body{padding-top:4px}
+.d .card,.d .links{background:var(--cream);box-shadow:0 14px 30px rgba(0,0,0,.22)}
+.d .links div{border-color:#e4d6bb}
+.d .foot{color:#cfe0d9;text-align:center;font-size:.8rem;margin-top:14px;opacity:.85}
+.play.d .card{animation-delay:.75s}.play.d .links{animation-delay:.92s}
+
 /* opening: same beats as the landing page (logo pops + palm sways, heading floats up, green pours down, cards rise) */
 .play .head img{animation:pop .7s cubic-bezier(.2,1.4,.4,1) both .1s;transform-origin:50% 80%}
 .play .head h2{animation:up .7s both .45s}
@@ -97,6 +105,7 @@ body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);pa
   <div><p class="tag">เดิม<small>การ์ดครีมทับขอบหยดครีม</small></p><div class="phone now" data-k="overlap"></div></div>
   <div><p class="tag">A · การ์ดอยู่ใต้หยด <span class="pick">แนะนำ</span><small>หยดไหลจบก่อน แล้วค่อยเป็นการ์ดสีขาวมีเส้นขอบบาง ๆ ไม่ทับกัน</small></p><div class="phone a" data-k="below"></div></div>
   <div><p class="tag">B · การ์ดอยู่บนพื้นเขียว<small>การ์ดขาวบนพื้นเขียวเด่นสุด หยดไหลต่อจากใต้การ์ด</small></p><div class="phone b" data-k="ongreen"></div></div>
+  <div><p class="tag">D · ไม่มีครีมเลย ทั้งหน้าเป็นเขียว<small>การ์ดครีมลอยบนพื้นเขียว ไม่มีหยด ไม่มีขอบให้กลืน</small></p><div class="phone d" data-k="allgreen"></div></div>
   <div><p class="tag">C · ที่เดิม แต่ขอบชัดขึ้น<small>ยังทับหยดเหมือนเดิม แต่การ์ดขาว มีเส้นขอบเขียวจาง + เงาเข้มขึ้น</small></p><div class="phone c" data-k="overlap"></div></div>
 </div>
 
@@ -104,6 +113,7 @@ body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);pa
   <ul>
     <li><b>A</b> แก้ตรงที่สุด หยดยังไหลเหมือนหน้าแรก แค่การ์ดเลื่อนลงไปไม่ทับ เสียพื้นที่ด้านบนไปนิดหน่อย</li>
     <li><b>B</b> เห็นปุ่มสั่งเร็วสุดตอนเปิดหน้า แต่พื้นเขียวยาวลงมาถึงครึ่งจอ</li>
+    <li><b>D</b> สะอาดที่สุด ปัญหาการ์ดกลืนหายไปเลย สีเดียวทั้งหน้าเหมือนสติกเกอร์บนกล่อง แต่ไม่มีหยดไหล animation ตอนเปิดเหลือแค่โลโก้ ข้อความ และการ์ดลอยขึ้น หน้าดูเข้มและหนักกว่าแบบอื่น</li>
     <li><b>C</b> แก้น้อยสุด แต่การ์ดยังทับหยดอยู่ อาจยังดูรก</li>
     <li>ตอนเปิดหน้า: โลโก้เด้งขึ้น ข้อความลอยขึ้น สีเขียวไหลลง แล้วการ์ดค่อยลอยขึ้นมา ใช้ท่าเดียวกับหน้าแรก ยาวราว 2 วินาที กดปุ่มข้างบนเพื่อดูซ้ำ · มือถือที่ตั้งค่าลดการเคลื่อนไหวไว้จะไม่เล่น</li>
     <li>ทุกแบบเปลี่ยนรูปให้เห็นเนื้อขนมมากขึ้น เห็นกระดาษในกล่องน้อยลง</li>
@@ -114,7 +124,8 @@ body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);pa
 const t = (id) => document.getElementById(id).innerHTML
 for (const el of document.querySelectorAll('.phone')) {
   const k = el.dataset.k
-  if (k === 'ongreen') el.innerHTML = t('head') + `<div class="greenwrap">${t('card')}</div>` + t('drip') + `<div class="body">${t('links')}</div>`
+  if (k === 'allgreen') el.innerHTML = t('head') + `<div class="body">${t('card')}${t('links')}<p class="foot">หน้าร้าน June · 10 พหลโยธิน<br>เวลาเปิด 10:00–20:00</p></div>`
+  else if (k === 'ongreen') el.innerHTML = t('head') + `<div class="greenwrap">${t('card')}</div>` + t('drip') + `<div class="body">${t('links')}</div>`
   else if (k === 'below') el.innerHTML = t('head') + t('drip') + `<div class="body">${t('card')}${t('links')}</div>`
   else {
     el.innerHTML = t('head') + t('drip') + `<div class="body">${t('card')}${t('links')}</div>`
