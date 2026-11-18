@@ -30,6 +30,15 @@ body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);pa
 .btn{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:10px;padding:13px;border-radius:999px;background:#2c3a37;color:var(--cream);font:500 .95rem Mitr,sans-serif;text-decoration:none}
 .btn svg{width:18px;height:18px}
 .btn.soft{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+/* care tips */
+.care h4{font:500 1.02rem Mitr,sans-serif;margin-bottom:8px}
+.care ul{list-style:none;padding:0;display:grid;gap:10px}
+.care li{display:flex;gap:10px;align-items:flex-start;font-size:.88rem;line-height:1.45}
+.care .ic{flex:0 0 34px;height:34px;border-radius:10px;background:#dcebb5;display:grid;place-items:center}
+.care .ic svg{width:19px;height:19px}
+.care b{font-weight:600;display:block}
+.care mark{background:#f3d9a4;color:var(--ink);border-radius:4px;padding:0 5px;font-weight:600}
+.play .care li{animation:up .6s both calc(1.05s + var(--k) * .12s)}
 /* review */
 .review{text-align:center}
 .review h4{font:500 1.02rem Mitr,sans-serif}
@@ -48,8 +57,8 @@ body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);pa
 .play .head img{animation:pop .7s cubic-bezier(.2,1.4,.4,1) both .1s;transform-origin:50% 80%}
 .play .head h2{animation:up .7s both .45s}
 .play .card{animation:rise .8s cubic-bezier(.2,.9,.3,1) both calc(.7s + var(--i) * .16s)}
-.play .foot{animation:up .7s both 1.4s}
-.play .stars svg{animation:star .5s cubic-bezier(.2,1.6,.4,1) both calc(1.3s + var(--s) * .08s)}
+.play .foot{animation:up .7s both 1.6s}
+.play .stars svg{animation:star .5s cubic-bezier(.2,1.6,.4,1) both calc(1.5s + var(--s) * .08s)}
 @keyframes pop{0%{opacity:0;transform:scale(.6) rotate(-6deg)}60%{opacity:1}100%{transform:none}}
 @keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
@@ -67,14 +76,23 @@ body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);pa
         <a class="btn" href="#"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8-6C21.4 14.2 22 12.7 22 11c0-4.4-4.5-8-10-8Z"/></svg>สั่งอีกรอบทาง LINE</a>
       </div></section>
 
-      <section class="card review in" style="--i:1">
+      <section class="card care in" style="--i:1">
+        <h4>เก็บยังไงให้นุ่ม</h4>
+        <ul>
+          <li style="--k:0"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#243b37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span><span><b>วันนี้–พรุ่งนี้</b>วางไว้ในกล่อง ปิดฝาให้สนิท ไม่โดนแดด</span></li>
+          <li style="--k:1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#243b37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M6 10h12M9 6v1M9 13v3"/></svg></span><span><b>เก็บนานกว่านั้น เข้าตู้เย็น</b>ใส่กล่องหรือถุงปิดสนิท อยู่ได้ <mark>X</mark> วัน</span></li>
+          <li style="--k:2"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#243b37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="4"/></svg></span><span><b>ก่อนทาน</b>เอาออกจากตู้เย็นพักไว้ราว 15–20 นาที ให้กลับมานุ่ม</span></li>
+        </ul>
+      </section>
+
+      <section class="card review in" style="--i:2">
         <h4>อร่อยไหม เล่าให้ร้านฟังหน่อย</h4>
         <p>พิมพ์รีวิวหรือแนบรูปในแชต LINE ของร้าน</p>
         <div class="stars" aria-hidden="true" id="stars"></div>
         <a class="btn soft" href="#">รีวิวทาง LINE</a>
       </section>
 
-      <section class="card links" style="--i:2">
+      <section class="card links" style="--i:3">
         <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/></svg><span>เพิ่มเพื่อน LINE รับข่าววันหยุด เมนูใหม่</span>›</a>
         <a href="#"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg><span>ดูเว็บ June</span>›</a>
       </section>
@@ -89,7 +107,8 @@ body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);pa
     <ul>
       <li>ทั้งหน้าเป็นเขียว การ์ดครีมลอยบนพื้นเขียว ไม่มีหยด ไม่มี "หวังว่าจะอร่อย ทานให้สนุก"</li>
       <li>ตอนเปิด: โลโก้เด้งขึ้น ข้อความลอยขึ้น การ์ดลอยขึ้นทีละใบ ดาว 5 ดวงเด้งตามกัน</li>
-      <li><b>การ์ดรีวิวใหม่</b> อยู่ใต้ปุ่มสั่ง กด "รีวิวทาง LINE" แล้วเข้าแชตร้าน มีข้อความรอไว้ว่า "รีวิว ชิฟฟ่อนมะพร้าวใบเตย:" ลูกค้าพิมพ์ต่อหรือแนบรูปได้เลย</li>
+      <li><b>การ์ด "เก็บยังไงให้นุ่ม"</b> อยู่ใต้ปุ่มสั่ง ข้อความในนี้เป็นร่าง <b>X</b> = จำนวนวันในตู้เย็น รอเจมมี่บอก ร้านแก้เองได้ในหลังร้าน → ข้อมูลร้าน → "วิธีเก็บขนม" ถ้าช่องว่าง การ์ดนี้ไม่ขึ้น (ตอนนี้บนเว็บจริงยังว่างอยู่ เลยยังไม่เห็น)</li>
+      <li><b>การ์ดรีวิวใหม่</b> อยู่ใต้วิธีเก็บ กด "รีวิวทาง LINE" แล้วเข้าแชตร้าน มีข้อความรอไว้ว่า "รีวิว ชิฟฟ่อนมะพร้าวใบเตย:" ลูกค้าพิมพ์ต่อหรือแนบรูปได้เลย</li>
       <li>ดาวเป็นแค่ลวดลาย กดไม่ได้ ไม่ได้เก็บคะแนน</li>
       <li>เอา "ถ่ายรูปส่งมาอวดกันหน่อย" ออก เพราะรวมอยู่ในการ์ดรีวิวแล้ว</li>
       <li>วันหลังพอร้านมีหมุดบน Google แล้ว ค่อยเพิ่มปุ่ม "รีวิวบน Google" ในการ์ดนี้</li>
