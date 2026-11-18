@@ -24,6 +24,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.safestring import SafeString, mark_safe
 from django.views.decorators.http import require_POST
 
+from menu.og import home_image_url
 from menu.models import ClosedDay, DailyStat, Expense, Order, Product, Review, ShopInfo
 
 TH_DAYS = ["จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส.", "อา."]
@@ -446,7 +447,7 @@ def reviews(request: HttpRequest) -> HttpResponse:
 class ShopForm(forms.ModelForm):
     class Meta:
         model = ShopInfo
-        fields = ["preorder_days", "shelf_life", "payment", "delivery", "hours", "about_title", "about_text", "about_photo", "instagram_url", "facebook_url"]
+        fields = ["preorder_days", "shelf_life", "payment", "delivery", "hours", "about_title", "about_text", "about_photo", "share_photo", "instagram_url", "facebook_url"]
         widgets = {"about_text": forms.Textarea(attrs={"rows": 4})}
 
 
@@ -460,7 +461,7 @@ def shop(request: HttpRequest) -> HttpResponse:
             messages.success(request, "บันทึกข้อมูลร้านแล้ว")
             return redirect("backoffice:shop")
         messages.error(request, "บันทึกไม่ได้ ตรวจช่องที่ขึ้นสีแดง")
-    return render(request, "backoffice/shop.html", base_context(request, "shop", "ข้อมูลร้าน") | {"form": form})
+    return render(request, "backoffice/shop.html", base_context(request, "shop", "ข้อมูลร้าน") | {"form": form, "og_home": home_image_url()})
 
 
 # ---------------------------------------------------------------- staff accounts (owner only)

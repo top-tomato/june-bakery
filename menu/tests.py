@@ -164,6 +164,59 @@ class AppShellTests(MediaTestCase):
         self.assertEqual(response["X-Frame-Options"], "SAMEORIGIN")
 
 
+def png(w: int = 40, h: int = 30) -> SimpleUploadedFile:
+    from io import BytesIO
+
+    from PIL import Image
+
+    buf = BytesIO()
+    Image.new("RGB", (w, h), (120, 180, 90)).save(buf, "PNG")
+    return SimpleUploadedFile("p.png", buf.getvalue(), content_type="image/png")
+
+
+class LinkPreviewTests(MediaTestCase):
+    def og_image(self, name: str = "menu:index") -> str:
+        match = re.search(r'property="og:image" content="https?://[^/]+(/[^"]+)"', self.client.get(reverse(name)).content.decode())
+        assert match is not None
+        return match.group(1)
+
+    def card(self, url: str):  # noqa: ANN201
+        from PIL import Image
+
+        return Image.open(Path(settings.MEDIA_ROOT, url.removeprefix(settings.MEDIA_URL)))
+
+    def test_home_card_is_drawn_from_the_first_cake_at_1200x630(self) -> None:
+        make_product(image=png())
+        url = self.og_image()
+        self.assertRegex(url, r"/media/og/home-[0-9a-f]{12}\.jpg$")
+        self.assertEqual(self.card(url).size, (1200, 630))
+        self.assertEqual(self.og_image(), url)  # same photo -> same file, not drawn again
+
+    def test_share_photo_from_the_back_office_replaces_it(self) -> None:
+        make_product(image=png())
+        before = self.og_image()
+        info = ShopInfo.load()
+        info.share_photo = png(60, 60)
+        info.save()
+        after = self.og_image()
+        self.assertNotEqual(before, after)
+        self.assertFalse(Path(settings.MEDIA_ROOT, before.removeprefix(settings.MEDIA_URL)).exists())  # old card cleaned up
+
+    def test_gallery_link_gets_the_photo_grid(self) -> None:
+        make_product(image=png())
+        GalleryPhoto.objects.create(image=png(), caption="a")
+        url = self.og_image("menu:gallery")
+        self.assertIn("/og/gallery-", url)
+        self.assertEqual(self.card(url).size, (1200, 630))
+        page = self.client.get(reverse("menu:gallery")).content.decode()
+        self.assertIn('content="Gallery · June"', page)
+        self.assertIn('name="twitter:card" content="summary_large_image"', page)
+
+    def test_no_photo_no_image_tag(self) -> None:
+        page = self.client.get(reverse("menu:index")).content.decode()
+        self.assertNotIn('property="og:image"', page)
+
+
 class MediaServeTests(MediaTestCase):
     """Safari on iPhone (and LINE's browser) only plays a video if the server answers byte ranges with 206."""
 

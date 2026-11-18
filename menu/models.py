@@ -100,6 +100,10 @@ class ShopInfo(models.Model):
     about_title = models.CharField("หัวข้อเรื่องของร้าน", max_length=80, blank=True)
     about_text = models.TextField("เรื่องของร้าน (2–3 ประโยค)", blank=True)
     about_photo = models.ImageField("รูปประกอบเรื่องของร้าน", upload_to=UniqueName("shop/"), blank=True)
+    share_photo = models.ImageField(
+        "รูปปกตอนแปะลิงก์", upload_to=UniqueName("shop/"), blank=True,
+        help_text="รูปขนมที่ขึ้นเวลาแปะลิงก์เว็บใน LINE / Facebook (ใส่โลโก้กับคำโปรยให้เอง) ว่าง = ใช้รูปขนมชิ้นแรกในเมนู",
+    )
     instagram_url = models.URLField("ลิงก์ Instagram", blank=True, help_text="เช่น https://www.instagram.com/ชื่อร้าน/ (ว่าง = ไม่แสดงปุ่ม)")
     facebook_url = models.URLField("ลิงก์เพจ Facebook", blank=True, help_text="ว่าง = ไม่แสดงปุ่ม")
     updated_at = models.DateTimeField(auto_now=True)

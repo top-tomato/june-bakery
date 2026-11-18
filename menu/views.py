@@ -10,6 +10,7 @@ from django.views.decorators.cache import cache_control
 from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.views.decorators.http import require_GET
 
+from menu.og import gallery_image_url, home_image_url
 from menu.models import ClosedDay, GalleryPhoto, Product, Review, ShopInfo
 
 # หน้าร้าน (มีสาขาเดียว) พิกัดจากแผนที่ที่เจ้าของร้านส่งมา
@@ -66,7 +67,13 @@ def api_menu(request: HttpRequest) -> JsonResponse:
 def app(request: HttpRequest) -> HttpResponse:
     """หน้าเปล่าของแอป React ทุกหน้า ฝังข้อมูลเมนูไว้ให้เลย หน้าแรกจะได้ไม่ต้องรอเรียก API อีกรอบ"""
     data = menu_data()
-    return render(request, "menu/app.html", {"bootstrap": data, "products": data["products"], "shop": data["shop"]})
+    gallery = request.resolver_match is not None and request.resolver_match.url_name == "gallery"
+    og = {
+        "title": "Gallery · June" if gallery else "June — อบใหม่ หอม นุ่มนาน",
+        "description": "รูปขนมที่อบเสร็จทุกวันของ June" if gallery else "ดูเมนูขนมของ June แล้วทักสั่งทาง LINE ได้เลย",
+        "image": gallery_image_url() if gallery else home_image_url(),
+    }
+    return render(request, "menu/app.html", {"bootstrap": data, "products": data["products"], "shop": data["shop"], "og": og})
 
 
 def phone_preview(request: HttpRequest) -> HttpResponse:

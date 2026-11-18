@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<!-- Source of the link-preview text layers (menu/og.py pastes them over photos). The server's Pillow cannot shape Thai,
+     so the text is drawn here once and saved as transparent PNGs:
+       node scripts/og_layers.cjs   (see README) -> home-text.png (1200x630), gallery-badge.png -->
+<link href="https://fonts.googleapis.com/css2?family=Mitr:wght@600&family=Itim&display=swap" rel="stylesheet">
+<style>
+*{margin:0;box-sizing:border-box}
+html,body{background:transparent}
+#home{position:relative;width:1200px;height:630px}
+#home .l{position:absolute;left:78px;top:0;bottom:0;display:flex;flex-direction:column;justify-content:center;gap:16px;color:#fff}
+#home img{width:300px;filter:drop-shadow(0 2px 14px rgba(0,0,0,.25))}
+#home .tag{font:600 66px/1.12 Mitr,sans-serif;text-shadow:0 2px 18px rgba(0,0,0,.35)}
+#home .sub{font:32px Itim,cursive;opacity:.92;text-shadow:0 1px 10px rgba(0,0,0,.35)}
+#badge{display:inline-block;padding:60px}
+#badge .b{background:#FFF6E6;border-radius:34px;padding:34px 56px 30px;text-align:center;box-shadow:0 16px 50px rgba(0,0,0,.28)}
+#badge img{width:260px;display:block;margin:0 auto;filter:brightness(0) invert(19%) sepia(12%) saturate(1500%) hue-rotate(118deg) brightness(92%)}
+#badge b{display:block;font:600 46px Mitr,sans-serif;margin-top:6px;color:#243b37}
+#badge small{display:block;font:28px Itim,cursive;color:#3E5D58}
+</style>
+</head>
+<body>
+<div id="home"><div class="l"><img src="logo.png" alt=""><div class="tag">อบใหม่ หอม<br>นุ่มนาน</div><div class="sub">ทักสั่งทาง LINE ได้เลย</div></div></div>
+<div id="badge"><div class="b"><img src="logo.png" alt=""><b>Gallery</b><small>อบเสร็จ ถ่ายเก็บไว้ทุกวัน</small></div></div>
+</body>
+</html>

@@ -6,9 +6,16 @@
 <title>June — อบใหม่ หอม นุ่มนาน</title>
 <meta name="description" content="ร้านขนมอบ June ใกล้อนุสาวรีย์ชัยฯ ดูเมนูแล้วทักสั่งทาง LINE {{ bootstrap.line.oaId }}">
 <meta property="og:type" content="website">
-<meta property="og:title" content="June — อบใหม่ หอม นุ่มนาน">
-<meta property="og:description" content="ดูเมนูขนมของ June แล้วทักสั่งทาง LINE ได้เลย">
-{% if products %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ products.0.image }}">{% endif %}
+<meta property="og:site_name" content="June Bakery">
+<meta property="og:locale" content="th_TH">
+<meta property="og:url" content="{{ request.build_absolute_uri }}">
+<meta property="og:title" content="{{ og.title }}">
+<meta property="og:description" content="{{ og.description }}">
+{% if og.image %}<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{{ og.image }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ og.title }}">
+<meta name="twitter:card" content="summary_large_image">{% endif %}
 <meta name="theme-color" content="#3E5D58">
 <link rel="icon" type="image/png" href="{% static 'favicon.png' %}">
 <script>

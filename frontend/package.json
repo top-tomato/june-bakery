@@ -9,7 +9,8 @@
     "typecheck": "tsc --noEmit -p tsconfig.json && tsc --noEmit -p tsconfig.node.json",
     "lint": "eslint .",
     "test:e2e": "playwright test",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "og:layers": "node tools/og-layers.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "5.108.0",
