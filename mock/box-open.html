@@ -93,8 +93,19 @@ const lidPlate=new THREE.Mesh(pg,paper); lidPlate.castShadow=lidPlate.receiveSha
 const win=new THREE.Mesh(new THREE.PlaneGeometry(L-2*m+.06,L-2*m+.06),film); win.rotation.x=-Math.PI/2; win.position.set(0,.002,L/2); lid.add(win)
 // front tuck flap + side flaps (hang down when closed, tuck inside the walls)
 const flap=part(W-.06,.2,T,paper,0,-.1,W-.03); lid.add(flap)
-for(const sx of [-1,1]){const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(L*.985,0);sh.lineTo(L*.8,-.16);sh.lineTo(L*.2,-.16);sh.closePath()
-  const g=new THREE.ShapeGeometry(sh);g.rotateY(-Math.PI/2);const f=new THREE.Mesh(g,paper);f.position.set(sx*(W/2-.03),0,0);f.castShadow=true;lid.add(f)}
+// side flaps join the lid to the box: each is a square of paper, one edge on the lid side, one on the side wall's top
+// edge, folded along its diagonal. Opening the lid unfolds it; fully unfolded (lid at 90 deg) it holds the lid up.
+const GA=.6, gussets=[-1,1].map(sx=>{const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.BufferAttribute(new Float32Array(18),3))
+  g.setAttribute('uv',new THREE.BufferAttribute(new Float32Array([0,0,GA,0,GA,GA,0,0,GA,GA,0,GA]),2))
+  const o=new THREE.Mesh(g,paper);o.castShadow=o.receiveShadow=true;s.add(o);return {sx,o}})
+const V=THREE.Vector3
+function foldGussets(angle){for(const {sx,o} of gussets){const x=sx*(W/2-.004)
+  const Hp=new V(x,TOP,-W/2), Wp=new V(x,TOP,-W/2+GA), Lp=new V(x,TOP+GA*Math.sin(angle),-W/2+GA*Math.cos(angle))
+  const Q=Wp.clone().add(Lp).multiplyScalar(.5), lw=Lp.distanceTo(Wp), r=Math.sqrt(Math.max(1e-6,GA*GA-lw*lw/4))
+  const u=Hp.clone().sub(Q).normalize(), dir=Lp.clone().sub(Wp).normalize(), v=new V().crossVectors(dir,u).normalize()
+  if(v.x*sx>0)v.negate()                                   // fold toward the inside of the box
+  const phi=2*Math.asin(Math.min(1,GA*Math.SQRT2/(2*r))), D=Q.clone().add(u.multiplyScalar(r*Math.cos(phi))).add(v.multiplyScalar(r*Math.sin(phi)))
+  const pos=o.geometry.attributes.position;[Hp,Lp,D,Hp,D,Wp].forEach((p,k)=>pos.setXYZ(k,p.x,p.y,p.z));pos.needsUpdate=true;o.geometry.computeVertexNormals();o.geometry.computeBoundingSphere()}}
 
 // 4 chiffon pieces from the real model, packed tight
 const pieces=new THREE.Group(); s.add(pieces)
@@ -114,7 +125,7 @@ addEventListener('resize',size);size()
 function frame(){
   const rect=scene.getBoundingClientRect(), p=clamp(-rect.top/(rect.height-innerHeight))
   const open=ease(clamp((p-.08)/.5)), look=ease(clamp((p-.45)/.4))
-  hinge.rotation.x=-open*2.95                      // ~170 degrees, lid lies back on the table like the photo
+  const ang=open*Math.PI/2*.985; hinge.rotation.x=-ang; foldGussets(ang)  // the side flaps stop the lid at ~90 deg
   s.rotation.y=lerp(-.55,-.15,p)                  // slow turn while scrolling
   const narrow=innerWidth<700, dist=narrow?13:8
   cam.position.set(0,lerp(3.2,dist*1.2,look),lerp(dist,dist*.4,look)); cam.lookAt(0,lerp(.7,.2,look),lerp(0,-.7,look)) // ends looking down, like the photo
