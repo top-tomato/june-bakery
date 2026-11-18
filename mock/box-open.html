@@ -92,11 +92,11 @@ const pg=new THREE.ExtrudeGeometry(plate,{depth:T,bevelEnabled:false}); pg.rotat
 const lidPlate=new THREE.Mesh(pg,paper); lidPlate.castShadow=lidPlate.receiveShadow=true; lid.add(lidPlate)
 const win=new THREE.Mesh(new THREE.PlaneGeometry(L-2*m+.06,L-2*m+.06),film); win.rotation.x=-Math.PI/2; win.position.set(0,.002,L/2); lid.add(win)
 // front tuck flap + side flaps (hang down when closed, tuck inside the walls)
-const flap=part(W-.06,.2,T,paper,0,-.1,W-.03); lid.add(flap)
+const flap=part(L-T*3.4,.2,T,paper,0,-.1,L-T*1.6); lid.add(flap)
 // side flaps: hang straight down from the lid's left and right edges, flush with the edge, and slide just inside the
 // side walls when the lid closes
 for(const sx of [-1,1]){const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(L-.01,0);sh.lineTo(L*.88,-.2);sh.lineTo(L*.06,-.2);sh.closePath()
-  const g=new THREE.ShapeGeometry(sh);g.rotateY(-Math.PI/2);const f=new THREE.Mesh(g,paper);f.position.set(sx*(L/2-T*.5),0,0);f.castShadow=true;lid.add(f)}
+  const g=new THREE.ShapeGeometry(sh);g.rotateY(-Math.PI/2);const f=new THREE.Mesh(g,paper);f.position.set(sx*(L/2-T*1.6),0,0);f.castShadow=true;lid.add(f)}
 
 // 4 chiffon pieces from the real model, packed tight
 const pieces=new THREE.Group(); s.add(pieces)
