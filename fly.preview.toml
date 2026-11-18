@@ -1,0 +1,25 @@
+# เว็บแยกไว้ให้ดูงานก่อนขึ้นเว็บจริง (preview) · deploy: fly deploy -c fly.preview.toml
+# ข้อมูล (ฐานข้อมูล + รูป) คัดลอกมาจากเว็บจริง แก้ตรงนี้ไม่กระทบเว็บจริง
+app = "june-bakery-preview"
+primary_region = "sin"
+
+[env]
+  DJANGO_ALLOWED_HOSTS = "june-bakery-preview.fly.dev"
+  LINE_OA_ID = "@561hgrea"
+
+[[mounts]]
+  source = "june_preview_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  # ไม่มีคนเปิดก็ปิดเครื่องเอง ประหยัดค่าใช้จ่าย (เปิดครั้งแรกจะช้าหน่อย)
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory = "512mb"

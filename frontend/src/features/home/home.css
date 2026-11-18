@@ -813,6 +813,10 @@ main .kicker {
   /* drips hang up to ~265px into the section at full stretch; keep the heading below them */
   padding: clamp(260px, calc(var(--vh) * 32), 320px) clamp(16px, 6vw, 96px) 96px;
 }
+/* the page's first section (no hero on top in preview/jemmy-order): keep its heading clear of the top bar */
+main > section.flush:first-child {
+  padding-top: 110px !important;
+}
 /* same colour as the section above: no drips, so no room for them (the two read as one continuing section) */
 .reviews.flush,
 .about.flush,

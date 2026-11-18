@@ -38,7 +38,8 @@ export interface CakeSceneOptions {
   canvas: HTMLCanvasElement
   models: string[]
   heroSpot: HTMLElement
-  stage: HTMLElement
+  /** the story section's stage; null on the page order without a story section (the hero sits mid-page then) */
+  stage: HTMLElement | null
   /** story progress written by the story section each frame: a = entering (0–1), p = through the pinned part (0–1) */
   story: { a: number; p: number }
   /** the box section's stage, and its progress through the pinned part (0–1), written by that section */
@@ -175,7 +176,10 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
     snaps.push(c)
     return { el: c, key: '' }
   }
-  const storySnap = makeSnap(o.stage)
+  const storySnap = makeSnap(o.stage ?? o.heroSpot)
+  // no story section: the hero is mid-page and scrolls natively, so while the page moves a still of the cake stands in
+  const heroSnap = makeSnap(o.heroSpot)
+  let lastY = Number.NaN, movedAt = -1e9, spin = 0, lastT = 0, heroStill = false
   const boxStart = makeSnap(o.boxStage)
   const boxEnd = makeSnap(o.boxStage)
   const capture = (snap: { el: HTMLCanvasElement }, stage: Rect, margin: number, sc: Scene, camera: PerspectiveCamera, ox = 0, oy = 0) => {
@@ -223,6 +227,7 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
   const snapStory = (i: number) => {
     const it = items[i]
     if (!it?.loaded) return
+    if (!o.stage) return
     const r = pinnedRect(o.stage), key = `${i}|${cw}x${ch}|${Math.round(r.width)}x${Math.round(r.height)}|${Math.round(r.left)},${Math.round(r.top)}`
     if (storySnap.key === key) return
     items.forEach((x) => (x.group.visible = x === it))
@@ -281,13 +286,20 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
       size()
       const VH = viewportHeight()
       const S = o.story
-      const st = o.stage.getBoundingClientRect()
+      const h = o.heroSpot.getBoundingClientRect()
+      const st = o.stage ? o.stage.getBoundingClientRect() : h
+      // page moving? (no-story order only: the hero cake then shows as a still until the page settles)
+      if (y !== lastY) movedAt = t
+      lastY = y
+      const moving = !o.stage && t - movedAt < 160
+      if (!moving) spin += t - lastT // the cake's idle turn pauses while it's a still
+      lastT = t
       const bs = o.boxStage.getBoundingClientRect()
       // stills, taken once the sections are near (and again if the size or the cake changes). If taking one fails on
       // some phone, give up on stills for good rather than failing every frame (that froze the 3D on a real iPhone)
       if (!stillsBroken) {
         try {
-          if (S.p > 0.5 || st.bottom < 0) snapStory(Math.round(o.active()))
+          if (o.stage && (S.p > 0.5 || st.bottom < 0)) snapStory(Math.round(o.active()))
           if (bs.top < ch * 2) snapBox()
         } catch (e) {
           stillsBroken = true
@@ -295,24 +307,28 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
           dbg.err = `still: ${String(e)}`
         }
       }
-      const done = S.p >= 0.999 // story un-pinned: its still takes over
+      const done = !!o.stage && S.p >= 0.999 // story un-pinned: its still takes over
       show(storySnap, done)
       const boxOn = updateBox()
       dbg.p = o.box.p.toFixed(2)
       dbg.box = boxOn ? 'live' : '-'
       dbg.stills = stillsBroken ? 'off' : `${storySnap.key ? 's' : ''}${boxStart.key ? 'b' : ''}`
       dbg.frames = ((dbg.frames as number) || 0) + 1
-      const nowAway = (done || st.bottom < -300) && !boxOn
+      const heroOff = h.bottom < -300 || h.top > ch + 300
+      const nowAway = (o.stage ? done || st.bottom < -300 : heroOff) && !boxOn
       if (nowAway !== away) {
         away = nowAway
         o.canvas.style.visibility = away ? 'hidden' : ''
       }
-      if (away) return renderer.clear()
-      if (boxOn) return renderer.render(boxScene, boxCam)
-      const h = o.heroSpot.getBoundingClientRect()
+      if (away || boxOn) {
+        if (heroStill) show(heroSnap, (heroStill = false))
+        return away ? renderer.clear() : renderer.render(boxScene, boxCam)
+      }
       smooth += (o.active() - smooth) * (calm ? 1 : 0.12)
       const cx = lerp(h.left + h.width / 2, st.left + st.width / 2, S.a)
-      const cy = lerp(Math.max(h.top + h.height / 2, VH * 0.42), st.top + st.height / 2, S.a)
+      // with the hero at the top, the cake holds at 42% of the screen as the page starts to move; mid-page it simply
+      // sits on the hero spot
+      const cy = lerp(o.stage ? Math.max(h.top + h.height / 2, VH * 0.42) : h.top + h.height / 2, st.top + st.height / 2, S.a)
       const px = lerp(h.height, st.height * 0.86, S.a)
       const gap = (innerWidth < 700 ? innerWidth * 0.6 : Math.min(innerWidth * 0.3, 440)) * (1 + S.a * 5)
       const k = ease(clamp(S.p / 0.18))
@@ -327,13 +343,28 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
         const hide = (1 - near) * ease(clamp(y / (VH * 0.3)))
         it.group.visible = it.loaded && hide < 0.99 && d > 0
         it.group.scale.setScalar(px * worldPerPx * (0.55 + 0.45 * near) * (1 - hide) * grow)
-        const free = ((calm ? 0 : t * 0.0004) + o.dragX() + i * 1.3 + (1 - d) * 1.5) % (Math.PI * 2)
+        const free = ((calm ? 0 : (o.stage ? t : spin) * 0.0004) + o.dragX() + i * 1.3 + (1 - d) * 1.5) % (Math.PI * 2)
         it.group.rotation.set(
           lerp(0.5, 0.75, S.a) - Math.sin(S.p * Math.PI) * 0.35 * near,
           lerp(free, 0.35, k) + ease(clamp((S.p - 0.15) / 0.8)) * Math.PI * 2 * near,
           0,
         )
       })
+      if (!o.stage && !stillsBroken) {
+        // page started moving: take a still of the cake as it is now and let it scroll with the hero
+        if (moving && !heroStill) {
+          try {
+            capture(heroSnap, { left: h.left, top: h.top, width: h.width, height: h.height }, h.height * 0.25, scene, cam)
+            heroSnap.key = 'x'
+            heroStill = true
+            show(heroSnap, true)
+          } catch (e) {
+            stillsBroken = true
+            dbg.err = `hero still: ${String(e)}`
+          }
+        } else if (!moving && heroStill) show(heroSnap, (heroStill = false))
+        if (heroStill) return renderer.clear()
+      }
       renderer.render(scene, cam)
     },
   })

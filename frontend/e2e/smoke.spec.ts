@@ -1,7 +1,7 @@
 import { expect, test, type Page } from '@playwright/test'
 
 // always on the page; reviews / about / gallery only appear once filled in via Django admin
-const REQUIRED_SECTIONS = ['flavors', 'story', 'box', 'how', 'where', 'end']
+const REQUIRED_SECTIONS = ['flavors', 'box', 'where', 'end'] // preview/jemmy-order: no story / how-to
 async function expectRequiredSections(page: Page) {
   for (const id of REQUIRED_SECTIONS) await expect(page.locator(`section#${id}`)).toHaveCount(1)
 }

@@ -5,7 +5,8 @@ import type { HomeMotion } from './motion'
 interface Props {
   models: string[]
   heroSpot: RefObject<HTMLDivElement | null>
-  stage: RefObject<HTMLDivElement | null>
+  /** the story section's stage, or null when the page has no story section */
+  stage: RefObject<HTMLDivElement | null> | null
   boxStage: RefObject<HTMLDivElement | null>
   motion: RefObject<HomeMotion>
   /** 'all' = no 3D at all (show photos), a number = that cake's model failed */
@@ -32,7 +33,7 @@ export function CakeLayer({ models, heroSpot, stage, boxStage, motion, onFail, o
 
   useEffect(() => {
     const canvas = canvasRef.current
-    if (!canvas || !heroSpot.current || !stage.current || !boxStage.current) return
+    if (!canvas || !heroSpot.current || (stage && !stage.current) || !boxStage.current) return
     if (debug.no3d || !hasWebGL) {
       onFailRef.current('all')
       return
@@ -48,13 +49,13 @@ export function CakeLayer({ models, heroSpot, stage, boxStage, motion, onFail, o
     }, 4500)
     import('./three/cakeScene')
       .then(({ createCakeScene }) => {
-        if (cancelled || !heroSpot.current || !stage.current || !boxStage.current) return
+        if (cancelled || !heroSpot.current || (stage && !stage.current) || !boxStage.current) return
         clearTimeout(giveUp)
         dispose = createCakeScene({
           canvas,
           models,
           heroSpot: heroSpot.current,
-          stage: stage.current,
+          stage: stage?.current ?? null,
           story: motion.current.story,
           boxStage: boxStage.current,
           box: motion.current.box,

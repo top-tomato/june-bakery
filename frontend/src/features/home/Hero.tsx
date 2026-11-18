@@ -10,12 +10,19 @@ interface Props {
   products: Product[]
   active: number
   onPick: (i: number) => void
-  onOpen: () => void
+  /** "ดูใกล้ ๆ รอบชิ้น": jump to the story section; absent when the page has none */
+  onOpen?: () => void
   spotRef: RefObject<HTMLDivElement | null>
   /** photo to show on the spot when there's no 3D for this cake */
   photo: string | null
   motion: RefObject<HomeMotion>
   lineOaId: string
+}
+
+/** the hero fills most of the screen (it may sit mid-page) */
+const heroInView = () => {
+  const r = document.getElementById('flavors')?.getBoundingClientRect()
+  return !!r && r.top < viewportHeight() * 0.4 && r.bottom > viewportHeight() * 0.6
 }
 
 export function Hero({ products, active, onPick, onOpen, spotRef, photo, motion, lineOaId }: Props) {
@@ -36,7 +43,7 @@ export function Hero({ products, active, onPick, onOpen, spotRef, photo, motion,
   // arrow keys switch cakes while the hero is on screen
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (scrollY > viewportHeight() * 0.5) return
+      if (!heroInView()) return
       if (e.key === 'ArrowRight') onPick(active + 1)
       if (e.key === 'ArrowLeft') onPick(active - 1)
     }
@@ -48,7 +55,7 @@ export function Hero({ products, active, onPick, onOpen, spotRef, photo, motion,
   useEffect(() => {
     let down: number | null = null
     const start = (e: PointerEvent) => {
-      if (scrollY < viewportHeight() * 0.6 && !(e.target as Element).closest('button,a')) down = e.clientX
+      if (heroInView() && !(e.target as Element).closest('button,a')) down = e.clientX
     }
     const move = (e: PointerEvent) => {
       if (down === null) return
@@ -109,9 +116,11 @@ export function Hero({ products, active, onPick, onOpen, spotRef, photo, motion,
             <ChatIcon />
             สั่งทาง LINE
           </a>
-          <button type="button" className="btn ghost" onClick={onOpen}>
-            ดูใกล้ ๆ รอบชิ้น
-          </button>
+          {onOpen && (
+            <button type="button" className="btn ghost" onClick={onOpen}>
+              ดูใกล้ ๆ รอบชิ้น
+            </button>
+          )}
         </div>
       </div>
     </section>

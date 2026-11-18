@@ -14,6 +14,8 @@ interface Props {
   photo: string | null
   motion: RefObject<HomeMotion>
   above: string
+  /** same colour as the section above: no drips */
+  flush?: boolean
 }
 
 /**
@@ -21,7 +23,7 @@ interface Props {
  * then the price ("฿120 กล่อง 4 ชิ้น") and the order button come up. The box itself is drawn by the cake layer's 3D scene
  * on top of `stageRef`; this section only writes its progress.
  */
-export function Box({ product, lineOaId, stageRef, photo, motion, above }: Props) {
+export function Box({ product, lineOaId, stageRef, photo, motion, above, flush }: Props) {
   const sectionRef = useRef<HTMLElement>(null)
   const pinRef = useRef<HTMLDivElement>(null)
 
@@ -48,7 +50,7 @@ export function Box({ product, lineOaId, stageRef, photo, motion, above }: Props
   const unit = product.price != null && product.priceUnit
   return (
     <section ref={sectionRef} className="boxsec" id="box" data-nav="light">
-      <Drips count={22} color={above} />
+      {!flush && <Drips count={22} color={above} />}
       <div ref={pinRef} className="pin">
         <p className="kick">สั่งเป็นกล่อง</p>
         <div ref={stageRef} className="box-stage">
