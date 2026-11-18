@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>mock · หน้าโปรโมชั่น /promo</title>
-<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<title>mock · หน้าโปรโมชั่น /promo แบบใบปลิว</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Itim&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
 <style>
-:root{--cream:#fff6e6;--ink:#243b37;--indigo:#3e5d58;--line:#e4d6bb;--lime:#dcebb5;--tea:#f3d9a4;--coral:#e98c74}
+:root{--cream:#fff6e6;--ink:#243b37;--indigo:#3e5d58;--line:#e4d6bb;--lime:#dcebb5;--coral:#e98c74}
 *{box-sizing:border-box;margin:0}
 body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);padding:24px 16px 60px}
 .top{max-width:1160px;margin:0 auto 18px;color:#f2ece0}
@@ -16,53 +16,50 @@ body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);pa
 .grid{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:26px;align-items:start}
 .tag{color:#f2ece0;font:600 .92rem Mitr,sans-serif;margin-bottom:8px}
 .tag small{display:block;font:400 .8rem Anuphan,sans-serif;opacity:.7}
+.tag .pick{background:#c9de98;color:var(--ink);border-radius:999px;padding:1px 10px;font-size:.72rem;margin-left:6px;vertical-align:2px}
 
-/* the page */
-.phone{width:360px;max-width:100%;background:var(--indigo);border-radius:30px;overflow:hidden;padding-bottom:24px}
-.head{color:var(--cream);text-align:center;padding:26px 20px 18px}
-.head img{width:110px;display:block;margin:0 auto}
-.head h2{font:500 1.45rem Mitr,sans-serif;margin-top:6px}
-.head p{font-size:.88rem;color:#cfe0d9;margin-top:2px}
-.body{padding:0 14px}
-.card{background:var(--cream);border-radius:18px;overflow:hidden;box-shadow:0 14px 30px rgba(0,0,0,.22);margin-top:12px;position:relative}
-.card:first-child{margin-top:0}
-.card .pic{display:block;width:100%;height:150px;object-fit:cover;object-position:30% 50%}
-.badge{position:absolute;top:12px;left:12px;background:var(--coral);color:#fff;font:600 .78rem Mitr,sans-serif;border-radius:999px;padding:3px 11px}
-.badge.soft{background:var(--lime);color:var(--ink)}
-.in{padding:12px 14px 14px}
-.card h3{font:500 1.1rem/1.35 Mitr,sans-serif}
-.card .det{font-size:.9rem;margin-top:4px;opacity:.85}
-.when{display:flex;align-items:center;gap:6px;font-size:.8rem;margin-top:8px;color:#6b5a2e;background:var(--tea);border-radius:8px;padding:4px 9px;width:max-content}
-.when svg{width:14px;height:14px}
-.btn{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:12px;padding:12px;border-radius:999px;background:#2c3a37;color:var(--cream);font:500 .95rem Mitr,sans-serif;text-decoration:none}
+.phone{width:360px;max-width:100%;background:var(--indigo);border-radius:30px;overflow:hidden;padding:26px 16px 24px}
+.logo{width:96px;display:block;margin:0 auto 14px}
+
+/* A: a flyer sheet */
+.sheet{background:var(--cream);border-radius:6px;padding:26px 22px 22px;box-shadow:0 18px 36px rgba(0,0,0,.28);position:relative;transform:rotate(-1deg)}
+.sheet::before{content:"";position:absolute;top:-10px;left:50%;width:90px;height:22px;margin-left:-45px;background:rgba(233,140,116,.75);transform:rotate(2deg);border-radius:2px}
+.month{text-align:center;font:400 1.15rem Itim,cursive;color:var(--coral)}
+.sheet h2{text-align:center;font:600 1.7rem/1.2 Mitr,sans-serif;margin-top:2px}
+.rule{height:0;border-top:2px dashed var(--line);margin:16px 0}
+.item{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:baseline;padding:10px 0}
+.item+.item{border-top:1px solid var(--line)}
+.item h3{font:500 1.05rem/1.35 Mitr,sans-serif}
+.item .price{font:600 1.35rem Mitr,sans-serif;text-align:right;white-space:nowrap}
+.item .price s{display:block;font:400 .8rem Anuphan,sans-serif;opacity:.55;text-align:right}
+.item p{grid-column:1/-1;font-size:.86rem;opacity:.8}
+.fine{font-size:.78rem;opacity:.7;text-align:center;margin-top:12px}
+.btn{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:16px;padding:13px;border-radius:999px;background:#2c3a37;color:var(--cream);font:500 .95rem Mitr,sans-serif;text-decoration:none}
 .btn svg{width:18px;height:18px}
-/* small promo without picture */
-.mini{display:flex;gap:12px;align-items:center;padding:14px}
-.mini .ic{flex:0 0 46px;height:46px;border-radius:14px;background:var(--lime);display:grid;place-items:center}
-.mini .ic svg{width:24px;height:24px}
-.mini h3{font-size:1rem}
-.mini .det{margin-top:0;font-size:.85rem}
-.mini .go{margin-left:auto;font:500 .85rem Mitr,sans-serif;color:var(--ink);border:1.5px solid var(--ink);border-radius:999px;padding:6px 12px;white-space:nowrap;text-decoration:none}
-/* stamp card */
-.stamps{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:10px}
-.stamps i{aspect-ratio:1;border-radius:50%;border:1.5px dashed #bfae86;display:grid;place-items:center}
-.stamps i.free{border:1.5px solid var(--coral);color:var(--coral);font:600 .6rem Mitr,sans-serif;font-style:normal}
-.note{color:#cfe0d9;font-size:.8rem;text-align:center;margin-top:14px;opacity:.9}
-/* empty state */
-.empty{background:var(--cream);border-radius:18px;padding:26px 18px;text-align:center;box-shadow:0 14px 30px rgba(0,0,0,.22)}
-.empty .ic{width:56px;height:56px;border-radius:18px;background:var(--lime);display:grid;place-items:center;margin:0 auto 10px}
-.empty .ic svg{width:28px;height:28px}
-.empty h3{font:500 1.05rem Mitr,sans-serif}
-.empty p{font-size:.88rem;opacity:.8;margin-top:4px}
+.btn.on-green{background:var(--cream);color:var(--ink)}
 
-/* opening (same as /box) */
-.play .head img{animation:pop .7s cubic-bezier(.2,1.4,.4,1) both .1s;transform-origin:50% 80%}
-.play .head h2{animation:up .7s both .4s}.play .head p{animation:up .7s both .55s}
-.play .card,.play .empty{animation:rise .8s cubic-bezier(.2,.9,.3,1) both calc(.7s + var(--i,0) * .16s)}
-.play .stamps i{animation:pop .45s cubic-bezier(.2,1.6,.4,1) both calc(1.3s + var(--s) * .05s)}
-@keyframes pop{0%{opacity:0;transform:scale(.6) rotate(-6deg)}60%{opacity:1}100%{transform:none}}
-@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
-@keyframes rise{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+/* B: the shop's own poster picture */
+.poster{display:block;width:100%;border-radius:12px;box-shadow:0 18px 36px rgba(0,0,0,.28);aspect-ratio:4/5;object-fit:cover}
+.fake-poster{aspect-ratio:4/5;border-radius:12px;box-shadow:0 18px 36px rgba(0,0,0,.28);background:linear-gradient(160deg,#f6c9b8,#fff1d6 55%,#dcebb5);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px}
+.fake-poster img{width:70%;border-radius:10px;transform:rotate(-3deg);box-shadow:0 8px 20px rgba(0,0,0,.18)}
+.fake-poster b{font:600 1.6rem Mitr,sans-serif;margin-top:14px}
+.fake-poster span{font:400 1.1rem Itim,cursive;color:#a4553f}
+.fake-poster small{position:absolute;top:10px;right:12px;font-size:.7rem;background:rgba(255,255,255,.8);border-radius:6px;padding:1px 6px}
+.cap{color:#cfe0d9;text-align:center;font-size:.84rem;margin-top:12px}
+
+/* empty */
+.none{text-align:center;color:var(--cream);padding:30px 6px 6px}
+.none h2{font:500 1.3rem Mitr,sans-serif}
+.none p{color:#cfe0d9;font-size:.9rem;margin-top:4px}
+
+/* opening: the sheet drops in like it's pinned to a board */
+.play .logo{animation:pop .7s cubic-bezier(.2,1.4,.4,1) both .1s}
+.play .sheet,.play .fake-poster{animation:drop .9s cubic-bezier(.2,1.1,.3,1) both .45s}
+.play .item{animation:up .6s both calc(1s + var(--k) * .12s)}
+.play .none{animation:up .7s both .4s}
+@keyframes pop{0%{opacity:0;transform:scale(.6)}100%{opacity:1;transform:none}}
+@keyframes drop{from{opacity:0;transform:translateY(-30px) rotate(-5deg)}to{opacity:1}}
+@keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.play *{animation:none!important}}
 
 .notes{max-width:1160px;margin:26px auto 0;background:#fffbf3;border-radius:14px;padding:16px 20px;font-size:.9rem}
@@ -74,99 +71,70 @@ body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);pa
 </head>
 <body>
 <div class="top">
-  <h1>หน้าโปรโมชั่น <code>/promo</code> · ปุ่มใหม่ใน rich menu พามาที่นี่</h1>
-  <p>โทนเดียวกับหน้า /box (เขียวทั้งหน้า การ์ดครีม) · โปรในภาพเป็น<b>ตัวอย่าง</b> ยังไม่ใช่โปรจริงของร้าน</p>
+  <h1>หน้าโปรโมชั่น <code>/promo</code> แบบใบปลิว "เดือนนี้มีโปรอะไร"</h1>
+  <p>อ่านอย่างเดียว มีปุ่มเดียวคือสั่งทาง LINE · โปรในภาพเป็น<b>ตัวอย่าง</b> ยังไม่ใช่โปรจริงของร้าน</p>
   <button class="replay" id="replay">เล่น animation ตอนเปิดอีกครั้ง</button>
 </div>
 
 <template id="line"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8-6C21.4 14.2 22 12.7 22 11c0-4.4-4.5-8-10-8Z"/></svg></template>
-<template id="clock"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></template>
 
 <div class="grid">
   <div>
-    <p class="tag">มีโปร<small>โปรใหญ่มีรูป · โปรเล็กเป็นแถบ · บัตรสะสมแต้ม</small></p>
+    <p class="tag">A · ใบปลิวพิมพ์ข้อความ <span class="pick">แนะนำ</span><small>ร้านพิมพ์โปรเป็นบรรทัด ๆ ในหลังร้าน เว็บจัดหน้าให้</small></p>
     <div class="phone">
-      <div class="head"><img src="img/june-mark-cream.svg" alt="June"><h2>โปรโมชั่น</h2><p>โปรของ June ตอนนี้ กดรับทาง LINE ได้เลย</p></div>
-      <div class="body">
-        <section class="card" style="--i:0">
-          <img class="pic" src="img/box-4.jpg" alt="">
-          <span class="badge">ลด 20 บาท</span>
-          <div class="in">
-            <h3>ชิฟฟ่อนมะพร้าวใบเตย 2 กล่อง 220 บาท</h3>
-            <p class="det">จากปกติ 240 บาท สั่งล่วงหน้า 1 วัน รับที่หน้าร้าน</p>
-            <p class="when" data-ic="clock">ถึง 31 ธ.ค. 2569</p>
-            <a class="btn" href="#" data-ic="line">รับโปรนี้ทาง LINE</a>
-          </div>
-        </section>
-
-        <section class="card" style="--i:1">
-          <div class="in">
-            <h3>สะสมครบ 10 กล่อง แถม 1</h3>
-            <p class="det">ซื้อกล่องละ 1 แต้ม บัตรอยู่ใน LINE ของร้าน</p>
-            <div class="stamps" id="stamps"></div>
-            <a class="btn" href="#" data-ic="line">เปิดบัตรสะสมแต้ม</a>
-          </div>
-        </section>
-
-        <section class="card mini" style="--i:2">
-          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#243b37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="4"/><path d="M2 21a7 7 0 0 1 14 0M19 8v6M16 11h6"/></svg></span>
-          <div><h3>เพิ่มเพื่อนใหม่ ลด 10 บาท</h3><p class="det">กล่องแรกหลังเพิ่มเพื่อน</p></div>
-          <a class="go" href="#">รับคูปอง</a>
-        </section>
-
-        <p class="note">โปรใช้ร่วมกันไม่ได้ · สอบถามทาง LINE @561hgrea</p>
+      <img class="logo" src="img/june-mark-cream.svg" alt="June">
+      <div class="sheet">
+        <p class="month">พฤศจิกายน 2569</p>
+        <h2>โปรเดือนนี้</h2>
+        <div class="rule"></div>
+        <div class="item" style="--k:0"><h3>ชิฟฟ่อนมะพร้าวใบเตย 2 กล่อง</h3><span class="price">220.-<s>240.-</s></span><p>สั่งล่วงหน้า 1 วัน รับที่หน้าร้าน</p></div>
+        <div class="item" style="--k:1"><h3>ซื้อครบ 10 กล่อง แถม 1</h3><span class="price">ฟรี 1</span><p>บอกแอดมินในแชต ร้านนับให้</p></div>
+        <div class="item" style="--k:2"><h3>เพื่อนใหม่ใน LINE</h3><span class="price">ลด 10.-</span><p>กล่องแรกหลังเพิ่มเพื่อน</p></div>
+        <p class="fine">ถึง 30 พ.ย. 2569 · ใช้ร่วมกับโปรอื่นไม่ได้</p>
+        <a class="btn" href="#" data-ic="line">สั่งทาง LINE</a>
       </div>
     </div>
   </div>
 
   <div>
-    <p class="tag">ไม่มีโปรตอนนี้<small>ปุ่มใน rich menu ยังกดได้ ไม่ว่างเปล่า</small></p>
+    <p class="tag">B · รูปโปสเตอร์ของร้านเอง<small>ร้านทำรูปใน Canva แล้วอัปโหลด เว็บโชว์รูปเต็ม ๆ</small></p>
     <div class="phone">
-      <div class="head"><img src="img/june-mark-cream.svg" alt="June"><h2>โปรโมชั่น</h2><p>โปรของ June ตอนนี้ กดรับทาง LINE ได้เลย</p></div>
-      <div class="body">
-        <section class="empty" style="--i:0">
-          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="#243b37" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9M2 7h20v5H2zM12 21V7M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7ZM12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg></div>
-          <h3>ตอนนี้ยังไม่มีโปรนะคะ</h3>
-          <p>เพิ่มเพื่อน LINE ไว้ มีโปรเมื่อไหร่ June แจ้งก่อนใคร</p>
-          <a class="btn" href="#" data-ic="line">เพิ่มเพื่อน LINE</a>
-        </section>
-        <section class="card" style="--i:1">
-          <img class="pic" src="img/box-4.jpg" alt="">
-          <div class="in">
-            <h3>ชิฟฟ่อนมะพร้าวใบเตย</h3>
-            <p class="det">฿120 · กล่อง 4 ชิ้น</p>
-            <a class="btn" href="#" data-ic="line">สั่งทาง LINE</a>
-          </div>
-        </section>
-      </div>
+      <img class="logo" src="img/june-mark-cream.svg" alt="June">
+      <div class="fake-poster"><small>รูปตัวอย่าง</small><img src="img/box-4.jpg" alt=""><b>2 กล่อง 220.-</b><span>โปรพฤศจิกาฯ นี้เท่านั้น</span></div>
+      <p class="cap">ถึง 30 พ.ย. 2569</p>
+      <a class="btn on-green" href="#" data-ic="line">สั่งทาง LINE</a>
+    </div>
+  </div>
+
+  <div>
+    <p class="tag">ไม่มีโปรเดือนนี้<small>ใช้ได้ทั้ง A และ B</small></p>
+    <div class="phone">
+      <img class="logo" src="img/june-mark-cream.svg" alt="June">
+      <div class="none"><h2>เดือนนี้ยังไม่มีโปรนะคะ</h2><p>มีโปรเมื่อไหร่ June แจ้งใน LINE ก่อนใคร</p></div>
+      <a class="btn on-green" href="#" data-ic="line">คุยกับร้านทาง LINE</a>
     </div>
   </div>
 </div>
 
 <div class="notes">
-  <h3>กดแล้วเกิดอะไร</h3>
+  <h3>หลังร้าน → โปรโมชั่น (แบบ A)</h3>
   <ul>
-    <li><b>รับโปรนี้ทาง LINE</b> → เปิดแชตร้าน มีข้อความรอไว้ "สนใจโปร ชิฟฟ่อนมะพร้าวใบเตย 2 กล่อง 220 บาท" ร้านเห็นว่าลูกค้ามาจากโปรไหน</li>
-    <li><b>เปิดบัตรสะสมแต้ม / รับคูปอง</b> → เปิดบัตรหรือคูปองที่ร้านสร้างไว้ใน LINE OA Manager (ร้านวางลิงก์ในหลังร้าน)</li>
-    <li>โปรที่หมดเขตแล้วหายไปเอง ไม่ต้องลบ</li>
+    <li>ช่องเดียว พิมพ์บรรทัดละโปร แบบ <code>ชื่อโปร | ราคา | รายละเอียด</code> เช่น <code>ชิฟฟ่อน 2 กล่อง | 220.- (240.-) | สั่งล่วงหน้า 1 วัน</code></li>
+    <li>ช่อง "หมดเขต" กับ "หมายเหตุท้ายใบ" · หัวเดือนขึ้นเอง</li>
+    <li>เลยวันหมดเขตแล้วจะขึ้นหน้า "เดือนนี้ยังไม่มีโปร" เอง</li>
   </ul>
-  <h3>หลังร้าน → โปรโมชั่น (ร้านทำเอง)</h3>
+  <h3>แบบ B</h3>
   <ul>
-    <li>แต่ละโปร: ชื่อ, รายละเอียด, ป้าย (เช่น "ลด 20 บาท"), รูป (ไม่ใส่ก็ได้ จะเป็นแถบเล็ก), วันเริ่ม–หมดเขต, ปุ่มพาไปไหน (แชต LINE / ลิงก์คูปอง / บัตรสะสมแต้ม), เปิด/ปิด, ลำดับ</li>
-    <li>ทำ QR ของหน้า <code>/promo</code> ได้จากหน้า QR code ที่มีอยู่แล้ว ไว้แปะหน้าร้าน</li>
+    <li>อัปโหลดรูป 1 รูป + วันหมดเขต · สวยได้เต็มที่ แต่ต้องทำรูปใหม่ทุกเดือน และตัวหนังสือในรูปค้นหาใน Google ไม่เจอ</li>
   </ul>
-  <h3>ยังต้องรู้จากร้าน</h3>
+  <h3>กดแล้ว</h3>
   <ul>
-    <li>โปรจริงที่จะเริ่มใช้ (ตัวเลข ลด/แถม เท่าไหร่) · จะทำบัตรสะสมแต้มหรือคูปองใน LINE ไหม</li>
-    <li>rich menu 4 ปุ่มจะเป็นแถวเดียว 4 ช่อง หรือ 2×2 (ทำ mock แยกให้ทีหลัง)</li>
+    <li>ปุ่มเดียว "สั่งทาง LINE" → เข้าแชตร้าน มีข้อความรอไว้ "สนใจโปรเดือนพฤศจิกายน"</li>
   </ul>
 </div>
 
 <script>
-const T = (id) => document.getElementById(id).innerHTML
-for (const el of document.querySelectorAll('[data-ic]')) el.insertAdjacentHTML('afterbegin', T(el.dataset.ic))
-document.getElementById('stamps').innerHTML = Array.from({ length: 10 }, (_, k) =>
-  k === 9 ? `<i class="free" style="--s:${k}">ฟรี</i>` : `<i style="--s:${k}"></i>`).join('')
+for (const el of document.querySelectorAll('[data-ic]')) el.insertAdjacentHTML('afterbegin', document.getElementById(el.dataset.ic).innerHTML)
 const play = () => document.querySelectorAll('.phone').forEach((p) => { p.classList.remove('play'); void p.offsetWidth; p.classList.add('play') })
 document.getElementById('replay').onclick = play
 addEventListener('load', play)
