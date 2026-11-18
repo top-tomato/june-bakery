@@ -86,7 +86,7 @@ s.add(box)
 // lid: hinge on the back top edge, plate hangs forward (+z) from it
 const hinge=new THREE.Group(); hinge.position.set(0,TOP,-W/2); s.add(hinge) // exactly on the back wall top: the lid is the same sheet folded, no gap
 const lid=new THREE.Group(); hinge.add(lid)
-const L=W+.01, m=.42                                     // lid size, kraft border around the window
+const L=W+T, m=.42                                     // lid size, kraft border around the window
 const plate=rrect(new THREE.Shape(),-L/2,-.012,L,L+.012,.006); plate.holes.push(rrect(new THREE.Path(),-L/2+m,m,L-2*m,L-2*m,.12))
 const pg=new THREE.ExtrudeGeometry(plate,{depth:T,bevelEnabled:false}); pg.rotateX(Math.PI/2); pg.translate(0,T,0)
 const lidPlate=new THREE.Mesh(pg,paper); lidPlate.castShadow=lidPlate.receiveShadow=true; lid.add(lidPlate)
@@ -96,7 +96,7 @@ const flap=part(W-.06,.2,T,paper,0,-.1,W-.03); lid.add(flap)
 // side flaps: hang straight down from the lid's left and right edges, flush with the edge, and slide just inside the
 // side walls when the lid closes
 for(const sx of [-1,1]){const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(L-.01,0);sh.lineTo(L*.88,-.2);sh.lineTo(L*.06,-.2);sh.closePath()
-  const g=new THREE.ShapeGeometry(sh);g.rotateY(-Math.PI/2);const f=new THREE.Mesh(g,paper);f.position.set(sx*(W/2-T*1.6),0,0);f.castShadow=true;lid.add(f)}
+  const g=new THREE.ShapeGeometry(sh);g.rotateY(-Math.PI/2);const f=new THREE.Mesh(g,paper);f.position.set(sx*(L/2-T*.5),0,0);f.castShadow=true;lid.add(f)}
 
 // 4 chiffon pieces from the real model, packed tight
 const pieces=new THREE.Group(); s.add(pieces)
