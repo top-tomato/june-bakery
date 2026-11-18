@@ -69,11 +69,12 @@ const part=(w,h,d,m,x,y,z)=>{const geo=new THREE.BoxGeometry(w,h,d), uv=geo.attr
   const o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=o.receiveShadow=true;return o}
 const rrect=(sh,x,y,w,h,r)=>{sh.moveTo(x+r,y);sh.lineTo(x+w-r,y);sh.quadraticCurveTo(x+w,y,x+w,y+r);sh.lineTo(x+w,y+h-r);sh.quadraticCurveTo(x+w,y+h,x+w-r,y+h);sh.lineTo(x+r,y+h);sh.quadraticCurveTo(x,y+h,x,y+h-r);sh.lineTo(x,y+r);sh.quadraticCurveTo(x,y,x+r,y);return sh}
 
-// like the photo: low front/side walls, the cake rises above them; the back panel goes up to the lid, and the lid's
-// front and side flaps close the gap
-const W=2.08, H=.42, TOP=.66, T=.008, box=new THREE.Group()
+// one-piece lock-corner window box (the usual Thai bakery kraft box, ~16x17.5x7.5 cm): four walls the same height,
+// the lid is the back wall folded over, closing flat on the rim; its front tuck flap and side dust flaps slide INSIDE
+// the walls, so from outside it is one plain box with a window on top
+const W=2.08, H=.8, TOP=H, T=.008, box=new THREE.Group()
 box.add(part(W,T,W,inner,0,T/2,0))
-for(const [w,d,x,z,h] of [[W,T,0,W/2,H],[W,T,0,-W/2,TOP],[T,W,W/2,0,H],[T,W,-W/2,0,H]]){
+for(const [w,d,x,z,h] of [[W,T,0,W/2,H],[W,T,0,-W/2,H],[T,W,W/2,0,H],[T,W,-W/2,0,H]]){
   box.add(part(w,h,d,paper,x,h/2,z))
   box.add(part(w+.012,.02,d+.012,paper,x,h-.01,z)) // folded double rim, still paper-thin
 }
@@ -81,15 +82,15 @@ s.add(box)
 // lid: hinge on the back top edge, plate hangs forward (+z) from it
 const hinge=new THREE.Group(); hinge.position.set(0,TOP+.004,-W/2-.01); s.add(hinge)
 const lid=new THREE.Group(); hinge.add(lid)
-const L=W+.02, m=.17                                     // lid size, kraft border around the window
+const L=W+.012, m=.17                                     // lid size, kraft border around the window
 const plate=rrect(new THREE.Shape(),-L/2,0,L,L,.02); plate.holes.push(rrect(new THREE.Path(),-L/2+m,m,L-2*m,L-2*m,.16))
 const pg=new THREE.ExtrudeGeometry(plate,{depth:T,bevelEnabled:false}); pg.rotateX(Math.PI/2); pg.translate(0,T,0)
 const lidPlate=new THREE.Mesh(pg,paper); lidPlate.castShadow=lidPlate.receiveShadow=true; lid.add(lidPlate)
 const win=new THREE.Mesh(new THREE.PlaneGeometry(L-2*m+.06,L-2*m+.06),film); win.rotation.x=-Math.PI/2; win.position.set(0,.002,L/2); lid.add(win)
 // front tuck flap + side flaps (hang down when closed, tuck inside the walls)
-const flap=part(W-.03,(TOP-H+.06),T,paper,0,-(TOP-H+.06)/2,W-.002); lid.add(flap)
-for(const sx of [-1,1]){const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(L*.985,0);sh.lineTo(L*.975,-(TOP-H+.06));sh.lineTo(L*.02,-(TOP-H+.06));sh.closePath()
-  const g=new THREE.ShapeGeometry(sh);g.rotateY(-Math.PI/2);const f=new THREE.Mesh(g,paper);f.position.set(sx*(W/2-.014),0,0);f.castShadow=true;lid.add(f)}
+const flap=part(W-.06,.2,T,paper,0,-.1,W-.03); lid.add(flap)
+for(const sx of [-1,1]){const sh=new THREE.Shape();sh.moveTo(0,0);sh.lineTo(L*.985,0);sh.lineTo(L*.8,-.16);sh.lineTo(L*.2,-.16);sh.closePath()
+  const g=new THREE.ShapeGeometry(sh);g.rotateY(-Math.PI/2);const f=new THREE.Mesh(g,paper);f.position.set(sx*(W/2-.03),0,0);f.castShadow=true;lid.add(f)}
 
 // 4 chiffon pieces from the real model, packed tight
 const pieces=new THREE.Group(); s.add(pieces)
