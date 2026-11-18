@@ -278,14 +278,14 @@ export function createCakeScene(o: CakeSceneOptions): () => void {
     const p = o.box.p
     show(boxStart, p <= 0)
     show(boxEnd, p >= 1)
+    if (p <= 0) dropAt = null // scrolled back above the section: empty box, plays again next time
     if (p <= 0 || p >= 1) return false
     const r = o.boxStage.getBoundingClientRect()
     if (r.bottom < 0 || r.top > ch || !r.width) return false
     // the box waits open, the pieces drop in on their own clock (real bounce speed, however fast you scroll), then the
     // lid lies back and the camera looks down. Scrolling back to the top of the section empties it to play again.
     const now = performance.now()
-    if (p > 0.08 && dropAt == null) dropAt = calm ? now - 1e4 : now
-    if (p < 0.02) dropAt = null
+    if (dropAt == null) dropAt = calm ? now - 1e4 : now // as soon as the section pins (was after 8% more scrolling, which looked stuck)
     const { ox, oy } = poseBox(p, r, dropAt == null ? null : now - dropAt)
     boxCam.setViewOffset(cw, ch, ox, oy, cw, ch)
     boxCam.updateProjectionMatrix()
