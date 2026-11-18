@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mock · ท้ายเรื่องของ June (แทน ♡)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#fff6e6;--ink:#243b37;--muted:#6b7d78;--line:#e7dcc6}
+*{box-sizing:border-box;margin:0}
+body{font:400 16px/1.7 Anuphan,sans-serif;background:#efe6d3;color:var(--ink);padding:28px 16px 60px}
+.top{max-width:1180px;margin:0 auto 22px}
+.top h1{font:600 1.3rem Mitr,sans-serif}
+.top p{color:var(--muted);font-size:.9rem}
+.grid{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
+.opt{display:flex;flex-direction:column;gap:8px}
+.tag{font:600 .9rem Mitr,sans-serif}
+.tag small{display:block;font:400 .8rem Anuphan,sans-serif;color:var(--muted)}
+.tag .pick{background:var(--ink);color:var(--cream);border-radius:999px;padding:1px 10px;font-size:.72rem;margin-left:6px;vertical-align:2px}
+/* phone-ish frame showing the real section look */
+.phone{background:var(--cream);border-radius:26px;padding:30px 22px 34px;box-shadow:0 1px 0 var(--line),0 12px 30px rgba(36,59,55,.08)}
+.kicker{font:600 .78rem Mitr,sans-serif;letter-spacing:.08em;color:#3e5d58;text-transform:uppercase;margin-bottom:6px}
+.phone h2{font:600 1.45rem/1.3 Mitr,sans-serif;margin-bottom:12px}
+.about-text{font-size:1rem}
+.about-text p{text-indent:2em}
+.about-text p+p{margin-top:.7em}
+/* the sign-off */
+.sign{display:flex;align-items:center;gap:10px;margin-top:18px}
+.sign .who{font:500 1rem Mitr,sans-serif;line-height:1.3}
+.sign .who small{display:block;font:400 .8rem Anuphan,sans-serif;color:var(--muted)}
+.palm{width:56px;height:auto;flex:none}
+.palm.inline{width:40px;display:inline-block;vertical-align:-8px;margin-left:6px}
+
+.rule{flex:1;height:1px;background:var(--line)}
+.notes{max-width:1180px;margin:26px auto 0;background:#fff;border-radius:14px;padding:16px 20px;font-size:.9rem}
+.notes li{margin-left:18px}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>ท้าย "เรื่องของ June" ใช้อะไรแทน ♡</h1>
+  <p>ข้อความเป็นของใหม่ที่ร่างมา แบ่ง 2 ย่อหน้า ขึ้นย่อหน้าใหม่ย่อเข้า 2 ตัวอักษรแบบหนังสือไทย โลโก้ June ตัวเล็กคือโลโก้ตัวจริง (ใบปาล์ม + June) เป็น SVG สีเขียวเข้มของร้าน ไม่ใช่ emoji</p>
+</div>
+
+<template id="body">
+  <p class="kicker">เรื่องของ June</p>
+  <h2>จากเค้กไข่กล่องละ 40 บาท สู่ชิฟฟ่อนมะพร้าวอ่อน</h2>
+  <div class="about-text">
+    <p>June เริ่มต้นจากร้านขนมออนไลน์เล็ก ๆ ในเดือนเมษายน 2563 ด้วยความรักในการทำขนม จนค้นพบเมนูซิกเนเจอร์อย่าง “ชิฟฟ่อนใบเตย มะพร้าวอ่อน” ที่ใช้มะพร้าวน้ำหอมขูดสดใหม่</p>
+    <p>จากครัวเล็ก ๆ สู่การออกบูธในหลายสถานที่ ทุกก้าวของ June เต็มไปด้วยความทรงจำดี ๆ และการสนับสนุนจากลูกค้าทุกคน วันนี้เรากลับมาอีกครั้งพร้อมโฉมใหม่ และพร้อมสร้างความทรงจำดี ๆ ไปด้วยกัน ขอบคุณที่ยังคิดถึงกันเสมอค่ะ<span class="end"></span></p>
+  </div>
+</template>
+
+<div class="grid">
+  <div class="opt">
+    <p class="tag">เดิม · ♡<small>บางเครื่องโชว์เป็นหัวใจแดงแบบ emoji</small></p>
+    <div class="phone" data-end=" ♡"></div>
+  </div>
+
+  <div class="opt">
+    <p class="tag">1 · ลายเซ็น<small>พิมพ์เองในหลังร้านได้ ไม่ต้องแก้โค้ด</small></p>
+    <div class="phone" data-sign="text"></div>
+  </div>
+
+  <div class="opt">
+    <p class="tag">2 · โลโก้เล็กท้ายประโยค<small>โลโก้ June ตัวเล็กต่อท้ายคำสุดท้าย</small></p>
+    <div class="phone" data-end="palm"></div>
+  </div>
+
+  <div class="opt">
+    <p class="tag">3 · ลายเซ็น + โลโก้ <span class="pick">แนะนำ</span><small>โลโก้นำหน้าชื่อ เหมือนตราประทับท้ายจดหมาย</small></p>
+    <div class="phone" data-sign="palm"></div>
+  </div>
+
+  <div class="opt">
+    <p class="tag">3b · โลโก้ตรงกลาง + เส้น<small>ปิดท้ายเรื่องแบบหน้าหนังสือ ไม่มีชื่อ</small></p>
+    <div class="phone" data-sign="divider"></div>
+  </div>
+</div>
+
+<div class="notes">
+  <b>ทุกแบบ + ถ้าเลือก 2, 3 หรือ 3b</b>
+  <ul>
+    <li>ย่อหน้า: ในหลังร้านแค่เว้นบรรทัดระหว่างย่อหน้า เว็บจะย่อหน้าให้เอง ไม่ต้องกด Tab หรือเคาะวรรค</li>
+    <li>โลโก้จะขึ้นเองทุกครั้ง ไม่ต้องพิมพ์อะไรในหลังร้าน</li>
+    <li>แบบ 3 ชื่อในลายเซ็นจะเป็นช่องใหม่ในหลังร้าน "ลงชื่อท้ายเรื่อง" ถ้าเว้นว่าง จะเหลือแค่โลโก้</li>
+    <li>ลองใบปาล์มอย่างเดียวแล้ว ตัวเล็กดูเป็นขีด ๆ ไม่รู้ว่าเป็นใบไม้ เลยใช้โลโก้เต็ม</li>
+    <li>ตอนเลื่อนมาถึง ใบปาล์มบนโลโก้ขยับเบา ๆ แบบเดียวกับโลโก้หน้าแรก</li>
+  </ul>
+</div>
+
+<script>
+const tpl = document.getElementById('body').innerHTML
+const palm = (cls) => `<img class="palm ${cls}" src="img/june-mark.svg" alt="">`
+for (const el of document.querySelectorAll('.phone')) {
+  el.innerHTML = tpl
+  const end = el.querySelector('.end'), mode = el.dataset.sign
+  if (el.dataset.end === 'palm') end.innerHTML = palm('inline')
+  else if (el.dataset.end) end.textContent = el.dataset.end
+  if (mode === 'text') el.insertAdjacentHTML('beforeend', '<div class="sign"><span class="who">— เจมมี่<small>June Bakery &amp; Dessert</small></span></div>')
+  if (mode === 'palm') el.insertAdjacentHTML('beforeend', `<div class="sign">${palm('')}<span class="who">เจมมี่<small>June Bakery &amp; Dessert</small></span></div>`)
+  if (mode === 'divider') el.insertAdjacentHTML('beforeend', `<div class="sign"><span class="rule"></span>${palm('')}<span class="rule"></span></div>`)
+}
+</script>
+</body>
+</html>
