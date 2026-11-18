@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>June — ราคาต่อกล่อง (mock)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Price with a unit ("฿120 กล่อง 4 ชิ้น") in the three places the price shows: hero name line, story buy row, menu book.
+   Left = now, right = new. The unit is a new optional text next to the price; empty = looks exactly like now. */
+:root{--tea:#f3a18f;--cream:#fff6e6;--indigo:#3e5d58;--ink:#243b37;--display:'Mitr','Anuphan',system-ui,sans-serif;--fl:#C9DE98;--bink:#2f4a45;--paper:#fffbf3}
+*{box-sizing:border-box;margin:0}
+body{font-family:Anuphan,system-ui,sans-serif;background:#1f2b29;color:var(--cream);padding:0 16px 40px}
+.top{padding:14px 0;font-size:.9rem;text-align:center;opacity:.85}
+section{max-width:980px;margin:0 auto 34px}
+h2.t{font:600 1.1rem Mitr;margin-bottom:4px}
+section>p{font-size:.88rem;opacity:.75;margin-bottom:12px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:700px){.pair{grid-template-columns:1fr}}
+.lab{font:500 .8rem Mitr;opacity:.7;margin-bottom:6px}
+.box{border-radius:14px;overflow:hidden;min-height:150px;display:grid;place-items:center;padding:26px 18px}
+
+/* hero */
+.hero{background:var(--cream);color:var(--ink);text-align:center}
+.hero h3{font:500 clamp(1.3rem,2.4vw,2rem) var(--display)}
+.hero p{opacity:.75;font-size:.95rem;margin-top:4px}
+.price-chip{display:inline-block;padding:0 12px;border-radius:999px;background:var(--tea);color:var(--ink);font-size:.75em;vertical-align:middle}
+.price-chip small{font:400 .72em Anuphan;margin-left:5px;opacity:.85}
+
+/* story */
+.story{background:var(--fl);color:var(--ink);place-items:center start}
+.buy{display:flex;align-items:center;gap:18px}
+.buy strong{font:500 2rem var(--display);line-height:1}
+.buy strong small{display:block;font:500 .95rem Anuphan;opacity:.75;margin-top:4px}
+.btn{font:500 1rem var(--display);background:var(--ink);color:var(--cream);padding:12px 22px;border-radius:999px;text-decoration:none}
+
+/* book */
+.book{background:#e7b3a0}
+.page{background:var(--paper);color:var(--bink);width:300px;aspect-ratio:3/4;border-radius:6px;container-type:inline-size;display:flex;flex-direction:column;justify-content:flex-end;padding:7cqw;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.page h4{font:600 9cqw/1.15 var(--display);margin-bottom:auto}
+.pb{display:flex;align-items:center;justify-content:space-between}
+.price{position:relative;font:600 11cqw/1 var(--display);padding:2cqw 4cqw}
+.price small{display:block;font:500 4.2cqw Anuphan;text-align:center;margin-top:1cqw}
+.price svg{position:absolute;inset:-12% -14%;width:128%;height:124%}
+.order{font:500 5.2cqw var(--display);color:var(--cream);background:var(--bink);text-decoration:none;padding:2.6cqw 4.5cqw;border-radius:999px}
+</style>
+</head>
+<body>
+<p class="top">mock: ใส่หน่วยข้างราคา · ซ้าย = ตอนนี้ (฿45) · ขวา = ใหม่ (฿120 กล่อง 4 ชิ้น)</p>
+
+<section><h2 class="t">1 · หน้าแรก ใต้ขนม 3D</h2><p>ป้ายราคาสีพีชข้างชื่อขนม หน่วยตัวเล็กอยู่ในป้ายเดียวกัน</p>
+<div class="pair">
+  <div><div class="lab">ตอนนี้</div><div class="box hero"><div><h3>ชิฟฟ่อน มะพร้าวใบเตย <span class="price-chip">฿45</span></h3><p>ชิฟฟ่อนนุ่ม หอมใบเตย มะพร้าวอ่อน</p></div></div></div>
+  <div><div class="lab">ใหม่</div><div class="box hero"><div><h3>ชิฟฟ่อน มะพร้าวใบเตย <span class="price-chip">฿120<small>กล่อง 4 ชิ้น</small></span></h3><p>ชิฟฟ่อนนุ่ม หอมใบเตย มะพร้าวอ่อน</p></div></div></div>
+</div></section>
+
+<section><h2 class="t">2 · ส่วนเล่าเรื่องขนม (เลื่อนลงมา)</h2><p>ราคาตัวใหญ่ หน่วยบรรทัดเล็กข้างใต้ ปุ่มสั่งอยู่ที่เดิม</p>
+<div class="pair">
+  <div><div class="lab">ตอนนี้</div><div class="box story"><div class="buy"><strong>฿45</strong><a class="btn">สั่งทาง LINE</a></div></div></div>
+  <div><div class="lab">ใหม่</div><div class="box story"><div class="buy"><strong>฿120<small>กล่อง 4 ชิ้น</small></strong><a class="btn">สั่งทาง LINE</a></div></div></div>
+</div></section>
+
+<section><h2 class="t">3 · สมุดเมนู</h2><p>ราคาในวงวาดมือ หน่วยอยู่ใต้ตัวเลข</p>
+<div class="pair">
+  <div><div class="lab">ตอนนี้</div><div class="box book"><div class="page"><h4>ชิฟฟ่อน<br>มะพร้าวใบเตย</h4><div class="pb"><span class="price">฿45<svg viewBox="0 0 100 60" fill="none" stroke="#f3a18f" stroke-width="2.4"><path d="M10 32C8 14 40 6 62 9s32 16 28 30-38 18-58 14S6 40 14 26"/></svg></span><a class="order">สั่งทาง LINE</a></div></div></div></div>
+  <div><div class="lab">ใหม่</div><div class="box book"><div class="page"><h4>ชิฟฟ่อน<br>มะพร้าวใบเตย</h4><div class="pb"><span class="price">฿120<small>กล่อง 4 ชิ้น</small><svg viewBox="0 0 100 60" fill="none" stroke="#f3a18f" stroke-width="2.4"><path d="M10 32C8 14 40 6 62 9s32 16 28 30-38 18-58 14S6 40 14 26"/></svg></span><a class="order">สั่งทาง LINE</a></div></div></div></div>
+</div></section>
+
+<section><h2 class="t">หลังร้าน → เมนู</h2><p>เพิ่มช่อง "ราคานี้ได้อะไร" ข้างช่องราคา เช่น กล่อง 4 ชิ้น / ชิ้น / ปอนด์ · ว่าง = ขึ้นแค่ราคาเหมือนเดิม</p></section>
+</body>
+</html>
