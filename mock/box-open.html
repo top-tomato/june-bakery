@@ -83,6 +83,18 @@ for(const [w,d,x,z,h] of [[W,T,0,W/2,H],[W,T,0,-W/2,H],[T,W,W/2,0,H],[T,W,-W/2,0
   box.add(part(w,h,d,paper,x,h/2,z))
 }
 s.add(box)
+// logo sticker on the front wall: cream oval label, logo in the shop's dark green, a little gloss
+{const SW=.92, SH=.44, c=document.createElement('canvas'); c.width=920; c.height=440; const g=c.getContext('2d')
+  const tex=new THREE.CanvasTexture(c); tex.colorSpace=THREE.SRGBColorSpace; tex.anisotropy=8
+  const draw=img=>{g.clearRect(0,0,920,440); g.fillStyle='#fff6e6'; g.beginPath(); g.ellipse(460,220,452,212,0,0,7); g.fill()
+    g.strokeStyle='#3e5d58'; g.lineWidth=6; g.beginPath(); g.ellipse(460,220,428,190,0,0,7); g.stroke()
+    if(img){const t=document.createElement('canvas'); t.width=img.width; t.height=img.height; const tg=t.getContext('2d')
+      tg.drawImage(img,0,0); tg.globalCompositeOperation='source-in'; tg.fillStyle='#243b37'; tg.fillRect(0,0,t.width,t.height)
+      const h=300, w=h*img.width/img.height; g.drawImage(t,460-w/2,220-h/2,w,h)}
+    tex.needsUpdate=true}
+  draw(); const img=new Image(); img.onload=()=>draw(img); img.src='img/logo.png'
+  const st=new THREE.Mesh(new THREE.PlaneGeometry(SW,SH),new THREE.MeshPhysicalMaterial({map:tex,transparent:true,roughness:.45,clearcoat:.4,clearcoatRoughness:.3}))
+  st.position.set(0,H*.5,W/2+T/2+.003); box.add(st)}
 // lid: hinge on the back top edge, plate hangs forward (+z) from it
 const hinge=new THREE.Group(); hinge.position.set(0,TOP,-W/2); s.add(hinge) // exactly on the back wall top: the lid is the same sheet folded, no gap
 const lid=new THREE.Group(); hinge.add(lid)
