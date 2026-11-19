@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mock · เพิ่มชานม (เครื่องดื่ม)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Itim&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#fff6e6;--ink:#243b37;--indigo:#3e5d58;--line:#e4d6bb;--lime:#dcebb5;--coral:#e98c74;--tea:#f3a18f}
+*{box-sizing:border-box;margin:0}
+body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);padding:24px 16px 60px}
+.top{max-width:1160px;margin:0 auto 18px;color:#f2ece0}
+.top h1{font:600 1.2rem Mitr,sans-serif}
+.top p{opacity:.75;font-size:.88rem}
+.grid{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:26px;align-items:start}
+.tag{color:#f2ece0;font:600 .92rem Mitr,sans-serif;margin-bottom:8px}
+.tag small{display:block;font:400 .8rem Anuphan,sans-serif;opacity:.7}
+.tag .pick{background:#c9de98;color:var(--ink);border-radius:999px;padding:1px 10px;font-size:.72rem;margin-left:6px;vertical-align:2px}
+.phone{width:360px;max-width:100%;border-radius:30px;overflow:hidden;background:var(--cream)}
+.ex{display:inline-block;background:#fde3c8;color:#8a4b2a;border-radius:6px;padding:0 6px;font-size:.7rem;margin-left:4px;vertical-align:2px}
+
+/* chiffon section stub (what is already on the site) */
+.cake{background:var(--lime);padding:22px 18px 26px;text-align:center}
+.cake .kick{font:400 1rem Itim,cursive;color:var(--indigo)}
+.cake img{width:100%;height:170px;object-fit:cover;border-radius:14px;margin:8px 0 10px}
+.cake h3{font:600 1.35rem Mitr,sans-serif}
+.cake .was{font-size:.8rem;opacity:.65}
+.dim{position:relative}
+.dim::after{content:"ส่วนชิฟฟ่อนที่มีอยู่แล้ว ไม่แก้";position:absolute;top:8px;right:8px;background:rgba(36,59,55,.85);color:var(--cream);font-size:.68rem;border-radius:6px;padding:1px 7px}
+
+/* B: drinks section */
+.drinks{background:var(--cream);padding:26px 16px 28px}
+.drinks .kick{text-align:center;font:400 1rem Itim,cursive;color:var(--coral)}
+.drinks h2{text-align:center;font:600 1.5rem Mitr,sans-serif;margin-bottom:14px}
+.dcard{display:grid;grid-template-columns:92px 1fr;gap:14px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px;margin-bottom:12px}
+.cup{width:92px;height:112px;border-radius:12px;background:#f6e7cf;display:grid;place-items:center}
+.cup svg{width:58px;height:88px}
+.dcard h3{font:600 1.08rem/1.25 Mitr,sans-serif}
+.dcard .sz{font-size:.8rem;opacity:.7}
+.dcard .desc{font-size:.84rem;line-height:1.45;margin:2px 0 6px}
+.opts{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.opts span{font-size:.72rem;border:1px solid var(--line);border-radius:999px;padding:0 8px;background:var(--cream)}
+.buy{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.buy strong{font:600 1.15rem Mitr,sans-serif}
+.btn{font:500 .82rem Mitr,sans-serif;background:var(--ink);color:var(--cream);border:0;border-radius:999px;padding:6px 14px;text-decoration:none;display:inline-flex;align-items:center;gap:5px;cursor:pointer}
+.btn svg{width:14px;height:14px}
+.combo{margin-top:6px;text-align:center;font-size:.84rem;background:var(--lime);border-radius:12px;padding:8px 10px}
+.sent{margin:10px auto 0;max-width:300px;background:#8fd18b;color:#123;border-radius:14px 14px 4px 14px;padding:6px 12px;font-size:.82rem;display:none}
+.sent.on{display:block}
+
+/* A: hero carousel */
+.hero{background:var(--indigo);color:var(--cream);padding:24px 16px 22px;text-align:center}
+.hero .slide{background:rgba(255,246,230,.08);border-radius:18px;padding:16px 12px}
+.hero .ph{height:190px;border-radius:14px;background:#f6e7cf;display:grid;place-items:center;margin-bottom:10px}
+.hero .ph svg{width:90px;height:140px}
+.hero h3{font:600 1.4rem/1.2 Mitr,sans-serif}
+.hero p{font-size:.86rem;opacity:.85}
+.hero .price{font:600 1.2rem Mitr,sans-serif;margin:6px 0}
+.dots{display:flex;justify-content:center;gap:6px;margin-top:12px}
+.dots i{width:8px;height:8px;border-radius:50%;background:rgba(255,246,230,.35)}
+.dots i.on{background:var(--cream)}
+.arrows{display:flex;justify-content:space-between;margin-top:-118px;margin-bottom:96px;padding:0 2px;pointer-events:none}
+.arrows span{width:30px;height:30px;border-radius:50%;background:rgba(255,246,230,.18);display:grid;place-items:center;font-size:1rem}
+.warn{background:#fde3c8;color:#6b3b20;font-size:.8rem;padding:10px 14px;line-height:1.5}
+
+/* back office */
+.bo{background:#f7f4ee;padding:18px 16px 22px;font-size:.88rem}
+.bo h2{font:600 1.1rem Mitr,sans-serif;margin-bottom:10px}
+.row{background:#fff;border:1px solid #e6e0d4;border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.row b{font-weight:600}
+.row small{display:block;opacity:.65}
+.pill{font-size:.7rem;border-radius:999px;padding:0 8px;background:#dcebb5}
+.pill.off{background:#eee;color:#777}
+.add{width:100%;margin:6px 0 12px;border:1.5px dashed #b9ae99;background:none;border-radius:10px;padding:9px;font:500 .9rem Mitr,sans-serif;color:var(--indigo);cursor:pointer}
+form{background:#fff;border:1px solid #e6e0d4;border-radius:12px;padding:12px}
+label{display:block;font-size:.78rem;opacity:.75;margin:8px 0 2px}
+input,textarea{width:100%;font:inherit;border:1px solid #d9d2c3;border-radius:8px;padding:6px 9px;background:#fffdf9}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.hint{font-size:.72rem;opacity:.6;margin-top:2px}
+.save{margin-top:12px;width:100%;justify-content:center}
+.notes{max-width:1160px;margin:30px auto 0;color:#f2ece0;font-size:.88rem;line-height:1.7}
+.notes h2{font:600 1rem Mitr,sans-serif;margin-bottom:6px}
+.notes li{margin-left:18px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="cup" viewBox="0 0 60 90">
+    <path d="M18 4 l6 0 l4 14" fill="none" stroke="#243b37" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M8 18 h44 l-5 66 a4 4 0 0 1 -4 4 h-26 a4 4 0 0 1 -4 -4z" fill="#fff" stroke="#243b37" stroke-width="2.2"/>
+    <path d="M10.5 34 h39 l-3.8 49 a3 3 0 0 1 -3 3 h-25.4 a3 3 0 0 1 -3 -3z" fill="#e9a86f"/>
+    <path d="M10.5 34 h39 l-.6 8 h-37.8z" fill="#f5d7b4"/>
+    <g fill="#5a3a2a"><circle cx="20" cy="78" r="3"/><circle cx="28" cy="80" r="3"/><circle cx="36" cy="78" r="3"/><circle cx="43" cy="80" r="3"/><circle cx="24" cy="73" r="3"/><circle cx="40" cy="73" r="3"/></g>
+    <path d="M6 18 h48" stroke="#243b37" stroke-width="3" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="cupg" viewBox="0 0 60 90">
+    <path d="M18 4 l6 0 l4 14" fill="none" stroke="#243b37" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M8 18 h44 l-5 66 a4 4 0 0 1 -4 4 h-26 a4 4 0 0 1 -4 -4z" fill="#fff" stroke="#243b37" stroke-width="2.2"/>
+    <path d="M10.5 34 h39 l-3.8 49 a3 3 0 0 1 -3 3 h-25.4 a3 3 0 0 1 -3 -3z" fill="#a9c47a"/>
+    <path d="M10.5 34 h39 l-.6 8 h-37.8z" fill="#e3edc9"/>
+    <path d="M6 18 h48" stroke="#243b37" stroke-width="3" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="line" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8.1-6C21.4 14.3 22 12.7 22 11c0-4.4-4.5-8-10-8z"/></symbol>
+</svg>
+
+<div class="top">
+  <h1>mock · เพิ่มชานมบนเว็บ</h1>
+  <p>ชื่อ ราคา ขนาด และตัวเลือกทั้งหมดเป็นข้อมูลตัวอย่าง (ป้าย <span class="ex">ตัวอย่าง</span>) รอร้านให้ข้อมูลจริง · รูปแก้วเป็นภาพวาดแทนรูปจริงชั่วคราว</p>
+</div>
+
+<div class="grid">
+  <!-- B -->
+  <div>
+    <p class="tag">ข. ส่วน "เครื่องดื่ม" แยกต่อจากชิฟฟ่อน <span class="pick">แนะนำ</span><small>หน้าชิฟฟ่อนเหมือนเดิมทุกอย่าง เลื่อนลงมาเจอเครื่องดื่ม</small></p>
+    <div class="phone">
+      <div class="cake dim">
+        <p class="kick">สั่งเป็นกล่อง</p>
+        <img src="img/box-4.jpg" alt="ชิฟฟ่อน 4 ชิ้นในกล่อง">
+        <h3>ชิฟฟ่อนมะพร้าวใบเตย</h3>
+        <p class="was">฿120 กล่อง 4 ชิ้น</p>
+      </div>
+      <section class="drinks">
+        <p class="kick">ทานคู่กับชิฟฟ่อน</p>
+        <h2>เครื่องดื่ม</h2>
+        <div class="dcard">
+          <div class="cup"><svg><use href="#cup"/></svg></div>
+          <div>
+            <h3>ชานมไทย <span class="ex">ตัวอย่าง</span></h3>
+            <p class="sz">แก้ว 16 oz · เย็น</p>
+            <p class="desc">ชาไทยต้มเอง หอมเข้ม หวานกำลังดี</p>
+            <div class="opts"><span>หวานน้อย / ปกติ / หวานมาก</span><span>+ ไข่มุก 10.-</span></div>
+            <div class="buy"><strong>฿45</strong><button class="btn" data-msg="สนใจสั่ง ชานมไทย"><svg><use href="#line"/></svg>สั่งทาง LINE</button></div>
+          </div>
+        </div>
+        <div class="dcard">
+          <div class="cup"><svg><use href="#cupg"/></svg></div>
+          <div>
+            <h3>ชาเขียวนม <span class="ex">ตัวอย่าง</span></h3>
+            <p class="sz">แก้ว 16 oz · เย็น</p>
+            <p class="desc">มัทฉะผสมนมสด</p>
+            <div class="opts"><span>หวานน้อย / ปกติ / หวานมาก</span></div>
+            <div class="buy"><strong>฿50</strong><button class="btn" data-msg="สนใจสั่ง ชาเขียวนม"><svg><use href="#line"/></svg>สั่งทาง LINE</button></div>
+          </div>
+        </div>
+        <p class="combo">ชิฟฟ่อน 1 กล่อง + ชานม 1 แก้ว ฿155 <span class="ex">ตัวอย่าง ถ้าอยากมีชุดคู่</span></p>
+        <p class="sent" id="sent"></p>
+      </section>
+    </div>
+  </div>
+
+  <!-- A -->
+  <div>
+    <p class="tag">ก. ชานมเป็นเมนูที่ 2 ในแถวเลื่อนด้านบน<small>เลื่อนซ้ายขวาสลับกับชิฟฟ่อน ใช้รูปแทน 3D</small></p>
+    <div class="phone">
+      <div class="hero">
+        <div class="slide">
+          <div class="ph"><svg><use href="#cup"/></svg></div>
+          <h3>ชานมไทย</h3>
+          <p>ชาไทยต้มเอง หอมเข้ม หวานกำลังดี</p>
+          <p class="price">฿45 <small style="font-size:.8rem;opacity:.75">แก้ว 16 oz</small></p>
+          <button class="btn" style="background:var(--cream);color:var(--ink)" data-msg="สนใจสั่ง ชานมไทย"><svg><use href="#line"/></svg>สั่งทาง LINE</button>
+        </div>
+        <div class="arrows"><span>‹</span><span>›</span></div>
+        <div class="dots"><i></i><i class="on"></i></div>
+      </div>
+      <p class="warn">ข้อเสีย: ขนมกับเครื่องดื่มปนอยู่แถวเดียวกัน ส่วน "สั่งเป็นกล่อง ใส่ให้ครบ 4 ชิ้น" ที่อยู่ถัดลงไปต้องซ่อนตอนเลือกชานม และถ้าวันหลังมีเครื่องดื่มหลายตัว แถวจะยาว ลูกค้าต้องเลื่อนหลายรอบกว่าจะเจอขนม</p>
+    </div>
+  </div>
+
+  <!-- back office -->
+  <div>
+    <p class="tag">หลังร้าน → เมนู (ทั้ง ก และ ข)<small>มีปุ่มเพิ่มเมนูใหม่ เลือกว่าเป็นขนมหรือเครื่องดื่ม</small></p>
+    <div class="phone">
+      <div class="bo">
+        <h2>เมนู</h2>
+        <div class="row"><div><b>ชิฟฟ่อนมะพร้าวใบเตย</b><small>ขนม · ฿120 กล่อง 4 ชิ้น</small></div><span class="pill">โชว์อยู่</span></div>
+        <div class="row"><div><b>ชานมไทย</b><small>เครื่องดื่ม · ฿45 แก้ว 16 oz</small></div><span class="pill">โชว์อยู่</span></div>
+        <div class="row"><div><b>ชาเขียวนม</b><small>เครื่องดื่ม · ฿50</small></div><span class="pill off">ซ่อน</span></div>
+        <button class="add">+ เพิ่มเมนู</button>
+        <form onsubmit="return false">
+          <label>ประเภท</label>
+          <div class="two"><label style="margin:0;opacity:1"><input type="radio" name="k" style="width:auto"> ขนม</label><label style="margin:0;opacity:1"><input type="radio" name="k" checked style="width:auto"> เครื่องดื่ม</label></div>
+          <label>ชื่อ</label><input value="ชานมไทย">
+          <div class="two">
+            <div><label>ราคา (บาท)</label><input value="45"></div>
+            <div><label>ราคานี้ได้อะไร</label><input value="แก้ว 16 oz"></div>
+          </div>
+          <label>คำบรรยาย</label><input value="ชาไทยต้มเอง หอมเข้ม หวานกำลังดี">
+          <label>ตัวเลือก (คั่นด้วย ,)</label><input value="หวานน้อย / ปกติ / หวานมาก, + ไข่มุก 10.-">
+          <p class="hint">ขึ้นเป็นป้ายเล็กใต้คำบรรยาย ลูกค้าบอกในแชตตอนสั่ง</p>
+          <label>รูป</label><input type="file">
+          <button class="btn save">บันทึก</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="notes">
+  <h2>ที่ต้องรู้จากร้าน</h2>
+  <ul>
+    <li>มีเครื่องดื่มกี่ตัว ชื่ออะไร ราคาและขนาดแก้ว</li>
+    <li>ตัวเลือก: ระดับหวาน ท็อปปิ้ง ร้อน/เย็น</li>
+    <li>รูปจริงของแก้วชานม</li>
+    <li>ส่งพร้อมขนมได้ หรือรับที่ร้านเท่านั้น · อยากมีชุดคู่ชิฟฟ่อน + ชานมไหม</li>
+  </ul>
+  <p style="margin-top:8px">กดปุ่ม "สั่งทาง LINE" ในตัวอย่างเพื่อดูข้อความที่จะพิมพ์รอไว้ในแชต</p>
+</div>
+
+<script>
+const sent = document.getElementById('sent')
+document.querySelectorAll('[data-msg]').forEach(b => b.addEventListener('click', () => {
+  sent.textContent = b.dataset.msg
+  sent.classList.add('on')
+}))
+</script>
+</body>
+</html>
