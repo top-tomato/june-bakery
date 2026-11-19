@@ -107,10 +107,10 @@ body{font:400 15px/1.55 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);p
           <div class="tools"><a href="#">แก้ไข</a><a href="#">หยุดโชว์</a></div></div>
 
         <p class="grp"><span class="dot" style="background:#d9a441"></span>ตั้งไว้ล่วงหน้า <small>· ขึ้นเองตามวันเริ่ม</small></p>
-        <div class="row"><b>ชิฟฟ่อน 2 กล่อง ของขวัญปีใหม่<span class="pill soon">เริ่ม 1 ธ.ค.</span></b><span class="pr">220.-<s>240.-</s></span><span class="when">1 – 31 ธ.ค.<span>อีก 12 วัน</span></span>
+        <div class="row"><b>ชิฟฟ่อน 2 กล่อง ของขวัญปีใหม่<span class="pill soon">เริ่ม 1 ธ.ค.</span><span class="pill" style="background:#e8eefc;color:#33508a">หัว: ของขวัญปีใหม่</span></b><span class="pr">220.-<s>240.-</s></span><span class="when">1 – 31 ธ.ค.<span>อีก 12 วัน</span></span>
           <span class="d">ใส่ถุงผูกโบให้ฟรี พร้อมการ์ดเขียนข้อความ</span>
           <div class="tools"><a href="#">แก้ไข</a><a href="#">ลบ</a></div></div>
-        <div class="row"><b>ชิฟฟ่อน 5 กล่อง แจกทีม แจกลูกค้า<span class="pill soon">เริ่ม 1 ธ.ค.</span></b><span class="pr">540.-<s>600.-</s></span><span class="when">1 – 28 ธ.ค.<span>อีก 12 วัน</span></span>
+        <div class="row"><b>ชิฟฟ่อน 5 กล่อง แจกทีม แจกลูกค้า<span class="pill soon">เริ่ม 1 ธ.ค.</span><span class="pill" style="background:#e8eefc;color:#33508a">หัว: ของขวัญปีใหม่</span></b><span class="pr">540.-<s>600.-</s></span><span class="when">1 – 28 ธ.ค.<span>อีก 12 วัน</span></span>
           <span class="d">สั่งล่วงหน้า 2 วัน แยกถุงให้ทุกกล่อง</span>
           <div class="tools"><a href="#">แก้ไข</a><a href="#">ลบ</a></div></div>
 
@@ -126,6 +126,7 @@ body{font:400 15px/1.55 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);p
     <div class="sheet">
       <h3>เพิ่มโปร</h3>
       <p class="hint">กด "เพิ่มโปร" หรือ "ใช้ซ้ำ" จะเปิดฟอร์มนี้ · ใช้ซ้ำ = กรอกข้อมูลเดิมไว้ให้ แก้แค่วันที่</p>
+      <label>หัวใบปลิว (ไม่ใส่ก็ได้)</label><div class="inp">ของขวัญปีใหม่</div><p class="hint">โปรที่ใส่หัวเดียวกันจะอยู่ใบเดียวกัน · ไม่ใส่ = "โปรโมชั่น"</p>
       <label>ชื่อโปร</label><div class="inp">ชิฟฟ่อน 2 กล่อง ของขวัญปีใหม่</div>
       <div class="row2"><div><label>ราคาโปร</label><div class="inp">220.-</div></div><div><label>ราคาปกติ (ขีดฆ่า · ไม่ใส่ก็ได้)</label><div class="inp">240.-</div></div></div>
       <label>รายละเอียด (ไม่ใส่ก็ได้)</label><div class="inp">ใส่ถุงผูกโบให้ฟรี พร้อมการ์ดเขียนข้อความ</div>
@@ -136,7 +137,7 @@ body{font:400 15px/1.55 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);p
   </div>
 
   <div>
-    <p class="tag">ลูกค้าเห็นอะไรในหน้า /promo<small>กดเลือกวันดู · หน้าตาเหมือนตอนนี้ทุกอย่าง</small></p>
+    <p class="tag">ลูกค้าเห็นอะไรในหน้า /promo<small>19 พ.ย. = ตัวอย่างโปรที่ไม่ใส่หัว · กดเลือกวันดู · หน้าตาเหมือนตอนนี้ทุกอย่าง</small></p>
     <div class="days" id="days"><button class="on" data-d="nov">19 พ.ย.</button><button data-d="dec">5 ธ.ค.</button><button data-d="late">30 ธ.ค.</button><button data-d="jan">2 ม.ค.</button></div>
     <div class="phone">
       <img class="logo" src="img/june-mark-cream.svg" alt="June">
@@ -150,14 +151,15 @@ body{font:400 15px/1.55 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);p
   <ul>
     <li>ตั้งโปรเดือนหน้าไว้ก่อนได้ ถึงวันเริ่มก็ขึ้นเอง หมดเขตก็หายเอง ไม่ต้องรอเข้ามาแก้วันที่ 1</li>
     <li>แต่ละโปรหมดเขตคนละวันได้ (เช่น ชุด 5 กล่องจบ 28 ธ.ค. เพราะต้องสั่งล่วงหน้า)</li>
-    <li>หัวใบปลิว = เดือนของวันที่ลูกค้าเปิดดู · โปรธันวาจะไม่โผล่ในเดือนพฤศจิกาอีก</li>
+    <li>หัวใบปลิว = คำที่ร้านพิมพ์ในช่อง "หัวใบปลิว" ของโปรที่กำลังโชว์ (เช่น ของขวัญปีใหม่) · ไม่ใส่ หรือโปรที่โชว์อยู่ใส่หัวต่างกัน = "โปรโมชั่น" · บรรทัดเล็กด้านบนบอกวันหมดเขต</li>
+    <li>ปุ่ม "สั่งทาง LINE" พิมพ์รอไว้ว่า "สนใจโปรของขวัญปีใหม่" (หรือ "สนใจโปรโมชั่น")</li>
     <li>โปรที่หมดแล้วอยู่ในกลุ่ม "หมดแล้ว" กด "ใช้ซ้ำ" ปีหน้าได้</li>
     <li>ถ้าโปรไหนหมดก่อนวันสุดท้ายของเดือน ใต้โปรนั้นขึ้น "ถึง 28 ธ.ค." ให้เอง</li>
   </ul>
   <h3>ตอนทำจริง</h3>
   <ul>
     <li>โปรที่กรอกไว้ตอนนี้ (2 บรรทัด ถึง 31 ธ.ค.) ย้ายเข้ารายการให้เอง ไม่ต้องกรอกใหม่</li>
-    <li>หน้า /promo ไม่เปลี่ยนหน้าตา · ปุ่ม "สั่งทาง LINE" เหมือนเดิม</li>
+    <li>หน้า /promo หน้าตาเหมือนเดิม เปลี่ยนแค่คำบนหัวใบปลิว</li>
   </ul>
 </div>
 
@@ -168,9 +170,9 @@ const P = {
   five: {n:'ชิฟฟ่อน 5 กล่อง แจกทีม แจกลูกค้า', p:'540.-', s:'600.-', d:'สั่งล่วงหน้า 2 วัน แยกถุงให้ทุกกล่อง', u:'ถึง 28 ธ.ค.'},
 }
 const V = {
-  nov: {m:'พฤศจิกายน 2569', items:['friend'], end:'ถึง 30 พ.ย. 2569'},
-  dec: {m:'ธันวาคม 2569', items:['two','five'], end:'ถึง 31 ธ.ค. 2569'},
-  late: {m:'ธันวาคม 2569', items:['two'], end:'ถึง 31 ธ.ค. 2569'},
+  nov: {t:'โปรโมชั่น', items:['friend'], end:'ถึง 30 พ.ย. 2569'},
+  dec: {t:'ของขวัญปีใหม่', items:['two','five'], end:'ถึง 31 ธ.ค. 2569'},
+  late: {t:'ของขวัญปีใหม่', items:['two'], end:'ถึง 31 ธ.ค. 2569'},
   jan: null,
 }
 const line = document.getElementById('line').innerHTML
@@ -178,7 +180,7 @@ const item = (k) => { const x = P[k]; return `<div class="it"><h4>${x.n}</h4><sp
 const show = (d) => {
   const v = V[d]
   document.getElementById('view').innerHTML = v
-    ? `<div class="fly"><p class="month">${v.m}</p><h2>โปรเดือนนี้</h2><div class="rule"></div>${v.items.map(item).join('')}<p class="fine">${v.end} · ใช้ร่วมกับโปรอื่นไม่ได้</p><div class="btn">${line}สั่งทาง LINE</div></div>`
+    ? `<div class="fly"><p class="month">${v.end}</p><h2>${v.t}</h2><div class="rule"></div>${v.items.map(item).join('')}<p class="fine">ใช้ร่วมกับโปรอื่นไม่ได้</p><div class="btn">${line}สั่งทาง LINE</div></div>`
     : `<div class="none"><h2>เดือนนี้ยังไม่มีโปรนะคะ</h2><p>มีโปรเมื่อไหร่ June แจ้งใน LINE ก่อนใคร</p></div><div class="btn cream">${line}คุยกับร้านทาง LINE</div>`
   document.querySelectorAll('#days button').forEach((b) => b.classList.toggle('on', b.dataset.d === d))
 }
