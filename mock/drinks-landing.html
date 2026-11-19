@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mock · ชานมในหน้า landing</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Itim&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#fff6e6;--ink:#243b37;--indigo:#3e5d58;--line:#e4d6bb;--lime:#dcebb5;--coral:#e98c74}
+*{box-sizing:border-box;margin:0}
+body{font:400 15px/1.6 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);padding:24px 16px 60px}
+.top{max-width:900px;margin:0 auto 18px;color:#f2ece0}
+.top h1{font:600 1.2rem Mitr,sans-serif}
+.top p{opacity:.75;font-size:.88rem}
+.cols{display:flex;gap:40px;justify-content:center;flex-wrap:wrap;align-items:flex-start}
+.tag{color:#f2ece0;font:600 .95rem Mitr,sans-serif;margin-bottom:8px;width:390px}
+.tag small{display:block;font:400 .8rem Anuphan,sans-serif;opacity:.7}
+.pick{background:#c9de98;color:var(--ink);border-radius:999px;padding:1px 10px;font-size:.72rem;margin-left:6px;vertical-align:2px}
+.phone{width:390px;border-radius:32px;overflow:hidden;background:#000}
+.shot{position:relative}
+.shot img{display:block;width:390px}
+.shot .lbl{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.6);color:#fff;font-size:.68rem;border-radius:6px;padding:1px 8px}
+.shot.dim img{filter:saturate(.55) brightness(.8)}
+.new{outline:3px dashed #f0b44c;outline-offset:-3px;position:relative}
+.new .badge{position:absolute;top:10px;right:10px;background:#f0b44c;color:#2a2a2a;font:600 .7rem Mitr,sans-serif;border-radius:999px;padding:1px 9px;z-index:2}
+.ex{display:inline-block;background:#fde3c8;color:#8a4b2a;border-radius:6px;padding:0 6px;font:400 .66rem Anuphan,sans-serif;margin-left:4px;vertical-align:3px}
+.note{background:#fde3c8;color:#6b3b20;font-size:.8rem;padding:10px 16px;line-height:1.5}
+
+/* drinks section, site style */
+.drinks{background:var(--lime);padding:0 0 40px;position:relative}
+.drips{display:block;width:100%;height:56px}
+.drinks .kick{text-align:center;font:600 .78rem Mitr,sans-serif;letter-spacing:.12em;color:var(--indigo);margin-top:22px}
+.drinks h2{text-align:center;font:600 2rem/1.15 Mitr,sans-serif;color:var(--ink);margin:4px 0 4px}
+.drinks .sub{text-align:center;font-size:.9rem;color:var(--indigo);margin-bottom:20px}
+.cards{display:flex;gap:14px;overflow-x:auto;padding:4px 22px 8px;scroll-snap-type:x mandatory}
+.card{flex:0 0 250px;scroll-snap-align:center;background:var(--cream);border-radius:22px;padding:14px 14px 16px;box-shadow:0 10px 24px rgba(36,59,55,.12)}
+.card .ph{height:190px;border-radius:16px;background:#f3e2c6;display:grid;place-items:center;margin-bottom:12px}
+.card .ph.g{background:#e7efcf}
+.card .ph svg{width:80px;height:124px}
+.card h3{font:600 1.25rem/1.2 Mitr,sans-serif}
+.card .sz{font-size:.8rem;color:var(--indigo)}
+.card .desc{font-size:.86rem;margin:4px 0 8px}
+.opts{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.opts span{font-size:.72rem;border:1px solid var(--line);border-radius:999px;padding:0 8px;background:#fff}
+.buy{display:flex;justify-content:space-between;align-items:center}
+.buy strong{font:600 1.5rem Mitr,sans-serif}
+.btn{font:500 .85rem Mitr,sans-serif;background:var(--ink);color:var(--cream);border:0;border-radius:999px;padding:8px 16px;display:inline-flex;align-items:center;gap:6px}
+.btn svg{width:15px;height:15px}
+.hintsw{text-align:center;font-size:.74rem;color:var(--indigo);opacity:.8;margin-top:10px}
+
+/* A: hero slide 2 */
+.hero2{background:var(--indigo);color:var(--cream);height:844px;text-align:center;padding:96px 20px 0;position:relative}
+.hero2 .kick{font:600 .78rem Mitr,sans-serif;letter-spacing:.12em;color:#c9de98}
+.hero2 h2{font:600 2.3rem/1.15 Mitr,sans-serif;margin:6px 0}
+.hero2 p{font-size:.92rem;opacity:.85}
+.hero2 .big{margin:40px auto 0;width:170px;height:270px}
+.hero2 .price{position:absolute;left:22px;right:22px;bottom:120px;display:flex;justify-content:space-between;align-items:center}
+.hero2 .price strong{font:600 2rem Mitr,sans-serif}
+.hero2 .price small{display:block;font-size:.8rem;opacity:.8;margin-top:-6px}
+.hero2 .price .btn{background:var(--cream);color:var(--ink)}
+.hero2 .arr{position:absolute;top:420px;width:34px;height:34px;border-radius:50%;background:rgba(255,246,230,.16);display:grid;place-items:center;font-size:1.2rem}
+.hero2 .arr.l{left:10px}.hero2 .arr.r{right:10px;opacity:.35}
+.hero2 .dots{position:absolute;bottom:80px;left:0;right:0;display:flex;justify-content:center;gap:7px}
+.hero2 .dots i{width:8px;height:8px;border-radius:50%;background:rgba(255,246,230,.35)}
+.hero2 .dots i.on{background:var(--cream)}
+.notes{max-width:900px;margin:30px auto 0;color:#f2ece0;font-size:.88rem;line-height:1.7}
+.notes h2{font:600 1rem Mitr,sans-serif;margin-bottom:6px}
+.notes li{margin-left:18px}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="cup" viewBox="0 0 60 90">
+    <path d="M18 4 l6 0 l4 14" fill="none" stroke="#243b37" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M8 18 h44 l-5 66 a4 4 0 0 1 -4 4 h-26 a4 4 0 0 1 -4 -4z" fill="#fff" stroke="#243b37" stroke-width="2.2"/>
+    <path d="M10.5 34 h39 l-3.8 49 a3 3 0 0 1 -3 3 h-25.4 a3 3 0 0 1 -3 -3z" fill="#e9a86f"/>
+    <path d="M10.5 34 h39 l-.6 8 h-37.8z" fill="#f5d7b4"/>
+    <g fill="#5a3a2a"><circle cx="20" cy="78" r="3"/><circle cx="28" cy="80" r="3"/><circle cx="36" cy="78" r="3"/><circle cx="43" cy="80" r="3"/><circle cx="24" cy="73" r="3"/><circle cx="40" cy="73" r="3"/></g>
+    <path d="M6 18 h48" stroke="#243b37" stroke-width="3" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="cupw" viewBox="0 0 60 90">
+    <path d="M18 4 l6 0 l4 14" fill="none" stroke="#fff6e6" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M8 18 h44 l-5 66 a4 4 0 0 1 -4 4 h-26 a4 4 0 0 1 -4 -4z" fill="#fff6e6" stroke="#fff6e6" stroke-width="2.2"/>
+    <path d="M10.5 34 h39 l-3.8 49 a3 3 0 0 1 -3 3 h-25.4 a3 3 0 0 1 -3 -3z" fill="#e9a86f"/>
+    <path d="M10.5 34 h39 l-.6 8 h-37.8z" fill="#f5d7b4"/>
+    <g fill="#5a3a2a"><circle cx="20" cy="78" r="3"/><circle cx="28" cy="80" r="3"/><circle cx="36" cy="78" r="3"/><circle cx="43" cy="80" r="3"/><circle cx="24" cy="73" r="3"/><circle cx="40" cy="73" r="3"/></g>
+  </symbol>
+  <symbol id="cupg" viewBox="0 0 60 90">
+    <path d="M18 4 l6 0 l4 14" fill="none" stroke="#243b37" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M8 18 h44 l-5 66 a4 4 0 0 1 -4 4 h-26 a4 4 0 0 1 -4 -4z" fill="#fff" stroke="#243b37" stroke-width="2.2"/>
+    <path d="M10.5 34 h39 l-3.8 49 a3 3 0 0 1 -3 3 h-25.4 a3 3 0 0 1 -3 -3z" fill="#a9c47a"/>
+    <path d="M10.5 34 h39 l-.6 8 h-37.8z" fill="#e3edc9"/>
+    <path d="M6 18 h48" stroke="#243b37" stroke-width="3" stroke-linecap="round"/>
+  </symbol>
+  <symbol id="line" viewBox="0 0 24 24"><path fill="currentColor" d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8.1-6C21.4 14.3 22 12.7 22 11c0-4.4-4.5-8-10-8z"/></symbol>
+</svg>
+
+<div class="top">
+  <h1>mock · ชานมในหน้า landing</h1>
+  <p>ภาพสีจางคือหน้าจริงจาก junedessert.com ตอนนี้ (จอมือถือ ถ่ายทีละส่วนตามลำดับที่เลื่อนลงมา) · กรอบเส้นประสีเหลืองคือส่วนที่เพิ่มใหม่ · ชื่อ ราคา ขนาด ตัวเลือก เป็นตัวอย่าง รูปแก้วเป็นภาพวาดแทนรูปจริง</p>
+</div>
+
+<div class="cols">
+  <!-- B -->
+  <div>
+    <p class="tag">ข. ส่วน "เครื่องดื่ม" ต่อจากกล่องชิฟฟ่อน <span class="pick">แนะนำ</span><small>ลำดับ: เปิด → เรื่องของ June → Gallery → ชิฟฟ่อน → กล่อง → <b>เครื่องดื่ม</b> → หน้าร้าน → ทักสั่ง</small></p>
+    <div class="phone">
+      <div class="shot dim"><img src="img/landing/1-opening.jpg" alt=""><span class="lbl">เปิดหน้า</span></div>
+      <p class="note">บรรทัดใต้โลโก้ "ชิฟฟ่อนมะพร้าวใบเตย ทำเองทุกชิ้น" อาจเปลี่ยนเป็น "ชิฟฟ่อนมะพร้าวใบเตย และชานม" ถ้าอยากให้รู้ตั้งแต่แรก</p>
+      <div class="shot dim"><img src="img/landing/2-about.jpg" alt=""><span class="lbl">เรื่องของ June</span></div>
+      <div class="shot dim"><img src="img/landing/3-gallery.jpg" alt=""><span class="lbl">Gallery</span></div>
+      <div class="shot dim"><img src="img/landing/4-hero.jpg" alt=""><span class="lbl">ชิฟฟ่อน (3D)</span></div>
+      <div class="shot dim"><img src="img/landing/5-box.jpg" alt=""><span class="lbl">สั่งเป็นกล่อง ฿120</span></div>
+      <section class="drinks new">
+        <span class="badge">ใหม่</span>
+        <svg class="drips" viewBox="0 0 390 56" preserveAspectRatio="none"><path fill="#3e5d58" d="M0 0h390v14c-8 0-10 8-14 22s-12 14-14 0-4-22-16-22-12 30-20 30-10-30-24-30-10 14-16 14-6-14-20-14-10 38-20 38-10-38-24-38-12 18-18 18-8-18-22-18-10 26-20 26-10-26-24-26-8 12-16 12-8-12-20-12-12 34-22 34-10-34-24-34-10 16-18 16-8-16-22-16-10 24-20 24S10 14 0 14z"/></svg>
+        <p class="kick">ทานคู่กับชิฟฟ่อน</p>
+        <h2>เครื่องดื่ม</h2>
+        <p class="sub">ชงแก้วต่อแก้ว สั่งพร้อมขนมได้เลย</p>
+        <div class="cards">
+          <div class="card">
+            <div class="ph"><svg><use href="#cup"/></svg></div>
+            <h3>ชานมไทย <span class="ex">ตัวอย่าง</span></h3>
+            <p class="sz">แก้ว 16 oz · เย็น</p>
+            <p class="desc">ชาไทยต้มเอง หอมเข้ม หวานกำลังดี</p>
+            <div class="opts"><span>หวานน้อย / ปกติ / หวานมาก</span><span>+ ไข่มุก 10.-</span></div>
+            <div class="buy"><strong>฿45</strong><span class="btn"><svg><use href="#line"/></svg>สั่งทาง LINE</span></div>
+          </div>
+          <div class="card">
+            <div class="ph g"><svg><use href="#cupg"/></svg></div>
+            <h3>ชาเขียวนม <span class="ex">ตัวอย่าง</span></h3>
+            <p class="sz">แก้ว 16 oz · เย็น</p>
+            <p class="desc">มัทฉะผสมนมสด</p>
+            <div class="opts"><span>หวานน้อย / ปกติ / หวานมาก</span></div>
+            <div class="buy"><strong>฿50</strong><span class="btn"><svg><use href="#line"/></svg>สั่งทาง LINE</span></div>
+          </div>
+        </div>
+        <p class="hintsw">ปัดซ้ายขวาดูเครื่องดื่มอื่น · มีตัวเดียวจะเป็นการ์ดเดียวกลางจอ</p>
+      </section>
+      <div class="shot dim"><img src="img/landing/6-where.jpg" alt=""><span class="lbl">หน้าร้าน (หยดครีมด้านบนเปลี่ยนเป็นสีเขียวอ่อนตามส่วนเครื่องดื่ม)</span></div>
+      <div class="shot dim"><img src="img/landing/7-end.jpg" alt=""><span class="lbl">ทักสั่ง</span></div>
+    </div>
+  </div>
+
+  <!-- A -->
+  <div>
+    <p class="tag">ก. ชานมเป็นเมนูที่ 2 ในแถวชิฟฟ่อน<small>กดลูกศรหรือปัดเพื่อสลับชิฟฟ่อน ↔ ชานม · ส่วนอื่นเหมือนเดิม</small></p>
+    <div class="phone">
+      <div class="shot dim"><img src="img/landing/3-gallery.jpg" alt=""><span class="lbl">… Gallery</span></div>
+      <div class="shot dim"><img src="img/landing/4-hero.jpg" alt=""><span class="lbl">เมนูที่ 1: ชิฟฟ่อน (3D)</span></div>
+      <section class="hero2 new">
+        <span class="badge">ใหม่ · เมนูที่ 2</span>
+        <p class="kick">ชงแก้วต่อแก้ว</p>
+        <h2>ชานมไทย <span class="ex">ตัวอย่าง</span></h2>
+        <p>ชาไทยต้มเอง หอมเข้ม หวานกำลังดี</p>
+        <svg class="big"><use href="#cupw"/></svg>
+        <span class="arr l">‹</span><span class="arr r">›</span>
+        <div class="price"><div><strong>฿45</strong><small>แก้ว 16 oz</small></div><span class="btn"><svg><use href="#line"/></svg>สั่งทาง LINE</span></div>
+        <div class="dots"><i></i><i class="on"></i></div>
+      </section>
+      <p class="note">ตอนเลือกชานม ส่วน "สั่งเป็นกล่อง ใส่ให้ครบ 4 ชิ้น" ที่อยู่ถัดลงไปต้องซ่อน เพราะไม่ใช่ของชานม · ชิฟฟ่อนเป็น 3D หมุนได้ ชานมเป็นรูปนิ่ง สองหน้าจะดูไม่เท่ากัน</p>
+      <div class="shot dim"><img src="img/landing/6-where.jpg" alt=""><span class="lbl">หน้าร้าน …</span></div>
+    </div>
+  </div>
+</div>
+
+<div class="notes">
+  <h2>ที่ต้องรู้จากร้าน</h2>
+  <ul>
+    <li>มีเครื่องดื่มกี่ตัว ชื่อ ราคา ขนาดแก้ว · ตัวเลือก (หวาน ท็อปปิ้ง ร้อน/เย็น)</li>
+    <li>รูปจริงของแก้วชานม (ถ่ายพื้นเรียบ ๆ จะเข้ากับการ์ดที่สุด)</li>
+    <li>ส่งพร้อมขนมได้ หรือรับที่ร้านเท่านั้น</li>
+  </ul>
+  <p style="margin-top:8px">หลังร้านเพิ่มปุ่ม "+ เพิ่มเมนู" ตามที่อยู่ใน <a href="drinks.html" style="color:#c9de98">drinks.html</a></p>
+</div>
+</body>
+</html>
