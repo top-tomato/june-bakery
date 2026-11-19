@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mock · ออเดอร์ของฉัน (LIFF ในแอป LINE)</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--cream:#fff6e6;--ink:#243b37;--indigo:#3e5d58;--line:#e4d6bb;--lime:#dcebb5}
+*{box-sizing:border-box;margin:0}
+body{font:400 15px/1.55 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);padding:24px 16px 60px}
+.top{max-width:1160px;margin:0 auto 18px;color:#f2ece0}
+.top h1{font:600 1.2rem Mitr,sans-serif}
+.top p{opacity:.75;font-size:.88rem}
+.grid{max-width:1160px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:26px;align-items:start}
+.tag{color:#f2ece0;font:600 .95rem Mitr,sans-serif;margin-bottom:8px}
+.tag small{display:block;font:400 .8rem Anuphan,sans-serif;opacity:.7}
+.tag .n{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#c9de98;color:var(--ink);font-size:.8rem;margin-right:6px}
+
+/* LINE in-app browser frame */
+.phone{width:360px;max-width:100%;border-radius:30px;overflow:hidden;background:var(--indigo)}
+.lbar{background:#fff;display:flex;align-items:center;gap:10px;padding:10px 14px;font:600 .88rem -apple-system,"Thonburi",sans-serif;color:#111}
+.lbar span{flex:1;text-align:center}
+.lbar svg{width:18px;height:18px;stroke:#111;stroke-width:2.2;fill:none;stroke-linecap:round}
+.pg{padding:20px 14px 26px}
+.hi{display:flex;align-items:center;gap:12px;color:var(--cream);margin-bottom:16px}
+.hi .av{width:46px;height:46px;border-radius:50%;background:#d98b6f;display:grid;place-items:center;font:600 1.1rem Mitr,sans-serif;color:#fff;border:2px solid var(--cream)}
+.hi b{font:500 1.15rem Mitr,sans-serif;display:block}
+.hi small{opacity:.75;font-size:.82rem}
+.hi img{width:64px;margin-left:auto}
+.sec{color:#cfe0d9;font:500 .85rem Mitr,sans-serif;margin:18px 4px 8px}
+.card{background:var(--cream);border-radius:18px;box-shadow:0 14px 30px rgba(0,0,0,.22);overflow:hidden}
+.card+.card{margin-top:10px}
+.up{padding:14px 16px 16px}
+.up .when{display:flex;align-items:center;gap:12px}
+.cal{width:54px;flex:none;border-radius:12px;background:#fff;text-align:center;overflow:hidden;border:1px solid var(--line)}
+.cal i{display:block;font:500 .7rem Mitr,sans-serif;background:var(--indigo);color:var(--cream);font-style:normal;padding:2px 0}
+.cal b{display:block;font:600 1.4rem/1.3 Mitr,sans-serif}
+.up h3{font:500 1.02rem Mitr,sans-serif}
+.up p{font-size:.86rem;opacity:.8}
+.st{display:inline-flex;align-items:center;gap:5px;font-size:.75rem;border-radius:99px;padding:2px 9px;font-weight:600;margin-top:4px}
+.st svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.st.ok{background:#e3f0df;color:#2e6b3f}
+.st.wait{background:#fff1d6;color:#8a5a12}
+.st.got{background:#ece6da;color:#6b5f4a}
+.rows{margin-top:12px;border-top:1px dashed var(--line);padding-top:10px;font-size:.88rem}
+.rows div{display:flex;justify-content:space-between;padding:2px 0}
+.rows .sum{font:600 1.05rem Mitr,sans-serif;margin-top:4px}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.btn{display:flex;justify-content:center;align-items:center;gap:6px;padding:11px;border-radius:999px;background:#2c3a37;color:var(--cream);font:500 .88rem Mitr,sans-serif;text-decoration:none}
+.btn.soft{background:transparent;color:var(--ink);border:1.5px solid var(--ink)}
+.btn svg{width:16px;height:16px}
+.past a{display:flex;align-items:center;gap:12px;padding:12px 16px;color:var(--ink);text-decoration:none;border-top:1px solid var(--line)}
+.past a:first-child{border-top:0}
+.past .d{width:44px;text-align:center;font:500 .78rem/1.2 Mitr,sans-serif;opacity:.7}
+.past .d b{display:block;font-size:1.1rem;opacity:1}
+.past span.t{flex:1;font-size:.9rem}
+.past span.t small{display:block;opacity:.65;font-size:.78rem}
+.past .m{font:500 .95rem Mitr,sans-serif}
+.again{display:flex;justify-content:center;align-items:center;gap:8px;margin:14px 0 0;padding:13px;border-radius:999px;background:var(--cream);color:var(--ink);font:500 .95rem Mitr,sans-serif}
+.again svg{width:18px;height:18px}
+.foot{color:#cfe0d9;text-align:center;font-size:.78rem;margin-top:14px;opacity:.8}
+.empty{color:var(--cream);text-align:center;padding:30px 10px}
+.empty h2{font:500 1.2rem Mitr,sans-serif}
+.empty p{color:#cfe0d9;font-size:.88rem}
+
+/* entry: the confirm card gets one more button */
+.chat{width:360px;max-width:100%;background:#8cabd9;border-radius:30px;padding:16px 12px;font-family:-apple-system,"Thonburi",sans-serif}
+.flex{width:290px;background:#fff;border-radius:18px;overflow:hidden}
+.fh{background:var(--indigo);color:var(--cream);padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.fh img{width:48px}
+.fb{padding:10px 16px;font-size:.86rem}
+.fb div{display:flex;justify-content:space-between;padding:3px 0}
+.fbtns{padding:4px 12px 14px;display:grid;gap:8px}
+.fbtn{border-radius:10px;padding:9px;text-align:center;font-weight:600;font-size:.88rem;border:1px solid #ccd;color:var(--indigo)}
+.fbtn.pri{background:var(--indigo);color:#fff;border:0}
+.fbtn.new{outline:2px dashed #c9de98;outline-offset:3px}
+.menu{margin-top:14px;background:#fff;border-radius:14px;padding:10px 14px;font-size:.85rem}
+.menu b{font-family:Mitr,sans-serif;font-weight:500}
+
+.notes{max-width:1160px;margin:26px auto 0;background:#fffbf3;border-radius:14px;padding:16px 20px;font-size:.9rem}
+.notes h3{font:600 1rem Mitr,sans-serif;margin:10px 0 4px}
+.notes h3:first-child{margin-top:0}
+.notes li{margin-left:18px}
+@media (prefers-reduced-motion:no-preference){.pg>*{animation:up .6s both calc(var(--i,0)*.1s + .1s)}}
+@keyframes up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>ออเดอร์ของฉัน · หน้าเว็บที่เปิดในแอป LINE (LIFF)</h1>
+  <p>ลูกค้าไม่ต้องสมัคร ไม่ต้องล็อกอิน LINE บอกเว็บเองว่าเป็นใคร · ข้อมูลในภาพเป็น<b>ตัวอย่าง</b></p>
+</div>
+
+<template id="line"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8-6C21.4 14.2 22 12.7 22 11c0-4.4-4.5-8-10-8Z"/></svg></template>
+<template id="pin"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></template>
+<template id="redo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3L20 9M20 4v5h-5M20 12a8 8 0 0 1-14 5.3L4 15M4 20v-5h5"/></svg></template>
+
+<div class="grid">
+  <div>
+    <p class="tag"><span class="n">1</span>ออเดอร์ของฉัน<small>มีนัดรับขึ้นก่อน ใต้ลงมาเป็นประวัติ</small></p>
+    <div class="phone">
+      <div class="lbar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg><span>June · ออเดอร์ของฉัน</span><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></div>
+      <div class="pg">
+        <div class="hi" style="--i:0"><span class="av">ฝ</span><div><b>สวัสดีค่ะ Fon ฝน</b><small>สั่งกับ June แล้ว 3 ครั้ง</small></div><img src="img/june-mark-cream.svg" alt="June"></div>
+
+        <p class="sec" style="--i:1">นัดรับครั้งถัดไป</p>
+        <section class="card up" style="--i:2">
+          <div class="when"><span class="cal"><i>พ.ย.</i><b>22</b></span><div><h3>เสาร์ 22 พ.ย. · 14:00</h3><p>รับที่ร้าน June</p><span class="st ok"><svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>ยืนยันแล้ว</span></div></div>
+          <div class="rows"><div><span>ชิฟฟ่อนมะพร้าวใบเตย × 2</span><span>฿240</span></div><div><span>จ่ายด้วย</span><span>โอน</span></div><div class="sum"><span>รวม</span><span>฿240</span></div></div>
+          <div class="btns"><a class="btn soft" href="#" data-ic="pin">เปิดแผนที่</a><a class="btn" href="#" data-ic="line">ทักร้าน</a></div>
+        </section>
+
+        <p class="sec" style="--i:3">ที่เคยสั่ง</p>
+        <section class="card past" style="--i:4">
+          <a href="#"><span class="d">ต.ค.<b>28</b></span><span class="t">ชิฟฟ่อนมะพร้าวใบเตย × 4<small><span class="st got" style="margin:2px 0 0">รับแล้ว</span></small></span><span class="m">฿480</span></a>
+          <a href="#"><span class="d">ต.ค.<b>05</b></span><span class="t">ชิฟฟ่อนมะพร้าวใบเตย × 1<small><span class="st got" style="margin:2px 0 0">รับแล้ว</span></small></span><span class="m">฿120</span></a>
+        </section>
+        <div class="again" style="--i:5" data-ic="redo">สั่งเหมือนครั้งล่าสุด</div>
+        <p class="foot" style="--i:6">เห็นเฉพาะออเดอร์ที่ร้านส่งยืนยันทาง LINE</p>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="tag"><span class="n">2</span>ยังไม่เคยสั่ง<small>เช่น เพิ่งเพิ่มเพื่อน หรือสั่งหน้าร้าน</small></p>
+    <div class="phone">
+      <div class="lbar"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg><span>June · ออเดอร์ของฉัน</span><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/></svg></div>
+      <div class="pg">
+        <div class="hi"><span class="av" style="background:#6f9bd9">P</span><div><b>สวัสดีค่ะ Ploy.</b><small>ยินดีต้อนรับ</small></div><img src="img/june-mark-cream.svg" alt="June"></div>
+        <div class="empty"><h2>ยังไม่มีออเดอร์นะคะ</h2><p>สั่งทางแชตได้เลย ร้านส่งสรุปออเดอร์ให้ แล้วจะขึ้นที่หน้านี้</p></div>
+        <div class="again" data-ic="line">สั่งขนมทาง LINE</div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <p class="tag"><span class="n">3</span>ทางเข้าหน้านี้<small>ปุ่มในการ์ดยืนยัน + ข้อความตอบตอนพิมพ์ "ออเดอร์"</small></p>
+    <div class="chat">
+      <div class="flex">
+        <div class="fh"><b>สรุปออเดอร์</b><img src="img/june-mark-cream.svg" alt=""></div>
+        <div class="fb"><div><span>ชิฟฟ่อนมะพร้าวใบเตย × 2</span><span>฿240</span></div><div><span>รับที่ร้าน</span><span>ส. 22 พ.ย. 14:00</span></div><div><b>รวม</b><b>฿240</b></div></div>
+        <div class="fbtns"><div class="fbtn pri">ยืนยันออเดอร์</div><div class="fbtn">ขอแก้ไข</div><div class="fbtn new">ดูออเดอร์ของฉัน</div></div>
+      </div>
+      <div class="menu"><b>rich menu เต็ม 4 ช่องแล้ว</b> ถ้าอยากให้มีปุ่มถาวร ต้องเปลี่ยนช่องใดช่องหนึ่ง (เช่น Gallery → ออเดอร์ของฉัน) ตอนนี้ยังไม่แตะ</div>
+    </div>
+  </div>
+</div>
+
+<div class="notes">
+  <h3>ทำงานยังไง</h3>
+  <ul>
+    <li>หน้านี้เปิดในแอป LINE · LINE ส่ง "ตั๋ว" ยืนยันตัวตนมาให้เว็บ เว็บเช็กกับ LINE ว่าจริงแล้วดึงเฉพาะออเดอร์ของคนนั้น</li>
+    <li>คนอื่นเปิดลิงก์นี้ เห็นแต่ของตัวเอง · เปิดในเบราว์เซอร์ทั่วไป จะให้ล็อกอิน LINE ก่อน</li>
+    <li>ออเดอร์ที่โชว์ = ออเดอร์ที่ร้านผูกกับลูกค้า LINE ตอนกด "ส่งการ์ดยืนยัน" · ออเดอร์หน้าร้านไม่ขึ้น</li>
+    <li>ป้าย "รับแล้ว" = หลังร้านต้องมีปุ่ม "ลูกค้ารับแล้ว" ในหน้าออเดอร์ (เพิ่มจาก mock ยืนยันออเดอร์) · ถ้าไม่กด เลยวันรับแล้วถือว่ารับแล้วเอง</li>
+    <li>"สั่งเหมือนครั้งล่าสุด" = เปิดแชตพร้อมข้อความ "ขอสั่งชิฟฟ่อนมะพร้าวใบเตย 4 กล่อง" ยังไม่ได้สั่งให้เอง แอดมินคุยต่อ</li>
+  </ul>
+  <h3>ต้องมีเพิ่มจากเรื่องยืนยันออเดอร์</h3>
+  <ul>
+    <li>ช่อง LINE Login 1 ช่อง ใน Provider เดียวกับบัญชีร้าน (ไม่งั้นรหัสลูกค้าไม่ตรงกัน) แล้วสร้าง LIFF app ชี้มาที่ junedessert.com/me</li>
+    <li>ฟรี ไม่กินโควตาข้อความ</li>
+  </ul>
+</div>
+<script>
+for (const el of document.querySelectorAll('[data-ic]')) el.insertAdjacentHTML('afterbegin', document.getElementById(el.dataset.ic).innerHTML)
+</script>
+</body>
+</html>
