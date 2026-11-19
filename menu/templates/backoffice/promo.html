@@ -1,14 +1,65 @@
 {% extends "backoffice/base.html" %}
+{% block head %}<style>
+.pgrp{font:600 .95rem Mitr,sans-serif;margin:18px 0 6px;display:flex;align-items:center;gap:8px}
+.pgrp:first-of-type{margin-top:0}
+.pgrp small{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
+.pdot{width:9px;height:9px;border-radius:50%;flex:none}
+.prow{display:grid;grid-template-columns:1fr auto auto;gap:2px 16px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 14px;margin-top:8px}
+.prow b{font:500 1rem Mitr,sans-serif}
+.prow .d{grid-column:1;font-size:.84rem;color:var(--muted)}
+.prow .pr{grid-row:span 2;font:600 1.15rem Mitr,sans-serif;text-align:right;white-space:nowrap}
+.prow .pr s{display:block;font:400 .78rem Anuphan,sans-serif;color:var(--muted)}
+.prow .when{grid-row:span 2;font-size:.8rem;text-align:right;white-space:nowrap}
+.prow .when span{display:block;color:var(--muted)}
+.prow.off{opacity:.62}
+.pill{display:inline-block;font:600 .72rem Anuphan,sans-serif;border-radius:99px;padding:1px 8px;margin-left:6px;vertical-align:2px}
+.pill.live{background:#e3f0df;color:#2e6b3f}.pill.soon{background:#fff1d6;color:#8a5a12}.pill.end{background:#ece6da;color:#6b5f4a}.pill.t{background:#e8eefc;color:#33508a}
+.ptools{grid-column:1/-1;display:flex;gap:14px;font-size:.84rem;margin-top:6px;border-top:1px dashed var(--line);padding-top:6px}
+.ptools a,.ptools button{color:var(--ink);background:none;border:0;padding:0;font:inherit;text-decoration:underline;cursor:pointer}
+.pnone{font-size:.88rem;color:var(--muted);margin:4px 2px 0}
+@media (max-width:640px){.prow{grid-template-columns:1fr auto}.prow .when{grid-column:1/-1;grid-row:auto;text-align:left}.prow .when span{display:inline;margin-left:6px}}
+</style>{% endblock %}
 {% block content %}
-<form class="card-form" method="post">{% csrf_token %}
-  <b style="font:600 1rem Mitr,sans-serif">โปรเดือนนี้ <small class="muted" style="font:400 .85rem Anuphan">ขึ้นในหน้า <a href="/promo" target="_blank" rel="noopener">/promo</a> (ปุ่มโปรโมชั่นใน rich menu) หัวเดือนขึ้นเอง</small></b>
-  <p class="muted" style="font-size:.85rem;margin:4px 0 0">
-    {% if live %}ตอนนี้หน้าโปรโชว์ {{ live.items|length }} โปร{% if live.until %} ถึง {{ live.until }}{% endif %}{% else %}ตอนนี้หน้าโปรขึ้นว่า "เดือนนี้ยังไม่มีโปร"{% endif %}
-  </p>
-  <label for="{{ form.promo.id_for_label }}">โปร บรรทัดละข้อ: ชื่อโปร | ราคา | รายละเอียด</label>{{ form.promo }}{{ form.promo.errors }}
-  <small class="muted" style="font-size:.8rem;line-height:1.5;display:block">ราคาใส่วงเล็บราคาปกติได้ เช่น <code>220.- (240.-)</code> จะขีดฆ่าราคาปกติให้ · ไม่มีราคาเว้นว่างได้ เช่น <code>เพื่อนใหม่ใน LINE | | กล่องแรกลด 10 บาท</code></small>
-  <div class="row2"><div><label for="{{ form.promo_until.id_for_label }}">หมดเขต</label>{{ form.promo_until }}{{ form.promo_until.errors }}</div><div><label for="{{ form.promo_note.id_for_label }}">หมายเหตุท้ายใบ</label>{{ form.promo_note }}</div></div>
+<p class="muted" style="font-size:.88rem;margin:0 2px 14px">
+  ขึ้นในหน้า <a href="/promo" target="_blank" rel="noopener">/promo</a> (ปุ่ม Promotion ใน rich menu) ·
+  {% if flyer %}วันนี้ใบปลิว "{{ flyer.title }}" โชว์ {{ flyer.items|length }} โปร{% if flyer.until %} ถึง {{ flyer.until }}{% endif %}{% else %}วันนี้หน้าโปรขึ้นว่า "ยังไม่มีโปร"{% endif %}
+</p>
+
+{% for key, rows in groups.items %}
+  {% if key == 'live' %}<p class="pgrp"><span class="pdot" style="background:#2e7d4f"></span>กำลังโชว์ในหน้า /promo <small>· {{ rows|length }} โปร</small></p>
+  {% elif key == 'soon' %}<p class="pgrp"><span class="pdot" style="background:#d9a441"></span>ตั้งไว้ล่วงหน้า <small>· ขึ้นเองตามวันเริ่ม</small></p>
+  {% else %}<p class="pgrp"><span class="pdot" style="background:#b9ad96"></span>หมดแล้ว / หยุดโชว์ <small>· เก็บไว้ดูย้อนหลัง</small></p>{% endif %}
+  {% for x in rows %}
+  <div class="prow{% if key == 'past' %} off{% endif %}">
+    <b>{{ x.name }}{% if key == 'live' %}<span class="pill live">โชว์อยู่</span>{% elif key == 'soon' %}<span class="pill soon">เริ่ม {{ x.starts|date:"j M" }}</span>{% elif x.hidden %}<span class="pill end">หยุดโชว์</span>{% else %}<span class="pill end">จบ {{ x.ends|date:"j M" }}</span>{% endif %}{% if x.title %}<span class="pill t">หัว: {{ x.title }}</span>{% endif %}</b>
+    <span class="pr">{{ x.price|default:"" }}{% if x.was %}<s>{{ x.was }}</s>{% endif %}</span>
+    <span class="when">{% if x.starts %}{{ x.starts|date:"j M" }}{% else %}ตอนนี้{% endif %} – {% if x.ends %}{{ x.ends|date:"j M" }}{% else %}ไม่มีกำหนด{% endif %}{% if key == 'live' and x.days_left is not None %}<span>เหลือ {{ x.days_left|add:1 }} วัน</span>{% elif key == 'soon' %}<span>อีก {{ x.days_to }} วัน</span>{% endif %}</span>
+    {% if x.detail %}<span class="d">{{ x.detail }}</span>{% endif %}
+    <form class="ptools" method="post">{% csrf_token %}<input type="hidden" name="pk" value="{{ x.pk }}">
+      {% if key == 'past' %}<a href="?reuse={{ x.pk }}#pform">ใช้ซ้ำ</a>{% if x.hidden %}<button name="act" value="show">กลับมาโชว์</button>{% endif %}<button name="act" value="delete" onclick="return confirm('ลบโปรนี้?')">ลบ</button>
+      {% else %}<a href="?edit={{ x.pk }}#pform">แก้ไข</a>{% if key == 'live' %}<button name="act" value="hide">หยุดโชว์</button>{% endif %}<button name="act" value="delete" onclick="return confirm('ลบโปรนี้?')">ลบ</button>{% endif %}
+    </form>
+  </div>
+  {% empty %}<p class="pnone">{% if key == 'live' %}ยังไม่มีโปรที่โชว์อยู่{% elif key == 'soon' %}ยังไม่ได้ตั้งโปรไว้ล่วงหน้า{% else %}ยังไม่มี{% endif %}</p>
+  {% endfor %}
+{% endfor %}
+
+<form class="card-form" id="pform" method="post" style="margin-top:22px">{% csrf_token %}
+  <input type="hidden" name="act" value="save">{% if editing %}<input type="hidden" name="pk" value="{{ editing.pk }}">{% endif %}
+  <b style="font:600 1rem Mitr,sans-serif">{% if editing %}แก้โปร{% else %}เพิ่มโปร{% endif %} <small class="muted" style="font:400 .85rem Anuphan">{% if editing %}<a href="{% url 'backoffice:promo' %}">ยกเลิก</a>{% else %}กด "ใช้ซ้ำ" ที่โปรเก่า จะกรอกข้อมูลเดิมไว้ให้ แก้แค่วันที่{% endif %}</small></b>
+  <label for="{{ form.title.id_for_label }}">หัวใบปลิว (ไม่ใส่ก็ได้)</label>{{ form.title }}
+  <small class="muted" style="font-size:.8rem;margin-top:-4px">โปรที่โชว์พร้อมกันและใส่หัวเดียวกัน หัวใบปลิวจะเป็นคำนั้น · ไม่ใส่ หรือใส่ต่างกัน = "โปรโมชั่น"</small>
+  <label for="{{ form.name.id_for_label }}">ชื่อโปร</label>{{ form.name }}{{ form.name.errors }}
+  <div class="row2"><div><label for="{{ form.price.id_for_label }}">ราคาโปร</label>{{ form.price }}</div><div><label for="{{ form.was.id_for_label }}">ราคาปกติ (ขีดฆ่า · ไม่ใส่ก็ได้)</label>{{ form.was }}</div></div>
+  <label for="{{ form.detail.id_for_label }}">รายละเอียด (ไม่ใส่ก็ได้)</label>{{ form.detail }}
+  <div class="row2"><div><label for="{{ form.starts.id_for_label }}">เริ่มโชว์</label>{{ form.starts }}</div><div><label for="{{ form.ends.id_for_label }}">หมดเขต</label>{{ form.ends }}{{ form.ends.errors }}</div></div>
+  <small class="muted" style="font-size:.8rem;margin-top:-4px">ไม่ใส่วันเริ่ม = โชว์ทันที · ไม่ใส่วันหมดเขต = โชว์ไปเรื่อย ๆ</small>
   {{ form.non_field_errors }}
   <button class="btn2" type="submit">บันทึก</button>
+</form>
+
+<form class="card-form" method="post">{% csrf_token %}<input type="hidden" name="act" value="note">
+  <label for="{{ note_form.promo_note.id_for_label }}">หมายเหตุท้ายใบ (ใช้ทุกใบ)</label>{{ note_form.promo_note }}
+  <button class="btn2" type="submit">บันทึกหมายเหตุ</button>
 </form>
 {% endblock %}

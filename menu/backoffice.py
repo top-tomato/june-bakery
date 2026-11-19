@@ -25,7 +25,7 @@ from django.utils.safestring import SafeString, mark_safe
 from django.views.decorators.http import require_POST
 
 from menu.og import home_image_url
-from menu.models import ClosedDay, DailyStat, Expense, Order, Product, Review, ShopInfo
+from menu.models import ClosedDay, DailyStat, Expense, Order, Product, Promo, Review, ShopInfo
 
 TH_DAYS = ["จ.", "อ.", "พ.", "พฤ.", "ศ.", "ส.", "อา."]
 TH_MONTHS = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."]
@@ -470,27 +470,82 @@ def shop(request: HttpRequest) -> HttpResponse:
 
 class PromoForm(forms.ModelForm):
     class Meta:
-        model = ShopInfo
-        fields = ["promo", "promo_until", "promo_note"]
+        model = Promo
+        fields = ["title", "name", "price", "was", "detail", "starts", "ends"]
         widgets = {
-            "promo": forms.Textarea(attrs={"rows": 5, "placeholder": "ชิฟฟ่อนมะพร้าวใบเตย 2 กล่อง | 220.- (240.-) | สั่งล่วงหน้า 1 วัน รับที่หน้าร้าน\nซื้อครบ 10 กล่อง แถม 1 | ฟรี 1 | บอกแอดมินในแชต ร้านนับให้"}),
-            "promo_until": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
-            "promo_note": forms.TextInput(attrs={"placeholder": "เช่น ใช้ร่วมกับโปรอื่นไม่ได้"}),
+            "title": forms.TextInput(attrs={"placeholder": "เช่น ของขวัญปีใหม่"}),
+            "name": forms.TextInput(attrs={"placeholder": "เช่น ชิฟฟ่อน 2 กล่อง"}),
+            "price": forms.TextInput(attrs={"placeholder": "เช่น 220.-"}),
+            "was": forms.TextInput(attrs={"placeholder": "เช่น 240.-"}),
+            "detail": forms.TextInput(attrs={"placeholder": "เช่น สั่งล่วงหน้า 1 วัน รับที่หน้าร้าน"}),
+            "starts": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+            "ends": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
         }
+
+    def clean(self) -> dict[str, Any]:
+        data = super().clean()
+        if data.get("starts") and data.get("ends") and data["ends"] < data["starts"]:
+            self.add_error("ends", "วันหมดเขตต้องไม่ก่อนวันเริ่ม")
+        return data
+
+
+class PromoNoteForm(forms.ModelForm):
+    class Meta:
+        model = ShopInfo
+        fields = ["promo_note"]
+        widgets = {"promo_note": forms.TextInput(attrs={"placeholder": "เช่น ใช้ร่วมกับโปรอื่นไม่ได้"})}
 
 
 @staff_member_required
 def promo(request: HttpRequest) -> HttpResponse:
-    """โปรเดือนนี้ for /promo (mock/promo.html A): one line per promo, an end date, a note"""
+    """the /promo flyer (mock/promo-list.html): one row per promo with its own start and end date, grouped into
+    showing now / set ahead / over; add, edit, reuse (a copy without dates), stop showing, delete; the footer note"""
+    today = timezone.localdate()
     info = ShopInfo.load()
-    form = PromoForm(request.POST or None, instance=info)
+    p = request.POST
+    act = p.get("act", "")
+    target = Promo.objects.filter(pk=p.get("pk") or request.GET.get("edit") or 0).first()
+    form = PromoForm(instance=target if request.GET.get("edit") else None)
+    if (reuse := Promo.objects.filter(pk=request.GET.get("reuse") or 0).first()) is not None:
+        form = PromoForm(initial={f: getattr(reuse, f) for f in ["title", "name", "price", "was", "detail"]})
+    note = PromoNoteForm(instance=info)
     if request.method == "POST":
-        if form.is_valid():
-            form.save()
-            messages.success(request, "บันทึกโปรแล้ว")
+        if act == "save":
+            form = PromoForm(p, instance=target)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "บันทึกโปรแล้ว")
+                return redirect("backoffice:promo")
+            messages.error(request, "บันทึกไม่ได้ ตรวจช่องที่ขึ้นสีแดง")
+        elif act == "note":
+            note = PromoNoteForm(p, instance=info)
+            if note.is_valid():
+                note.save()
+                messages.success(request, "บันทึกหมายเหตุแล้ว")
+                return redirect("backoffice:promo")
+        elif target is not None and act in ("hide", "show"):
+            target.hidden = act == "hide"
+            target.save(update_fields=["hidden"])
+            messages.success(request, "หยุดโชว์แล้ว" if target.hidden else "กลับมาโชว์แล้ว")
             return redirect("backoffice:promo")
-        messages.error(request, "บันทึกไม่ได้ ตรวจช่องที่ขึ้นสีแดง")
-    return render(request, "backoffice/promo.html", base_context(request, "promo", "โปรโมชั่น") | {"form": form, "live": info.promo_payload()})
+        elif target is not None and act == "delete":
+            target.delete()
+            messages.success(request, "ลบโปรแล้ว")
+            return redirect("backoffice:promo")
+    groups: dict[str, list[Promo]] = {"live": [], "soon": [], "past": []}
+    for x in Promo.objects.all():
+        x.days_left = (x.ends - today).days if x.ends else None  # type: ignore[attr-defined]
+        x.days_to = (x.starts - today).days if x.starts else None  # type: ignore[attr-defined]
+        groups[x.state(today)].append(x)
+    groups["past"].sort(key=lambda x: x.ends or x.created_at.date(), reverse=True)
+    return render(request, "backoffice/promo.html", base_context(request, "promo", "โปรโมชั่น") | {
+        "form": form,
+        "editing": target if request.GET.get("edit") or (act == "save" and target) else None,
+        "note_form": note,
+        "groups": groups,
+        "today": today,
+        "flyer": Promo.flyer(today),
+    })
 
 
 # ---------------------------------------------------------------- staff accounts (owner only)

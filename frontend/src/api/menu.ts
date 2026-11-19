@@ -50,10 +50,11 @@ export interface MenuData {
 }
 
 export interface Promo {
-  /** e.g. "พฤศจิกายน 2569" (the current month) */
-  month: string
-  items: { name: string; price: string; was: string; detail: string }[]
-  /** end date, e.g. "30 พ.ย. 2569"; "" = no end date */
+  /** the flyer's heading: the title the shop gave the promos showing today, or "โปรโมชั่น" */
+  title: string
+  /** until = this promo's own end date when it ends before the flyer does, e.g. "28 ธ.ค. 2569"; "" otherwise */
+  items: { name: string; price: string; was: string; detail: string; until: string }[]
+  /** the flyer's end date (the last promo's), e.g. "31 ธ.ค. 2569"; "" = no end date */
   until: string
   note: string
 }

@@ -1,4 +1,3 @@
-import re
 from datetime import date
 from urllib.parse import urlsplit
 
@@ -10,7 +9,6 @@ from django.db import models
 from django.utils import timezone
 
 TH_MONTHS_SHORT = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."]
-TH_MONTHS_LONG = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]
 
 
 class UniqueName:
@@ -115,11 +113,6 @@ class ShopInfo(models.Model):
         "วิธีเก็บขนม", blank=True,
         help_text="ขึ้นในหน้าที่ลูกค้าเห็นหลังสแกน QR บนกล่อง (/box) บรรทัดละข้อ เขียนแบบ หัวข้อ: รายละเอียด (ว่าง = ไม่แสดง)",
     )
-    promo = models.TextField(
-        "โปรเดือนนี้", blank=True,
-        help_text="หน้าโปรโมชั่น (/promo) บรรทัดละโปร: ชื่อโปร | ราคา | รายละเอียด เช่น ชิฟฟ่อน 2 กล่อง | 220.- (240.-) | สั่งล่วงหน้า 1 วัน (ว่าง = เดือนนี้ไม่มีโปร)",
-    )
-    promo_until = models.DateField("โปรหมดเขต", null=True, blank=True, help_text="เลยวันนี้แล้วหน้าโปรขึ้นว่าไม่มีโปรเอง (ว่าง = ไม่มีวันหมดเขต)")
     promo_note = models.CharField("หมายเหตุท้ายใบโปร", max_length=120, blank=True, help_text="เช่น ใช้ร่วมกับโปรอื่นไม่ได้")
     instagram_url = models.URLField("ลิงก์ Instagram", blank=True, help_text="เช่น https://www.instagram.com/ชื่อร้าน/ (ว่าง = ไม่แสดงปุ่ม)")
     facebook_url = models.URLField("ลิงก์เพจ Facebook", blank=True, help_text="ว่าง = ไม่แสดงปุ่ม")
@@ -177,33 +170,6 @@ class ShopInfo(models.Model):
             tips.append(tip)
         return tips[:6]
 
-    def promo_payload(self, today: date | None = None) -> dict[str, object] | None:
-        """this month's flyer for /promo (mock/promo.html A); None = no promo now (none written, or past its end date)"""
-        today = today or timezone.localdate()
-        if self.promo_until and self.promo_until < today:
-            return None
-        items = []
-        for line in self.promo.splitlines():
-            line = line.strip().lstrip("-•· ").strip()
-            if not line:
-                continue
-            name, price, detail = ([p.strip() for p in line.split("|", 2)] + ["", ""])[:3]
-            # "220.- (240.-)": the price in brackets is the usual one, shown struck through
-            was = ""
-            m = re.fullmatch(r"(.*?)\s*\((.+)\)", price)
-            if m and m.group(1):
-                price, was = m.group(1).strip(), m.group(2).strip()
-            items.append({"name": name, "price": price, "was": was, "detail": detail})
-        if not items:
-            return None
-        until = self.promo_until
-        return {
-            "month": f"{TH_MONTHS_LONG[today.month - 1]} {today.year + 543}",
-            "items": items[:8],
-            "until": f"{until.day} {TH_MONTHS_SHORT[until.month - 1]} {until.year + 543}" if until else "",
-            "note": self.promo_note,
-        }
-
     @property
     def social(self) -> dict[str, str]:
         return {k: v for k, v in {"instagram": self.instagram_url, "facebook": self.facebook_url}.items() if v}
@@ -229,6 +195,74 @@ class ShopInfo(models.Model):
                 if self.about_text
                 else None
             ),
+        }
+
+
+
+def th_date(d: date) -> str:
+    """e.g. 31 ธ.ค. 2569"""
+    return f"{d.day} {TH_MONTHS_SHORT[d.month - 1]} {d.year + 543}"
+
+
+class Promo(models.Model):
+    """one promotion on the /promo flyer (back office → โปรโมชั่น, mock/promo-list.html): shows itself from its start
+    date to its end date. Promos showing at the same time share one flyer; its heading is their common title."""
+
+    title = models.CharField("หัวใบปลิว", max_length=60, blank=True, help_text="เช่น ของขวัญปีใหม่ (ว่าง = โปรโมชั่น)")
+    name = models.CharField("ชื่อโปร", max_length=120)
+    price = models.CharField("ราคาโปร", max_length=30, blank=True, help_text="เช่น 220.- หรือ ลด 20.- (ว่างได้)")
+    was = models.CharField("ราคาปกติ", max_length=30, blank=True, help_text="ขีดฆ่าให้ เช่น 240.- (ว่างได้)")
+    detail = models.CharField("รายละเอียด", max_length=160, blank=True)
+    starts = models.DateField("เริ่มโชว์", null=True, blank=True, help_text="ว่าง = โชว์ทันที")
+    ends = models.DateField("หมดเขต", null=True, blank=True, help_text="ว่าง = ไม่มีวันหมดเขต")
+    hidden = models.BooleanField("หยุดโชว์", default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["starts", "id"]
+        verbose_name = "โปร"
+        verbose_name_plural = "โปรโมชั่น"
+
+    def __str__(self) -> str:
+        return self.name
+
+    def state(self, today: date) -> str:
+        """live / soon / past (hidden counts as past: it's off the flyer)"""
+        if self.hidden or (self.ends and self.ends < today):
+            return "past"
+        if self.starts and self.starts > today:
+            return "soon"
+        return "live"
+
+    @classmethod
+    def live(cls, today: date) -> "models.QuerySet[Promo]":
+        return (
+            cls.objects.filter(hidden=False)
+            .filter(models.Q(starts__isnull=True) | models.Q(starts__lte=today))
+            .filter(models.Q(ends__isnull=True) | models.Q(ends__gte=today))
+        )
+
+    @classmethod
+    def flyer(cls, today: date | None = None) -> dict[str, object] | None:
+        """the /promo flyer for today; None = nothing showing"""
+        today = today or timezone.localdate()
+        promos = list(cls.live(today)[:8])
+        if not promos:
+            return None
+        titles = {p.title.strip() for p in promos}
+        title = titles.pop() if len(titles) == 1 and "" not in titles else ""
+        ends = [p.ends for p in promos]
+        last = max(ends) if all(ends) else None  # type: ignore[type-var]
+        return {
+            "title": title or "โปรโมชั่น",
+            "items": [
+                {"name": p.name, "price": p.price, "was": p.was, "detail": p.detail,
+                 # a promo ending before the rest says so under itself
+                 "until": th_date(p.ends) if p.ends and p.ends != last else ""}
+                for p in promos
+            ],
+            "until": th_date(last) if last else "",
+            "note": ShopInfo.load().promo_note,
         }
 
 

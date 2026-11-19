@@ -13,8 +13,9 @@ const lineIcon = (
 )
 
 /**
- * This month's promotions as a simple flyer to read (mock/promo.html A): the month, one line per promo with its price,
- * the end date, and a single "order on LINE" button. No promo (none written, or past its end date) = a short note and
+ * The promotions showing today as a simple flyer to read (mock/promo.html A, mock/promo-list.html): the end date, the
+ * heading the shop gave them ("ของขวัญปีใหม่", else "โปรโมชั่น"), one line per promo with its price, and a single
+ * "order on LINE" button. No promo (none written, or past its end date) = a short note and
  * a chat button. Opening: the logo's palm sways, the sheet drops in like it's pinned to a board, the lines float up.
  */
 export function PromoPage({ data }: { data: MenuData }) {
@@ -23,9 +24,10 @@ export function PromoPage({ data }: { data: MenuData }) {
   const [t0] = useState(introDelayMs) // decided once, before the curtain marks itself played
   const delay = { '--t0': `${t0}ms` } as CSSProperties
 
+  const title = promo?.title ?? 'โปรโมชั่น'
   useEffect(() => {
-    document.title = 'โปรเดือนนี้ · June'
-  }, [])
+    document.title = `${title} · June`
+  }, [title])
 
   return (
     <main className="pm" style={delay}>
@@ -33,8 +35,8 @@ export function PromoPage({ data }: { data: MenuData }) {
       <JuneLogo className="logo go" role="img" aria-label="June" aria-hidden={false} style={delay} />
       {promo ? (
         <article className="pm-sheet">
-          <p className="pm-month">{promo.month}</p>
-          <h1>โปรเดือนนี้</h1>
+          {promo.until && <p className="pm-month">ถึง {promo.until}</p>}
+          <h1>{promo.title}</h1>
           <ul>
             {promo.items.map((it, k) => (
               <li key={k} style={{ '--k': k } as CSSProperties}>
@@ -46,20 +48,19 @@ export function PromoPage({ data }: { data: MenuData }) {
                   </p>
                 )}
                 {it.detail && <p className="det">{it.detail}</p>}
+                {it.until && <p className="det until">ถึง {it.until}</p>}
               </li>
             ))}
           </ul>
-          {(promo.until || promo.note) && (
-            <p className="pm-fine">{[promo.until && `ถึง ${promo.until}`, promo.note].filter(Boolean).join(' · ')}</p>
-          )}
-          <a className="pm-btn" href={lineChatUrl(line.oaId, `สนใจโปรเดือน${promo.month.split(' ')[0]}`)}>
+          {promo.note && <p className="pm-fine">{promo.note}</p>}
+          <a className="pm-btn" href={lineChatUrl(line.oaId, promo.title === 'โปรโมชั่น' ? 'สนใจโปรโมชั่น' : `สนใจโปร${promo.title}`)}>
             {lineIcon}
             สั่งทาง LINE
           </a>
         </article>
       ) : (
         <section className="pm-none">
-          <h1>เดือนนี้ยังไม่มีโปรนะคะ</h1>
+          <h1>ตอนนี้ยังไม่มีโปรนะคะ</h1>
           <p>มีโปรเมื่อไหร่ June แจ้งใน LINE ก่อนใคร</p>
           <a className="pm-btn light" href={lineChatUrl(line.oaId)}>
             {lineIcon}

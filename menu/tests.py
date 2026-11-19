@@ -12,7 +12,7 @@ from django.test import SimpleTestCase, TestCase, override_settings
 from django.urls import reverse
 from django.utils import timezone
 
-from menu.models import ClosedDay, DailyStat, Expense, GalleryPhoto, Order, Product, Review, ShopInfo
+from menu.models import ClosedDay, DailyStat, Expense, GalleryPhoto, Order, Product, Promo, Review, ShopInfo
 
 # GIF ขนาด 1x1 พิกเซล ใช้แทนรูปขนมในเทสต์
 TINY_GIF = (
@@ -633,52 +633,63 @@ class BoxQrTests(MediaTestCase):
 
 
 class PromoTests(TestCase):
-    """/promo: this month's flyer, written in the back office (โปรโมชั่น)"""
+    """/promo: the flyer of the promos showing today (back office → โปรโมชั่น, mock/promo-list.html)"""
 
-    def test_lines_become_items(self) -> None:
-        info = ShopInfo.load()
-        info.promo = "ชิฟฟ่อน 2 กล่อง | 220.- (240.-) | สั่งล่วงหน้า 1 วัน\n\n• ครบ 10 แถม 1 | ฟรี 1\nเพื่อนใหม่ | | ลด 10 บาท"
-        info.promo_until = date(2026, 11, 30)
-        info.promo_note = "ใช้ร่วมกับโปรอื่นไม่ได้"
-        info.save()
-        p = info.promo_payload(date(2026, 11, 19))
-        assert p is not None
-        self.assertEqual(p["month"], "พฤศจิกายน 2569")
-        self.assertEqual(p["until"], "30 พ.ย. 2569")
-        self.assertEqual(p["items"], [
-            {"name": "ชิฟฟ่อน 2 กล่อง", "price": "220.-", "was": "240.-", "detail": "สั่งล่วงหน้า 1 วัน"},
-            {"name": "ครบ 10 แถม 1", "price": "ฟรี 1", "was": "", "detail": ""},
-            {"name": "เพื่อนใหม่", "price": "", "was": "", "detail": "ลด 10 บาท"},
+    def test_dates_decide_what_shows(self) -> None:
+        Promo.objects.create(title="ของขวัญปีใหม่", name="2 กล่อง", price="220.-", was="240.-", starts=date(2026, 12, 1), ends=date(2026, 12, 31))
+        Promo.objects.create(title="ของขวัญปีใหม่", name="5 กล่อง", price="540.-", starts=date(2026, 12, 1), ends=date(2026, 12, 28))
+        self.assertIsNone(Promo.flyer(date(2026, 11, 30)))  # set ahead: not yet
+        f = Promo.flyer(date(2026, 12, 5))
+        assert f is not None
+        self.assertEqual(f["title"], "ของขวัญปีใหม่")
+        self.assertEqual(f["until"], "31 ธ.ค. 2569")
+        self.assertEqual(f["items"], [
+            {"name": "2 กล่อง", "price": "220.-", "was": "240.-", "detail": "", "until": ""},
+            {"name": "5 กล่อง", "price": "540.-", "was": "", "detail": "", "until": "28 ธ.ค. 2569"},  # ends first
         ])
+        self.assertEqual(len(Promo.flyer(date(2026, 12, 30))["items"]), 1)  # type: ignore[index, arg-type]
+        self.assertIsNone(Promo.flyer(date(2027, 1, 1)))
 
-    def test_none_when_empty_or_over(self) -> None:
-        info = ShopInfo.load()
-        self.assertIsNone(info.promo_payload())
-        info.promo = "ชิฟฟ่อน 2 กล่อง | 220.-"
-        info.promo_until = date(2026, 11, 30)
-        self.assertIsNotNone(info.promo_payload(date(2026, 11, 30)))  # still on, on its last day
-        self.assertIsNone(info.promo_payload(date(2026, 12, 1)))
+    def test_title_falls_back_and_hidden_is_off(self) -> None:
+        Promo.objects.create(title="ของขวัญปีใหม่", name="a")
+        b = Promo.objects.create(name="b")
+        f = Promo.flyer(date(2026, 12, 1))
+        assert f is not None
+        self.assertEqual(f["title"], "โปรโมชั่น")  # titles differ
+        self.assertEqual(f["until"], "")  # one has no end date
+        b.hidden = True
+        b.save()
+        self.assertEqual(Promo.flyer(date(2026, 12, 1))["title"], "ของขวัญปีใหม่")  # type: ignore[index]
+        self.assertEqual(b.state(date(2026, 12, 1)), "past")
 
     def test_page_and_api(self) -> None:
-        info = ShopInfo.load()
-        info.promo = "ชิฟฟ่อน 2 กล่อง | 220.-"
-        info.save()
+        Promo.objects.create(name="ชิฟฟ่อน 2 กล่อง", price="220.-")
         page = self.client.get("/promo")
         self.assertEqual(page.status_code, 200)
-        self.assertContains(page, "โปรเดือนนี้ · June")
+        self.assertContains(page, "โปรโมชั่น · June")
         data = self.client.get("/api/menu/").json()
         self.assertEqual(data["promo"]["items"][0]["name"], "ชิฟฟ่อน 2 กล่อง")
 
-    def test_back_office_edit(self) -> None:
+    def test_back_office(self) -> None:
         from django.contrib.auth.models import User
 
         self.assertEqual(self.client.get("/admin/shop/promo/").status_code, 302)  # staff only
         self.client.force_login(User.objects.create_user("s", is_staff=True))
         self.assertContains(self.client.get("/admin/shop/promo/"), "ยังไม่มีโปร")
-        r = self.client.post("/admin/shop/promo/", {"promo": "ชิฟฟ่อน 2 กล่อง | 220.-", "promo_until": "2099-01-31", "promo_note": ""})
+        r = self.client.post("/admin/shop/promo/", {"act": "save", "title": "", "name": "2 กล่อง", "price": "220.-", "was": "", "detail": "", "starts": "", "ends": "2099-01-31"})
         self.assertEqual(r.status_code, 302)
-        self.assertEqual(ShopInfo.load().promo_until, date(2099, 1, 31))
-        self.assertContains(self.client.get("/admin/shop/promo/"), "1 โปร")
+        p = Promo.objects.get()
+        self.assertEqual(p.ends, date(2099, 1, 31))
+        self.assertContains(self.client.get("/admin/shop/promo/"), "โชว์อยู่")
+        bad = self.client.post("/admin/shop/promo/", {"act": "save", "name": "x", "starts": "2099-02-01", "ends": "2099-01-01"})
+        self.assertContains(bad, "วันหมดเขตต้องไม่ก่อนวันเริ่ม")
+        self.assertContains(self.client.get(f"/admin/shop/promo/?reuse={p.pk}"), 'value="2 กล่อง"')
+        self.client.post("/admin/shop/promo/", {"act": "hide", "pk": p.pk})
+        self.assertTrue(Promo.objects.get().hidden)
+        self.client.post("/admin/shop/promo/", {"act": "note", "promo_note": "ใช้ร่วมกับโปรอื่นไม่ได้"})
+        self.assertEqual(ShopInfo.load().promo_note, "ใช้ร่วมกับโปรอื่นไม่ได้")
+        self.client.post("/admin/shop/promo/", {"act": "delete", "pk": p.pk})
+        self.assertFalse(Promo.objects.exists())
 
 
 @override_settings(ALLOWED_HOSTS=["junedessert.com", "www.junedessert.com", "june-bakery.fly.dev"], CANONICAL_HOST="junedessert.com")
