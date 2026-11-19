@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>mock · หลังร้าน โปรโมชั่นแบบรายการ</title>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;600&family=Itim&family=Mitr:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#2F4A45;--muted:#6b7f7a;--cream:#FFF6E6;--paper:#FFFBF3;--peach:#F3A18F;--green:#3E5D58;--line:#e6dccb;--coral:#e98c74}
+*{box-sizing:border-box;margin:0}
+body{font:400 15px/1.55 Anuphan,sans-serif;background:#2a2a2a;color:var(--ink);padding:24px 16px 60px}
+.top{max-width:1240px;margin:0 auto 18px;color:#f2ece0}
+.top h1{font:600 1.2rem Mitr,sans-serif}
+.top p{opacity:.75;font-size:.88rem}
+.wrap{max-width:1240px;margin:0 auto;display:grid;grid-template-columns:1fr 380px;gap:26px;align-items:start}
+@media (max-width:980px){.wrap{grid-template-columns:1fr}}
+.tag{color:#f2ece0;font:600 .95rem Mitr,sans-serif;margin-bottom:8px}
+.tag small{display:block;font:400 .8rem Anuphan,sans-serif;opacity:.7}
+
+/* back office page */
+.bo{background:var(--paper);border-radius:18px;overflow:hidden}
+.bo header{display:flex;align-items:center;gap:12px;padding:14px 20px;border-bottom:1px solid var(--line)}
+.bo header h2{flex:1;font:600 1.2rem Mitr,sans-serif}
+.act{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:999px;padding:10px 18px;background:var(--ink);color:var(--cream);font:500 .92rem Mitr,sans-serif;cursor:pointer}
+.act svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round}
+.bo main{padding:18px 20px 22px}
+.grp{font:600 .95rem Mitr,sans-serif;margin:18px 0 8px;display:flex;align-items:center;gap:8px}
+.grp:first-child{margin-top:0}
+.grp small{font:400 .82rem Anuphan,sans-serif;color:var(--muted)}
+.dot{width:9px;height:9px;border-radius:50%}
+.row{display:grid;grid-template-columns:1fr auto auto;gap:4px 16px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:14px;padding:11px 14px;margin-top:8px}
+.row b{font:500 1rem Mitr,sans-serif}
+.row .d{grid-column:1;font-size:.84rem;color:var(--muted)}
+.row .pr{grid-row:span 2;font:600 1.15rem Mitr,sans-serif;text-align:right;white-space:nowrap}
+.row .pr s{display:block;font:400 .78rem Anuphan;color:var(--muted)}
+.row .when{grid-row:span 2;font-size:.8rem;text-align:right;white-space:nowrap;min-width:128px}
+.row .when span{display:block;color:var(--muted)}
+.row.off{opacity:.6}
+.pill{display:inline-block;font-size:.72rem;border-radius:99px;padding:1px 8px;margin-left:6px;font-weight:600;vertical-align:2px}
+.pill.live{background:#e3f0df;color:#2e6b3f}
+.pill.soon{background:#fff1d6;color:#8a5a12}
+.pill.end{background:#ece6da;color:#6b5f4a}
+.tools{grid-column:1/-1;display:flex;gap:14px;font-size:.82rem;margin-top:4px;border-top:1px dashed var(--line);padding-top:6px}
+.tools a{color:var(--ink)}
+.note{margin-top:20px;background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.note label{display:block;font:500 .9rem Mitr,sans-serif;margin-bottom:6px}
+.note .inp{font-size:.95rem}
+.inp{width:100%;font:1rem Anuphan,sans-serif;padding:10px 13px;border:1.5px solid var(--line);border-radius:12px;background:#fff;color:var(--ink)}
+.hint{font-size:.78rem;color:var(--muted);margin-top:4px}
+
+/* add / edit sheet */
+.sheet{background:var(--paper);border-radius:18px;padding:18px 20px 20px;margin-top:22px;border:2px dashed #b9cfa0}
+.sheet h3{font:600 1.1rem Mitr,sans-serif;margin-bottom:4px}
+.sheet label{display:block;font:500 .88rem Mitr,sans-serif;margin:12px 0 6px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.save{text-align:center;width:100%;margin-top:16px;border:0;border-radius:999px;padding:13px;background:var(--ink);color:var(--cream);font:500 1rem Mitr,sans-serif}
+
+/* phone preview */
+.days{display:inline-flex;background:#444;border-radius:999px;padding:3px;margin-bottom:10px;flex-wrap:wrap}
+.days button{border:0;background:none;color:#ddd;border-radius:999px;padding:6px 12px;font:500 .82rem Mitr,sans-serif;cursor:pointer}
+.days button.on{background:#c9de98;color:var(--ink)}
+.phone{width:360px;max-width:100%;background:var(--green);border-radius:30px;padding:24px 16px 22px}
+.logo{width:90px;display:block;margin:0 auto 12px}
+.fly{background:var(--cream);border-radius:6px;padding:24px 20px 20px;box-shadow:0 18px 36px rgba(0,0,0,.28);position:relative;transform:rotate(-1deg)}
+.fly::before{content:"";position:absolute;top:-10px;left:50%;width:90px;height:22px;margin-left:-45px;background:rgba(233,140,116,.75);transform:rotate(2deg);border-radius:2px}
+.month{text-align:center;font:400 1.1rem Itim,cursive;color:var(--coral)}
+.fly h2{text-align:center;font:600 1.6rem/1.2 Mitr,sans-serif}
+.rule{border-top:2px dashed var(--line);margin:14px 0}
+.it{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:baseline;padding:9px 0}
+.it+.it{border-top:1px solid var(--line)}
+.it h4{font:500 1rem/1.35 Mitr,sans-serif}
+.it .p{font:600 1.25rem Mitr,sans-serif;text-align:right;white-space:nowrap}
+.it .p s{display:block;font:400 .78rem Anuphan;opacity:.55}
+.it p{grid-column:1/-1;font-size:.84rem;opacity:.8}
+.it .until{grid-column:1/-1;font-size:.75rem;color:var(--coral)}
+.fine{font-size:.76rem;opacity:.7;text-align:center;margin-top:10px}
+.btn{display:flex;justify-content:center;align-items:center;gap:8px;margin-top:14px;padding:12px;border-radius:999px;background:#2c3a37;color:var(--cream);font:500 .92rem Mitr,sans-serif}
+.btn.cream{background:var(--cream);color:var(--ink)}
+.btn svg{width:18px;height:18px}
+.none{text-align:center;color:var(--cream);padding:26px 6px 4px}
+.none h2{font:500 1.25rem Mitr,sans-serif}
+.none p{color:#cfe0d9;font-size:.88rem}
+
+.notes{max-width:1240px;margin:26px auto 0;background:#fffbf3;border-radius:14px;padding:16px 20px;font-size:.9rem}
+.notes h3{font:600 1rem Mitr,sans-serif;margin:10px 0 4px}
+.notes h3:first-child{margin-top:0}
+.notes li{margin-left:18px}
+</style>
+</head>
+<body>
+<div class="top">
+  <h1>หลังร้าน → โปรโมชั่น แบบรายการ</h1>
+  <p>1 โปร = 1 รายการ มีวันเริ่มกับวันหมดเขตของตัวเอง · สมมติว่าวันนี้ 19 พ.ย. 2569 · โปรในภาพเป็น<b>ตัวอย่าง</b></p>
+</div>
+
+<template id="line"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 3C6.5 3 2 6.6 2 11c0 3.9 3.5 7.2 8.3 7.9.3.1.8.2.9.5.1.3.1.7 0 1l-.1.9c0 .3-.2 1 .9.5s5.9-3.5 8-6C21.4 14.2 22 12.7 22 11c0-4.4-4.5-8-10-8Z"/></svg></template>
+
+<div class="wrap">
+  <div>
+    <p class="tag">หลังร้าน<small>แบ่งเป็น 3 กลุ่มเอง ตามวันที่: กำลังโชว์ · ตั้งไว้ล่วงหน้า · หมดแล้ว</small></p>
+    <div class="bo">
+      <header><h2>โปรโมชั่น</h2><button class="act"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>เพิ่มโปร</button></header>
+      <main>
+        <p class="grp"><span class="dot" style="background:#2e7d4f"></span>กำลังโชว์ในหน้า /promo <small>· 1 โปร</small></p>
+        <div class="row"><b>ชิฟฟ่อน 3 กล่อง ฝากที่บ้าน<span class="pill live">โชว์อยู่</span></b><span class="pr">330.-<s>360.-</s></span><span class="when">ตอนนี้ – 30 พ.ย.<span>เหลือ 11 วัน</span></span>
+          <span class="d">ซื้อไปฝากที่บ้าน</span>
+          <div class="tools"><a href="#">แก้ไข</a><a href="#">หยุดโชว์</a></div></div>
+
+        <p class="grp"><span class="dot" style="background:#d9a441"></span>ตั้งไว้ล่วงหน้า <small>· ขึ้นเองตามวันเริ่ม</small></p>
+        <div class="row"><b>ชิฟฟ่อน 2 กล่อง ของขวัญปีใหม่<span class="pill soon">เริ่ม 1 ธ.ค.</span></b><span class="pr">220.-<s>240.-</s></span><span class="when">1 – 31 ธ.ค.<span>อีก 12 วัน</span></span>
+          <span class="d">ใส่ถุงผูกโบให้ฟรี พร้อมการ์ดเขียนข้อความ</span>
+          <div class="tools"><a href="#">แก้ไข</a><a href="#">ลบ</a></div></div>
+        <div class="row"><b>ชิฟฟ่อน 5 กล่อง แจกทีม แจกลูกค้า<span class="pill soon">เริ่ม 1 ธ.ค.</span></b><span class="pr">540.-<s>600.-</s></span><span class="when">1 – 28 ธ.ค.<span>อีก 12 วัน</span></span>
+          <span class="d">สั่งล่วงหน้า 2 วัน แยกถุงให้ทุกกล่อง</span>
+          <div class="tools"><a href="#">แก้ไข</a><a href="#">ลบ</a></div></div>
+
+        <p class="grp"><span class="dot" style="background:#b9ad96"></span>หมดแล้ว <small>· เก็บไว้ดูย้อนหลัง</small></p>
+        <div class="row off"><b>ชิฟฟ่อน 2 กล่อง ฉลองเปิดร้าน<span class="pill end">จบ 31 ต.ค.</span></b><span class="pr">220.-<s>240.-</s></span><span class="when">1 – 31 ต.ค.</span>
+          <span class="d">รับที่หน้าร้าน</span>
+          <div class="tools"><a href="#">ใช้ซ้ำ</a></div></div>
+
+        <div class="note"><label>หมายเหตุท้ายใบ <span style="font:400 .8rem Anuphan;color:var(--muted)">ใช้ทุกเดือน</span></label><div class="inp">ใช้ร่วมกับโปรอื่นไม่ได้</div></div>
+      </main>
+    </div>
+
+    <div class="sheet">
+      <h3>เพิ่มโปร</h3>
+      <p class="hint">กด "เพิ่มโปร" หรือ "ใช้ซ้ำ" จะเปิดฟอร์มนี้ · ใช้ซ้ำ = กรอกข้อมูลเดิมไว้ให้ แก้แค่วันที่</p>
+      <label>ชื่อโปร</label><div class="inp">ชิฟฟ่อน 2 กล่อง ของขวัญปีใหม่</div>
+      <div class="row2"><div><label>ราคาโปร</label><div class="inp">220.-</div></div><div><label>ราคาปกติ (ขีดฆ่า · ไม่ใส่ก็ได้)</label><div class="inp">240.-</div></div></div>
+      <label>รายละเอียด (ไม่ใส่ก็ได้)</label><div class="inp">ใส่ถุงผูกโบให้ฟรี พร้อมการ์ดเขียนข้อความ</div>
+      <div class="row2"><div><label>เริ่มโชว์</label><div class="inp">01/12/2026</div></div><div><label>หมดเขต</label><div class="inp">31/12/2026</div></div></div>
+      <p class="hint">ไม่ใส่วันเริ่ม = โชว์ทันทีที่บันทึก</p>
+      <div class="save">บันทึก</div>
+    </div>
+  </div>
+
+  <div>
+    <p class="tag">ลูกค้าเห็นอะไรในหน้า /promo<small>กดเลือกวันดู · หน้าตาเหมือนตอนนี้ทุกอย่าง</small></p>
+    <div class="days" id="days"><button class="on" data-d="nov">19 พ.ย.</button><button data-d="dec">5 ธ.ค.</button><button data-d="late">30 ธ.ค.</button><button data-d="jan">2 ม.ค.</button></div>
+    <div class="phone">
+      <img class="logo" src="img/june-mark-cream.svg" alt="June">
+      <div id="view"></div>
+    </div>
+  </div>
+</div>
+
+<div class="notes">
+  <h3>ต่างจากตอนนี้ยังไง</h3>
+  <ul>
+    <li>ตั้งโปรเดือนหน้าไว้ก่อนได้ ถึงวันเริ่มก็ขึ้นเอง หมดเขตก็หายเอง ไม่ต้องรอเข้ามาแก้วันที่ 1</li>
+    <li>แต่ละโปรหมดเขตคนละวันได้ (เช่น ชุด 5 กล่องจบ 28 ธ.ค. เพราะต้องสั่งล่วงหน้า)</li>
+    <li>หัวใบปลิว = เดือนของวันที่ลูกค้าเปิดดู · โปรธันวาจะไม่โผล่ในเดือนพฤศจิกาอีก</li>
+    <li>โปรที่หมดแล้วอยู่ในกลุ่ม "หมดแล้ว" กด "ใช้ซ้ำ" ปีหน้าได้</li>
+    <li>ถ้าโปรไหนหมดก่อนวันสุดท้ายของเดือน ใต้โปรนั้นขึ้น "ถึง 28 ธ.ค." ให้เอง</li>
+  </ul>
+  <h3>ตอนทำจริง</h3>
+  <ul>
+    <li>โปรที่กรอกไว้ตอนนี้ (2 บรรทัด ถึง 31 ธ.ค.) ย้ายเข้ารายการให้เอง ไม่ต้องกรอกใหม่</li>
+    <li>หน้า /promo ไม่เปลี่ยนหน้าตา · ปุ่ม "สั่งทาง LINE" เหมือนเดิม</li>
+  </ul>
+</div>
+
+<script>
+const P = {
+  friend: {n:'ชิฟฟ่อน 3 กล่อง ฝากที่บ้าน', p:'330.-', s:'360.-', d:'ซื้อไปฝากที่บ้าน'},
+  two: {n:'ชิฟฟ่อน 2 กล่อง ของขวัญปีใหม่', p:'220.-', s:'240.-', d:'ใส่ถุงผูกโบให้ฟรี พร้อมการ์ดเขียนข้อความ'},
+  five: {n:'ชิฟฟ่อน 5 กล่อง แจกทีม แจกลูกค้า', p:'540.-', s:'600.-', d:'สั่งล่วงหน้า 2 วัน แยกถุงให้ทุกกล่อง', u:'ถึง 28 ธ.ค.'},
+}
+const V = {
+  nov: {m:'พฤศจิกายน 2569', items:['friend'], end:'ถึง 30 พ.ย. 2569'},
+  dec: {m:'ธันวาคม 2569', items:['two','five'], end:'ถึง 31 ธ.ค. 2569'},
+  late: {m:'ธันวาคม 2569', items:['two'], end:'ถึง 31 ธ.ค. 2569'},
+  jan: null,
+}
+const line = document.getElementById('line').innerHTML
+const item = (k) => { const x = P[k]; return `<div class="it"><h4>${x.n}</h4><span class="p">${x.p}${x.s ? `<s>${x.s}</s>` : ''}</span><p>${x.d}</p>${x.u ? `<span class="until">${x.u}</span>` : ''}</div>` }
+const show = (d) => {
+  const v = V[d]
+  document.getElementById('view').innerHTML = v
+    ? `<div class="fly"><p class="month">${v.m}</p><h2>โปรเดือนนี้</h2><div class="rule"></div>${v.items.map(item).join('')}<p class="fine">${v.end} · ใช้ร่วมกับโปรอื่นไม่ได้</p><div class="btn">${line}สั่งทาง LINE</div></div>`
+    : `<div class="none"><h2>เดือนนี้ยังไม่มีโปรนะคะ</h2><p>มีโปรเมื่อไหร่ June แจ้งใน LINE ก่อนใคร</p></div><div class="btn cream">${line}คุยกับร้านทาง LINE</div>`
+  document.querySelectorAll('#days button').forEach((b) => b.classList.toggle('on', b.dataset.d === d))
+}
+document.querySelectorAll('#days button').forEach((b) => b.onclick = () => show(b.dataset.d))
+show('nov')
+</script>
+</body>
+</html>
